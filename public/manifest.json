@@ -1,0 +1,22 @@
+{
+  "name": "SyncPulse — Cozy Co-Op Sanctuary",
+  "short_name": "SyncPulse",
+  "description": "Warm-minimalist shared productivity, timeline, and habit tracker.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#151413",
+  "theme_color": "#5B7F78",
+  "icons": [
+    {
+      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2615.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2615.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
