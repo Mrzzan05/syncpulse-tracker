@@ -32,51 +32,23 @@
   * **Additional Companions:** *Warm Terracotta* 🍑 & *Matcha Oat Milk* 🍵
 * **Warm Latte ☀️ & Cozy Night 🌙 Modes:** Switch effortlessly between an organic oat-milk daylight theme and a candlelight dark mode.
 
-### 🧭 2. Notion/Linear-Inspired Sidebar & Floating Timer Dock
+### ⏳ 2. Visual Daily Timeline (*Structured* & *Amie* Inspired)
+* **Unified Day Stream:** Automatically merges your fixed university/language classes for the day with your scheduled daily tasks into a chronological vertical timeline.
+* **Live "NOW" Indicator & Countdowns:** Highlights what is happening right now, calculates time until your next session, and detects **Free Focus Windows** between classes.
+
+### 🧭 3. Notion/Linear-Inspired Sidebar & Floating Timer Dock
 * **Distraction-Free Sidebar Navigation:** Clean separation between daily flow, goal time-banks, weekly schedules, and visual analytics.
 * **Persistent Floating Focus Dock:** Inspired by *Toggl* and *Spotify*, the bottom floating timer (supporting both **Open Stopwatch** and **25m Cozy Pomodoro**) stays with you across all tabs.
 
-### 🌧️ 3. Built-In Web Audio Soundscape
+### 🌧️ 4. Built-In Web Audio Soundscape
 * Zero external audio files required—synthesizes soothing **Soft Rain** and **432Hz Warm Zen** frequencies directly in the browser using the native Web Audio API.
-
-### 🎯 4. Full CRUD & Real-Time Squad Accountability (Up to 4 Members)
-* Add, edit, or delete **Short-Term / Long-Term Goals**, **Weekly Classes**, and **Daily Reminders**.
-* Send **Heart Cheers (💜)** on your companions' logged sessions in the Shared Activity Feed.
-* Generate instant **Shareable Status Snapshots** for Telegram and social stories.
-
----
-
-## 🛠️ Tech Stack
-
-* **Frontend Framework:** React 18 + TypeScript
-* **Styling & Design System:** Tailwind CSS + Custom Organic Paper-Grain & Breathing Orb Animations
-* **Typography:** *Instrument Serif* (Editorial Headings), *Plus Jakarta Sans* (UI), *JetBrains Mono* (Timers & Metrics)
-* **Icons & Micro-interactions:** Lucide React + Canvas Confetti
-* **Persistence & Sync:** LocalStorage + Optional Firebase Realtime Database REST Sync + JSON Backup/Restore
-* **CI/CD Deployment:** Automated GitHub Actions workflow deploying directly to GitHub Pages
-
----
-
-## 🚀 Getting Started Locally
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/Mrzzan05/syncpulse-tracker.git
-cd syncpulse-tracker
-
-# 2. Install dependencies
-npm install
-
-# 3. Start the development server
-npm run dev
-```
 
 ---
 
 ## 🗺️ Development Roadmap
 
 - [x] **Phase 1:** Notion/Linear Sidebar Architecture + Persistent Floating Timer Dock + Pro Documentation
-- [ ] **Phase 2:** Visual Daily Timeline (*Structured* style) with live "Now" indicator & class countdowns
+- [x] **Phase 2:** Visual Daily Timeline (*Structured* style) with live "Now" indicator, Free Focus Windows & class countdowns
 - [ ] **Phase 3:** 30-Day Habit Heatmap (*GitHub / Duolingo* style) + Streak Counter & RPG Badges
 - [ ] **Phase 4:** One-Click Cloud Room Sync + JSON Data Backup/Restore + Installable PWA / Desktop & Mobile builds
 

@@ -5,7 +5,8 @@ import {
   Play, Pause, RotateCcw, TrendingUp, Bell, Sparkles,
   Users, Cloud, Check, X, GraduationCap, HelpCircle,
   Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
-  Sun, Moon, Coffee, CloudRain, VolumeX, LayoutDashboard, Menu
+  Sun, Moon, Coffee, CloudRain, VolumeX, LayoutDashboard, Menu,
+  Compass, ArrowRight
 } from 'lucide-react';
 import {
   INITIAL_STATE, AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette
@@ -31,6 +32,7 @@ interface CozyStyle {
   progressBar: string;
   accentText: string;
   barColor: string;
+  timelineLine: string;
 }
 
 const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
@@ -42,7 +44,7 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           sidebarBg: 'bg-[#F3E8FF]/90 border-purple-200/80',
           cardBg: 'bg-white/85 border-purple-200/80 shadow-sm shadow-purple-950/5',
           innerCardBg: 'bg-[#F6EEFC]/85 border-purple-200/60',
-          dockBg: 'bg-white/90 border-purple-300/80 shadow-2xl shadow-purple-950/10',
+          dockBg: 'bg-white/95 border-purple-300/80 shadow-2xl shadow-purple-950/10',
           textMain: 'text-[#2E1B3B]',
           textMuted: 'text-[#735A85]',
           orb1: 'bg-purple-300/45',
@@ -53,7 +55,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-purple-400/80 shadow-lg shadow-purple-300/30',
           progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
           accentText: 'text-[#8B47C2]',
-          barColor: 'from-[#9D65C9] to-[#E879F9]'
+          barColor: 'from-[#9D65C9] to-[#E879F9]',
+          timelineLine: 'border-purple-300'
         }
       : {
           name: 'Cozy Velvet Lavender 💜',
@@ -72,7 +75,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-purple-400/50 shadow-xl shadow-purple-950/60',
           progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
           accentText: 'text-[#DFB6FF]',
-          barColor: 'from-[#A855F7] to-[#F472B6]'
+          barColor: 'from-[#A855F7] to-[#F472B6]',
+          timelineLine: 'border-purple-400/30'
         };
   }
 
@@ -84,7 +88,7 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           sidebarBg: 'bg-[#F9EFEA]/90 border-orange-200/80',
           cardBg: 'bg-white/85 border-orange-200/80 shadow-sm',
           innerCardBg: 'bg-[#FAF0EA]/80 border-orange-200/60',
-          dockBg: 'bg-white/90 border-orange-300/80 shadow-2xl',
+          dockBg: 'bg-white/95 border-orange-300/80 shadow-2xl',
           textMain: 'text-[#362019]',
           textMuted: 'text-[#856256]',
           orb1: 'bg-amber-300/40',
@@ -95,7 +99,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-orange-400/80 shadow-lg',
           progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
           accentText: 'text-[#C85A32]',
-          barColor: 'from-[#D97757] to-[#F59E0B]'
+          barColor: 'from-[#D97757] to-[#F59E0B]',
+          timelineLine: 'border-orange-300'
         }
       : {
           name: 'Fireside Terracotta',
@@ -114,7 +119,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-orange-400/50 shadow-xl',
           progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
           accentText: 'text-[#FDBA8C]',
-          barColor: 'from-[#EA580C] to-[#FBBF24]'
+          barColor: 'from-[#EA580C] to-[#FBBF24]',
+          timelineLine: 'border-orange-400/30'
         };
   }
 
@@ -126,7 +132,7 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           sidebarBg: 'bg-[#EBF2E6]/90 border-emerald-200/80',
           cardBg: 'bg-white/85 border-emerald-200/80 shadow-sm',
           innerCardBg: 'bg-[#ECF3E8]/80 border-emerald-200/60',
-          dockBg: 'bg-white/90 border-emerald-300/80 shadow-2xl',
+          dockBg: 'bg-white/95 border-emerald-300/80 shadow-2xl',
           textMain: 'text-[#1B2E22]',
           textMuted: 'text-[#5A7864]',
           orb1: 'bg-emerald-300/35',
@@ -137,7 +143,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-emerald-400/80 shadow-lg',
           progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
           accentText: 'text-[#387558]',
-          barColor: 'from-[#4E8C6F] to-[#84CC16]'
+          barColor: 'from-[#4E8C6F] to-[#84CC16]',
+          timelineLine: 'border-emerald-300'
         }
       : {
           name: 'Forest Matcha Night',
@@ -156,11 +163,11 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           activeBorder: 'border-emerald-400/50 shadow-xl',
           progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
           accentText: 'text-[#86EFAC]',
-          barColor: 'from-[#10B981] to-[#84CC16]'
+          barColor: 'from-[#10B981] to-[#84CC16]',
+          timelineLine: 'border-emerald-400/30'
         };
   }
 
-  // Default: 'warm-sage' (Mehrsan's Cozy Espresso, Warm Sage & Soft Amber)
   return isLatte
     ? {
         name: 'Warm Oat & Sage ☕',
@@ -179,7 +186,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         activeBorder: 'border-[#5B7F78]/70 shadow-lg',
         progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
         accentText: 'text-[#4A6B65]',
-        barColor: 'from-[#4A6B65] to-[#D99B52]'
+        barColor: 'from-[#4A6B65] to-[#D99B52]',
+        timelineLine: 'border-[#D6CFC2]'
       }
     : {
         name: 'Cozy Espresso & Amber ☕',
@@ -198,28 +206,42 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         activeBorder: 'border-[#C88A4B]/50 shadow-xl',
         progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
         accentText: 'text-[#E6B88A]',
-        barColor: 'from-[#5B7F78] to-[#E09F5A]'
+        barColor: 'from-[#5B7F78] to-[#E09F5A]',
+        timelineLine: 'border-[#383430]'
       };
+};
+
+// Helper: Convert "HH:MM" to minutes from midnight
+const toMins = (timeStr: string): number => {
+  const [h, m] = (timeStr || '09:00').split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+};
+
+// Helper: Convert minutes from midnight back to "HH:MM"
+const fromMins = (total: number): string => {
+  const h = Math.floor(total / 60) % 24;
+  const m = total % 60;
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 };
 
 const TUTORIAL_STEPS = [
   {
-    title: 'Welcome to Your New Sidebar Workspace ✨',
-    subtitle: 'Inspired by Notion & Linear for calm, clutter-free focus.',
-    description: 'We moved companion profiles, navigation tabs, and ambient controls into a sleek left sidebar so your main canvas feels spacious and peaceful.',
-    highlight: 'Switch between Mehrsan ☕ and Ronak 💜 in the left sidebar to watch the entire sanctuary change its color palette!'
+    title: 'Phase 2: Visual Daily Timeline ⏳✨',
+    subtitle: 'Inspired by Structured & Amie Calendar.',
+    description: 'Your classes and daily tasks are now woven together into a single chronological river! You can see what’s happening right now, what’s coming up next, and how much time is left.',
+    highlight: 'Look for the pulsing "HAPPENING NOW" or "UP NEXT" badges on your timeline—and switch days anytime to preview tomorrow!'
   },
   {
-    title: 'Meet the Floating Timer Dock ⏱️',
-    subtitle: 'Inspired by Toggl Track & Spotify.',
-    description: 'Look at the bottom of your screen! Your Focus Timer now floats with you across every tab—whether you are checking your schedule or reviewing goals.',
-    highlight: 'Switch between Open Stopwatch and 25m Cozy Pomodoro anytime, and click "Log" to save your minutes.'
+    title: 'Smart "Free Focus Windows" 🌿',
+    subtitle: 'Turn gaps between classes into progress.',
+    description: 'Whenever you have a gap of 45+ minutes between two scheduled items, SyncPulse automatically detects a "Free Focus Window" and lets you launch your focus timer with 1 click!',
+    highlight: 'Check-in to classes or complete tasks right inside the timeline to trigger confetti and log minutes automatically.'
   },
   {
-    title: 'Cheer & Grow Together 💜',
-    subtitle: 'Up to 4 Companions + Ambient Soundscapes.',
-    description: 'Play soothing Rain or 432Hz Zen audio from the sidebar, check off daily tasks, and tap the 💜 button on your partner’s activity logs!',
-    highlight: 'All your changes save automatically in your browser, and you can connect Cloud Sync anytime.'
+    title: 'Sidebar + Persistent Timer Dock 🎧',
+    subtitle: 'Everything in its right place.',
+    description: 'Switch between Mehrsan ☕ and Ronak 💜 on the left sidebar, turn on soothing Rain audio, and use the bottom floating timer dock across any tab.',
+    highlight: 'Next up in Phase 3: 30-Day GitHub/Duolingo Habit Heatmap & Streak Badges!'
   }
 ];
 
@@ -241,10 +263,28 @@ export default function App() {
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'schedule' | 'analytics'>('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [selectedDay, setSelectedDay] = useState<string>(() => {
+
+  const realTodayName = (() => {
     const jsDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
     return DAYS.includes(jsDay) ? jsDay : 'Saturday';
+  })();
+
+  const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
+  const [timelineDay, setTimelineDay] = useState<string>(realTodayName);
+
+  // Live Current Clock for Timeline "NOW" Indicator
+  const [nowMinutes, setNowMinutes] = useState<number>(() => {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
   });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const d = new Date();
+      setNowMinutes(d.getHours() * 60 + d.getMinutes());
+    }, 30000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Web Audio API Cozy Ambient Sound Generator
   const [ambientMode, setAmbientMode] = useState<'off' | 'rain' | 'zen'>('off');
@@ -308,7 +348,7 @@ export default function App() {
 
   // Modals
   const [showTutorial, setShowTutorial] = useState<boolean>(() => {
-    return !localStorage.getItem('syncpulse_phase1_seen');
+    return !localStorage.getItem('syncpulse_phase2_seen');
   });
   const [tutorialStep, setTutorialStep] = useState<number>(0);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
@@ -347,8 +387,8 @@ export default function App() {
   });
 
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskTime, setNewTaskTime] = useState('18:00');
-  const [newTaskMins, setNewTaskMins] = useState(30);
+  const [newTaskTime, setNewTaskTime] = useState('17:00');
+  const [newTaskMins, setNewTaskMins] = useState(45);
 
   // Cloud Sync
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -593,11 +633,12 @@ export default function App() {
     if (!attended) {
       confetti({ particleCount: 40, spread: 55, origin: { y: 0.8 } });
       const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const newDuration = Math.max(30, toMins(sched.endTime) - toMins(sched.startTime));
       const newLog = {
         id: 'log-' + Date.now(),
         userId: sched.userId,
         targetTitle: `Attended: ${sched.title}`,
-        minutes: 90,
+        minutes: newDuration,
         date: todayStr,
         timestamp: `Today, ${nowTime}`,
         cheers: 1
@@ -693,7 +734,7 @@ export default function App() {
   };
 
   const closeTutorial = () => {
-    localStorage.setItem('syncpulse_phase1_seen', 'true');
+    localStorage.setItem('syncpulse_phase2_seen', 'true');
     setShowTutorial(false);
     setTutorialStep(0);
   };
@@ -716,6 +757,111 @@ export default function App() {
     setTimeout(() => setCopiedShare(false), 2500);
   };
 
+  const userGoals = state.goals.filter((g) => g.userId === activeUser);
+  const userTasks = state.tasks.filter((t) => t.userId === activeUser);
+  const levelInfo = getLevelInfo(activeUser);
+
+  // ============================================================================
+  // PHASE 2: BUILD UNIFIED VISUAL DAILY TIMELINE (STRUCTURED / AMIE STYLE)
+  // ============================================================================
+  interface TimelineEntry {
+    id: string;
+    kind: 'class' | 'task' | 'gap';
+    title: string;
+    subtitle: string;
+    badge: string;
+    startMins: number;
+    endMins: number;
+    startTime: string;
+    endTime: string;
+    durationMins: number;
+    completed: boolean;
+    rawClass?: ScheduleItem;
+    rawTask?: TaskItem;
+  }
+
+  const buildDailyStream = (): TimelineEntry[] => {
+    const dayClasses = state.schedules.filter(
+      (s) => s.userId === activeUser && s.day === timelineDay
+    );
+
+    const baseEntries: TimelineEntry[] = [];
+
+    dayClasses.forEach((c) => {
+      const sM = toMins(c.startTime);
+      const eM = Math.max(sM + 30, toMins(c.endTime));
+      baseEntries.push({
+        id: c.id,
+        kind: 'class',
+        title: c.title,
+        subtitle: c.details,
+        badge: c.category,
+        startMins: sM,
+        endMins: eM,
+        startTime: c.startTime,
+        endTime: c.endTime,
+        durationMins: eM - sM,
+        completed: c.attendedDates.includes(todayStr),
+        rawClass: c
+      });
+    });
+
+    userTasks.forEach((t) => {
+      const sM = toMins(t.reminderTime);
+      const eM = sM + (t.estimatedMinutes || 30);
+      baseEntries.push({
+        id: t.id,
+        kind: 'task',
+        title: t.title,
+        subtitle: `Scheduled Task • +${t.estimatedMinutes}m credit`,
+        badge: 'Intention',
+        startMins: sM,
+        endMins: eM,
+        startTime: t.reminderTime,
+        endTime: fromMins(eM),
+        durationMins: t.estimatedMinutes || 30,
+        completed: t.completed,
+        rawTask: t
+      });
+    });
+
+    baseEntries.sort((a, b) => a.startMins - b.startMins);
+
+    // Insert Smart "Free Focus Windows" when gap between events >= 45 mins
+    const streamWithGaps: TimelineEntry[] = [];
+    for (let i = 0; i < baseEntries.length; i++) {
+      const current = baseEntries[i];
+      streamWithGaps.push(current);
+
+      if (i < baseEntries.length - 1) {
+        const next = baseEntries[i + 1];
+        const gapMins = next.startMins - current.endMins;
+        if (gapMins >= 45) {
+          streamWithGaps.push({
+            id: `gap-${current.id}-${next.id}`,
+            kind: 'gap',
+            title: 'Free Focus Window ✨',
+            subtitle: `Unscheduled breathing room before ${next.title}`,
+            badge: 'Open Slot',
+            startMins: current.endMins,
+            endMins: next.startMins,
+            startTime: fromMins(current.endMins),
+            endTime: fromMins(next.startMins),
+            durationMins: gapMins,
+            completed: false
+          });
+        }
+      }
+    }
+
+    return streamWithGaps;
+  };
+
+  const dailyStream = buildDailyStream();
+  const nextUpcomingItem = dailyStream.find(
+    (item) => item.kind !== 'gap' && !item.completed && item.endMins > nowMinutes
+  );
+
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -735,12 +881,8 @@ export default function App() {
     ...last7Days.flatMap((d) => d.memberTotals.map((mt) => mt.mins))
   );
 
-  const userGoals = state.goals.filter((g) => g.userId === activeUser);
-  const userTasks = state.tasks.filter((t) => t.userId === activeUser);
-  const levelInfo = getLevelInfo(activeUser);
-
   const navItems = [
-    { id: 'dashboard', label: 'Today’s Sanctuary', icon: LayoutDashboard, badge: `${userTasks.filter(t => !t.completed).length}` },
+    { id: 'dashboard', label: 'Today’s Timeline', icon: Compass, badge: `${dailyStream.filter(i => i.kind !== 'gap' && !i.completed).length}` },
     { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: `${userGoals.length}` },
     { id: 'schedule', label: 'Weekly Classes', icon: Calendar },
     { id: 'analytics', label: 'Squad Analytics', icon: TrendingUp },
@@ -798,7 +940,7 @@ export default function App() {
               <div>
                 <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
                 <span className={`text-[11px] font-mono ${theme.textMuted}`}>
-                  Cozy Workspace
+                  Cozy Sanctuary
                 </span>
               </div>
             </div>
@@ -951,7 +1093,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Bottom Sidebar Controls (Latte/Night, Share, Cloud, Guide) */}
+        {/* Bottom Sidebar Controls */}
         <div className="pt-4 border-t border-current/10 space-y-2">
           <div className="grid grid-cols-2 gap-2">
             <button
@@ -994,19 +1136,25 @@ export default function App() {
       {/* MAIN WORKSPACE CONTENT AREA */}
       <div className="flex-1 min-w-0 relative z-10 pb-32">
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-7 space-y-7">
-          {/* Top Personal Greeting & Status Note */}
+          {/* Top Personal Greeting + Live Next Up Banner */}
           <section className={`p-6 rounded-3xl border backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 cozy-transition ${theme.cardBg}`}>
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className={`text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
                   Lv.{levelInfo.level} • {levelInfo.title}
                 </span>
                 <span className={`text-xs font-mono ${theme.textMuted}`}>
-                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  🕐 {fromMins(nowMinutes)} • {realTodayName}
                 </span>
+                {nextUpcomingItem && (
+                  <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${theme.innerCardBg}`}>
+                    <Sparkles className="w-3 h-3" />
+                    Next: <b>{nextUpcomingItem.title}</b> ({nextUpcomingItem.startTime})
+                  </span>
+                )}
               </div>
               <h2 className="font-serif italic text-3xl sm:text-4xl tracking-tight pt-1">
-                Welcome to your sanctuary, {currentMember.name}.
+                Flow through your day, {currentMember.name}.
               </h2>
               <input
                 type="text"
@@ -1017,7 +1165,7 @@ export default function App() {
               />
             </div>
 
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-3 shrink-0">
               <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
                 <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today's Focus</span>
                 <span className={`font-mono font-bold text-xl ${theme.accentText}`}>
@@ -1033,93 +1181,259 @@ export default function App() {
             </div>
           </section>
 
-          {/* VIEW 1: TODAY'S SANCTUARY (DASHBOARD) */}
+          {/* VIEW 1: STRUCTURED-STYLE VISUAL DAILY TIMELINE + QUICK LOG */}
           {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left 7 Cols: Daily Intentions + Active Goals Quick Log */}
+              {/* Left 7 Cols: Visual Daily Timeline Stream */}
               <div className="lg:col-span-7 space-y-6">
-                {/* Daily Tasks & Reminders */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
-                  <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-1">
-                    <Bell className={`w-5 h-5 ${theme.accentText}`} />
-                    Today's Gentle Intentions
-                  </h3>
-                  <p className={`text-xs mb-4 ${theme.textMuted}`}>
-                    Check off an intention to celebrate and automatically credit its minutes
-                  </p>
+                  {/* Timeline Header & Day Switcher */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                        <Compass className={`w-5 h-5 ${theme.accentText}`} />
+                        Visual Daily Timeline
+                      </h3>
+                      <p className={`text-xs ${theme.textMuted}`}>
+                        Classes, scheduled intentions & free focus windows in one stream
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setScheduleForm({ ...scheduleForm, day: timelineDay });
+                        setShowScheduleModal(true);
+                      }}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-semibold flex items-center gap-1 border ${theme.softBadge}`}
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Add Class
+                    </button>
+                  </div>
 
-                  <form onSubmit={addTask} className="flex flex-wrap gap-2 mb-4">
+                  {/* Mini Day Selector Pill Bar */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-4 border-b border-current/10">
+                    {DAYS.map((d) => {
+                      const isToday = d === realTodayName;
+                      const active = d === timelineDay;
+                      return (
+                        <button
+                          key={d}
+                          onClick={() => setTimelineDay(d)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1 shrink-0 ${
+                            active
+                              ? theme.primaryBtn
+                              : `${theme.innerCardBg} ${theme.textMuted} hover:opacity-100`
+                          }`}
+                        >
+                          <span>{d.slice(0, 3)}</span>
+                          {isToday && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Quick Add Scheduled Task to Timeline */}
+                  <form onSubmit={addTask} className="flex flex-wrap gap-2 mb-6">
                     <input
                       type="text"
-                      placeholder={`What would feel good to finish today, ${currentMember.name}?`}
+                      placeholder={`Add task to timeline (e.g., Practice French / Code)...`}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
-                      className={`flex-1 min-w-[180px] border rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none ${theme.innerCardBg}`}
+                      className={`flex-1 min-w-[160px] border rounded-2xl px-3.5 py-2 text-xs focus:outline-none ${theme.innerCardBg}`}
                     />
                     <input
                       type="time"
                       value={newTaskTime}
                       onChange={(e) => setNewTaskTime(e.target.value)}
-                      className={`border rounded-2xl px-3 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
+                      className={`border rounded-2xl px-2.5 py-2 text-xs font-mono ${theme.innerCardBg}`}
+                      title="Start Time"
                     />
                     <select
                       value={newTaskMins}
                       onChange={(e) => setNewTaskMins(Number(e.target.value))}
-                      className={`border rounded-2xl px-2.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
+                      className={`border rounded-2xl px-2 py-2 text-xs font-mono ${theme.innerCardBg}`}
                     >
-                      <option value={15}>+15m</option>
-                      <option value={30}>+30m</option>
-                      <option value={45}>+45m</option>
-                      <option value={60}>+1h</option>
+                      <option value={15}>15m</option>
+                      <option value={30}>30m</option>
+                      <option value={45}>45m</option>
+                      <option value={60}>1h</option>
+                      <option value={90}>1.5h</option>
                     </select>
                     <button
                       type="submit"
-                      className={`px-4 py-2.5 rounded-2xl font-semibold text-xs ${theme.primaryBtn}`}
+                      className={`px-4 py-2 rounded-2xl font-semibold text-xs ${theme.primaryBtn}`}
                     >
-                      Add
+                      + Plot
                     </button>
                   </form>
 
-                  <div className="space-y-2.5">
-                    {userTasks.map((task) => (
+                  {/* CHRONOLOGICAL VERTICAL STREAM (STRUCTURED STYLE) */}
+                  {dailyStream.length === 0 ? (
+                    <div className={`p-8 rounded-2xl border text-center space-y-2 ${theme.innerCardBg}`}>
+                      <p className="font-serif italic text-xl">An open, unhurried canvas ✨</p>
+                      <p className={`text-xs ${theme.textMuted}`}>
+                        No fixed classes or tasks plotted for {timelineDay} yet. Add an intention above or start a focus session below!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative pl-3 sm:pl-5 space-y-4">
+                      {/* Vertical Timeline Spine */}
                       <div
-                        key={task.id}
-                        className={`flex items-center justify-between p-3.5 rounded-2xl border ${theme.innerCardBg}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => toggleTask(task)}
-                            className={`w-5 h-5 rounded-lg flex items-center justify-center border transition ${
-                              task.completed
-                                ? 'bg-emerald-500 border-emerald-500 text-white'
-                                : 'border-current/30'
-                            }`}
-                          >
-                            {task.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
-                          </button>
-                          <div>
-                            <p className={`text-xs sm:text-sm font-medium ${task.completed ? 'line-through opacity-50' : ''}`}>
-                              {task.title}
-                            </p>
-                            <div className={`flex items-center gap-2 text-[11px] font-mono mt-0.5 ${theme.textMuted}`}>
-                              <span>⏰ {task.reminderTime}</span>
-                              <span>•</span>
-                              <span className={theme.accentText}>+{task.estimatedMinutes}m credit</span>
+                        className={`absolute top-3 bottom-3 left-[74px] sm:left-[86px] border-l-2 border-dashed ${theme.timelineLine}`}
+                      />
+
+                      {dailyStream.map((entry) => {
+                        const isHappeningNow =
+                          timelineDay === realTodayName &&
+                          nowMinutes >= entry.startMins &&
+                          nowMinutes <= entry.endMins;
+                        const isPast =
+                          timelineDay === realTodayName && nowMinutes > entry.endMins;
+                        const isNextUp = nextUpcomingItem?.id === entry.id && !isHappeningNow;
+
+                        const minsUntilStart = entry.startMins - nowMinutes;
+                        const countdownLabel =
+                          minsUntilStart > 0
+                            ? minsUntilStart >= 60
+                              ? `in ${Math.floor(minsUntilStart / 60)}h ${minsUntilStart % 60}m`
+                              : `in ${minsUntilStart}m`
+                            : '';
+
+                        if (entry.kind === 'gap') {
+                          return (
+                            <div key={entry.id} className="relative flex items-center gap-3 sm:gap-4 group">
+                              <div className={`w-14 sm:w-16 text-right font-mono text-[11px] shrink-0 ${theme.textMuted}`}>
+                                {entry.startTime}
+                              </div>
+                              <div className={`w-3.5 h-3.5 rounded-full border-2 z-10 shrink-0 ${theme.pageBg} ${theme.timelineLine}`} />
+                              <div
+                                className={`flex-1 px-4 py-2.5 rounded-2xl border border-dashed flex flex-wrap items-center justify-between gap-2 text-xs transition opacity-75 hover:opacity-100 ${theme.innerCardBg}`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Sparkles className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                                  <span className="font-medium">
+                                    {entry.title} ({Math.floor(entry.durationMins / 60) > 0 ? `${Math.floor(entry.durationMins / 60)}h ` : ''}{entry.durationMins % 60}m free)
+                                  </span>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    switchTimerMode('pomodoro');
+                                    setIsTimerRunning(true);
+                                  }}
+                                  className={`text-[11px] font-mono px-2.5 py-1 rounded-xl border flex items-center gap-1 ${theme.softBadge}`}
+                                >
+                                  <Play className="w-3 h-3" /> Start 25m Focus
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div key={entry.id} className="relative flex items-start gap-3 sm:gap-4">
+                            {/* Left Time Column */}
+                            <div className="w-14 sm:w-16 text-right font-mono shrink-0 pt-2">
+                              <span className="text-xs font-bold block">{entry.startTime}</span>
+                              <span className={`text-[10px] block ${theme.textMuted}`}>{entry.endTime}</span>
+                            </div>
+
+                            {/* Center Timeline Node */}
+                            <button
+                              onClick={() => {
+                                if (entry.kind === 'class' && entry.rawClass) {
+                                  toggleClassAttendance(entry.rawClass);
+                                } else if (entry.kind === 'task' && entry.rawTask) {
+                                  toggleTask(entry.rawTask);
+                                }
+                              }}
+                              className={`mt-2.5 w-4 h-4 rounded-full border-2 z-10 shrink-0 flex items-center justify-center transition ${
+                                entry.completed
+                                  ? 'bg-emerald-500 border-emerald-500 text-white'
+                                  : isHappeningNow
+                                  ? 'bg-amber-400 border-amber-300 animate-ping'
+                                  : `${theme.pageBg} border-current`
+                              }`}
+                              title="Click to check-off"
+                            >
+                              {entry.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                            </button>
+
+                            {/* Right Event Card */}
+                            <div
+                              className={`flex-1 p-4 rounded-2xl border transition-all ${
+                                isHappeningNow
+                                  ? `${theme.cardBg} ${theme.activeBorder} ring-2 ring-amber-400/40`
+                                  : entry.completed
+                                  ? `${theme.innerCardBg} opacity-60`
+                                  : theme.innerCardBg
+                              }`}
+                            >
+                              <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
+                                    {entry.kind === 'class' ? `🎓 ${entry.badge}` : '✨ Intention'}
+                                  </span>
+                                  {isHappeningNow && (
+                                    <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/40 font-bold">
+                                      ● Happening Now
+                                    </span>
+                                  )}
+                                  {isNextUp && countdownLabel && (
+                                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
+                                      ⏳ Up Next ({countdownLabel})
+                                    </span>
+                                  )}
+                                </div>
+
+                                <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                                  {entry.durationMins}m
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between gap-2 mt-1">
+                                <div>
+                                  <h4 className={`font-semibold text-sm ${entry.completed ? 'line-through' : ''}`}>
+                                    {entry.title}
+                                  </h4>
+                                  <p className={`text-xs mt-0.5 ${theme.textMuted}`}>
+                                    {entry.subtitle}
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  <button
+                                    onClick={() => {
+                                      if (entry.kind === 'class' && entry.rawClass) {
+                                        toggleClassAttendance(entry.rawClass);
+                                      } else if (entry.kind === 'task' && entry.rawTask) {
+                                        toggleTask(entry.rawTask);
+                                      }
+                                    }}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1 transition ${
+                                      entry.completed ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : theme.cardBg
+                                    }`}
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    {entry.completed ? 'Done' : `+${entry.durationMins}m`}
+                                  </button>
+                                  {entry.kind === 'task' && entry.rawTask && (
+                                    <button
+                                      onClick={() => deleteTask(entry.rawTask!.id)}
+                                      className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {/* Active Goals Quick Log */}
+                {/* Active Goals Quick Time Bank */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
                     <div>
@@ -1128,7 +1442,7 @@ export default function App() {
                         Active Goals & Quick Time Log
                       </h3>
                       <p className={`text-xs ${theme.textMuted}`}>
-                        Tap +15m, +30m, or +1h to bank time directly into a goal
+                        Tap +15m, +30m, or +1h to bank extra study time directly into a goal
                       </p>
                     </div>
                     <button
@@ -1523,12 +1837,11 @@ export default function App() {
           )}
         </main>
 
-        {/* PERSISTENT FLOATING FOCUS TIMER DOCK (TOGGL / SPOTIFY STYLE) */}
+        {/* PERSISTENT FLOATING FOCUS TIMER DOCK */}
         <div className="fixed bottom-4 left-0 right-0 lg:left-72 z-30 px-4 pointer-events-none">
           <div
             className={`max-w-3xl mx-auto rounded-3xl p-3 sm:px-5 border backdrop-blur-2xl pointer-events-auto flex flex-wrap items-center justify-between gap-3 cozy-transition ${theme.dockBg}`}
           >
-            {/* Left: Mode Switch & Goal Select */}
             <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
               <button
                 onClick={() => switchTimerMode(timerMode === 'stopwatch' ? 'pomodoro' : 'stopwatch')}
@@ -1551,12 +1864,10 @@ export default function App() {
               </select>
             </div>
 
-            {/* Center: Live Digital Readout */}
             <div className="font-mono text-2xl sm:text-3xl font-bold tracking-wider px-2">
               {formatTimer(timerSeconds)}
             </div>
 
-            {/* Right: Play/Pause, Log & Reset */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsTimerRunning(!isTimerRunning)}
@@ -1594,7 +1905,7 @@ export default function App() {
           <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-5 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
-                Phase 1 Update • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
+                Phase 2 Update • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
               </span>
               <button onClick={closeTutorial} className={`text-xs font-mono ${theme.textMuted}`}>
                 Close ✕
@@ -1638,7 +1949,7 @@ export default function App() {
                   onClick={closeTutorial}
                   className={`px-6 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}
                 >
-                  Explore Workspace ✨
+                  Explore Timeline ✨
                 </button>
               )}
             </div>
