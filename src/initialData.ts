@@ -1,8 +1,16 @@
-export type UserId = 'mehrsan' | 'ronak';
+export type ThemePalette = 'cyber-cyan' | 'royal-violet' | 'sunset-coral' | 'emerald-mint';
+
+export interface Member {
+  id: string;
+  name: string;
+  tagline: string;
+  avatar: string;
+  theme: ThemePalette;
+}
 
 export interface ScheduleItem {
   id: string;
-  userId: UserId;
+  userId: string;
   day: string;
   title: string;
   startTime: string;
@@ -14,7 +22,7 @@ export interface ScheduleItem {
 
 export interface GoalItem {
   id: string;
-  userId: UserId;
+  userId: string;
   title: string;
   category: 'Short-Term' | 'Long-Term' | 'Habit' | 'Career';
   targetHours: number;
@@ -24,7 +32,7 @@ export interface GoalItem {
 
 export interface TaskItem {
   id: string;
-  userId: UserId;
+  userId: string;
   title: string;
   reminderTime: string;
   completed: boolean;
@@ -34,7 +42,7 @@ export interface TaskItem {
 
 export interface ExamItem {
   id: string;
-  userId: UserId;
+  userId: string;
   title: string;
   date: string;
   time: string;
@@ -44,14 +52,15 @@ export interface ExamItem {
 
 export interface TimeLog {
   id: string;
-  userId: UserId;
+  userId: string;
   targetTitle: string;
   minutes: number;
-  date: string; // YYYY-MM-DD
+  date: string;
   timestamp: string;
 }
 
 export interface AppState {
+  members: Member[];
   schedules: ScheduleItem[];
   goals: GoalItem[];
   tasks: TaskItem[];
@@ -67,8 +76,24 @@ const getPastDateStr = (daysAgo: number) => {
 };
 
 export const INITIAL_STATE: AppState = {
+  members: [
+    {
+      id: 'mehrsan',
+      name: 'Mehrsan',
+      tagline: 'Computer Eng • AI & Web',
+      avatar: 'M',
+      theme: 'cyber-cyan'
+    },
+    {
+      id: 'ronak',
+      name: 'Ronak',
+      tagline: 'French B2 • English & Uni',
+      avatar: 'R',
+      theme: 'royal-violet' // Her favorite purple/lavender aesthetic!
+    }
+  ],
   schedules: [
-    // Mehrsan's Schedule (From Image)
+    // Mehrsan's Schedule
     { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Morteza Damanafshan • Room 101', category: 'Core', attendedDates: [] },
     { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Saleh Yousefi • Room 1205', category: 'Core', attendedDates: [] },
     { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Mohammad Karimi • Room 102 (Zaryab Khoyi)', category: 'General', attendedDates: [] },
@@ -89,12 +114,10 @@ export const INITIAL_STATE: AppState = {
     { id: 'r-s6', userId: 'ronak', day: 'Wednesday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
   ],
   goals: [
-    // Mehrsan's Initial Editable Goals
     { id: 'm-g1', userId: 'mehrsan', title: 'B.Sc. Final Project (3 Credits)', category: 'Long-Term', targetHours: 120, loggedMinutes: 1440, deadline: 'End of Semester' },
     { id: 'm-g2', userId: 'mehrsan', title: 'Master Deep Learning & Neural Nets', category: 'Long-Term', targetHours: 80, loggedMinutes: 960, deadline: '1405/11/14' },
     { id: 'm-g3', userId: 'mehrsan', title: 'Full-Stack Web Dev Projects', category: 'Short-Term', targetHours: 50, loggedMinutes: 720, deadline: 'Ongoing' },
 
-    // Ronak's Goals
     { id: 'r-g1', userId: 'ronak', title: 'Master French up to B2 Level', category: 'Long-Term', targetHours: 400, loggedMinutes: 3600, deadline: 'Until B.Sc. Graduation (~3 Years)' },
     { id: 'r-g2', userId: 'ronak', title: 'English Immersion (Movies, YouTube & Media)', category: 'Habit', targetHours: 150, loggedMinutes: 2100, deadline: 'Daily Routine' },
     { id: 'r-g3', userId: 'ronak', title: 'Launch English Teaching Career', category: 'Career', targetHours: 60, loggedMinutes: 600, deadline: 'This Year' },
@@ -102,7 +125,7 @@ export const INITIAL_STATE: AppState = {
   tasks: [
     { id: 'm-t1', userId: 'mehrsan', title: 'Review Compiler Design Lexical Analysis notes', reminderTime: '18:00', completed: false, estimatedMinutes: 45, createdAt: getTodayStr() },
     { id: 'm-t2', userId: 'mehrsan', title: 'Coordinate Final Project milestone with supervisor', reminderTime: '11:00', completed: true, estimatedMinutes: 30, createdAt: getTodayStr() },
-    { id: 'r-t1', userId: 'ronak', title: 'Watch 1hr English YouTube / Movie without subtitles', reminderTime: '20:00', completed: false, estimatedMinutes: 60, createdAt: getTodayStr() },
+    { id: 'r-t1', userId: 'ronak', title: 'Watch 1hr English YouTube / Movie', reminderTime: '20:00', completed: false, estimatedMinutes: 60, createdAt: getTodayStr() },
     { id: 'r-t2', userId: 'ronak', title: 'Review French grammar & vocab before 9 PM class', reminderTime: '19:30', completed: true, estimatedMinutes: 45, createdAt: getTodayStr() },
   ],
   exams: [
