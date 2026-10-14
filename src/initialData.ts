@@ -6,7 +6,7 @@ const today = getLocalDateStr();
 const todayDay = getTodayWeekday();
 
 export const INITIAL_STATE: AppState = {
-  version: 4,
+  version: 4.2,
   lastUpdatedMs: now,
   members: [
     {
@@ -48,13 +48,88 @@ export const INITIAL_STATE: AppState = {
     { id: 'r-s6', userId: 'ronak', day: 'Wednesday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
   ],
   goals: [
-    { id: 'm-g1', userId: 'mehrsan', title: 'B.Sc. Final Project (3 Credits)', category: 'Long-Term', targetHours: 120, loggedMinutes: 1440, deadline: 'End of Semester' },
-    { id: 'm-g2', userId: 'mehrsan', title: 'Master Deep Learning & Neural Nets', category: 'Long-Term', targetHours: 80, loggedMinutes: 960, deadline: '1405/11/14' },
-    { id: 'm-g3', userId: 'mehrsan', title: 'Full-Stack Web Dev Projects', category: 'Short-Term', targetHours: 50, loggedMinutes: 720, deadline: 'Ongoing' },
+    {
+      id: 'm-g1',
+      userId: 'mehrsan',
+      title: 'B.Sc. Final Project (3 Credits)',
+      category: 'Long-Term',
+      targetHours: 120,
+      loggedMinutes: 1440,
+      deadline: 'End of Semester',
+      milestones: [
+        { id: 'ms-1', title: 'Finalize architecture & supervisor approval', completed: true },
+        { id: 'ms-2', title: 'Complete core prototype & database schema', completed: true },
+        { id: 'ms-3', title: 'Run evaluation tests & write final thesis', completed: false }
+      ]
+    },
+    {
+      id: 'm-g2',
+      userId: 'mehrsan',
+      title: 'Master Deep Learning & Neural Nets',
+      category: 'Long-Term',
+      targetHours: 80,
+      loggedMinutes: 960,
+      deadline: '1405/11/14',
+      milestones: [
+        { id: 'ms-4', title: 'Master CNNs & Optimization techniques', completed: true },
+        { id: 'ms-5', title: 'Implement Transformer / Attention mini-project', completed: false }
+      ]
+    },
+    {
+      id: 'm-g3',
+      userId: 'mehrsan',
+      title: 'Full-Stack Web Dev Projects',
+      category: 'Short-Term',
+      targetHours: 50,
+      loggedMinutes: 720,
+      deadline: 'Ongoing',
+      milestones: [
+        { id: 'ms-6', title: 'Ship SyncPulse Co-Op Sanctuary v4', completed: true },
+        { id: 'ms-7', title: 'Complete course project deliverables', completed: false }
+      ]
+    },
 
-    { id: 'r-g1', userId: 'ronak', title: 'Master French up to B2 Level', category: 'Long-Term', targetHours: 400, loggedMinutes: 3600, deadline: 'Until B.Sc. Graduation (~3 Years)' },
-    { id: 'r-g2', userId: 'ronak', title: 'English Immersion (Movies, YouTube & Media)', category: 'Habit', targetHours: 150, loggedMinutes: 2100, deadline: 'Daily Routine' },
-    { id: 'r-g3', userId: 'ronak', title: 'Launch English Teaching Career', category: 'Career', targetHours: 60, loggedMinutes: 600, deadline: 'This Year' },
+    {
+      id: 'r-g1',
+      userId: 'ronak',
+      title: 'Master French up to B2 Level',
+      category: 'Long-Term',
+      targetHours: 400,
+      loggedMinutes: 3600,
+      deadline: 'Until B.Sc. Graduation (~3 Years)',
+      milestones: [
+        { id: 'ms-8', title: 'Complete A1 Foundations & pronunciation', completed: true },
+        { id: 'ms-9', title: 'Finish A2 Elementary grammar & daily speaking', completed: false },
+        { id: 'ms-10', title: 'Reach B1 Intermediate fluency', completed: false },
+        { id: 'ms-11', title: 'Achieve B2 Upper-Intermediate certification', completed: false }
+      ]
+    },
+    {
+      id: 'r-g2',
+      userId: 'ronak',
+      title: 'English Immersion (Movies, YouTube & Media)',
+      category: 'Habit',
+      targetHours: 150,
+      loggedMinutes: 2100,
+      deadline: 'Daily Routine',
+      milestones: [
+        { id: 'ms-12', title: 'Watch 20 hours of native English YouTube/vlogs', completed: true },
+        { id: 'ms-13', title: 'Finish 5 full movies without Persian subtitles', completed: false }
+      ]
+    },
+    {
+      id: 'r-g3',
+      userId: 'ronak',
+      title: 'Launch English Teaching Career',
+      category: 'Career',
+      targetHours: 60,
+      loggedMinutes: 600,
+      deadline: 'This Year',
+      milestones: [
+        { id: 'ms-14', title: 'Prepare teaching methodology & sample lesson plan', completed: true },
+        { id: 'ms-15', title: 'Start tutoring first students / language institute', completed: false }
+      ]
+    },
   ],
   tasks: [
     { id: 'm-t1', userId: 'mehrsan', day: todayDay, title: 'Review Compiler Design Lexical Analysis notes', reminderTime: '18:00', completed: false, estimatedMinutes: 45, createdAt: today },
@@ -66,6 +141,7 @@ export const INITIAL_STATE: AppState = {
     { id: 'ex-3', userId: 'mehrsan', title: 'Analytical History of Early Islam', date: '1405/11/05', time: '14:00', professor: 'Karimi', type: 'General' },
     { id: 'ex-4', userId: 'mehrsan', title: 'Web Programming', date: '1405/11/10', time: '09:00', professor: 'Azimi', type: 'Core' },
     { id: 'ex-5', userId: 'mehrsan', title: 'Special Topics (Deep Learning)', date: '1405/11/14', time: '09:00', professor: 'Yousefi', type: 'Core' },
+    { id: 'ex-6', userId: 'ronak', title: 'French Level Assessment Exam', date: '1405/10/28', time: '21:00', professor: 'French Institute', type: 'Language' },
   ],
   logs: [
     { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastLocalDateStr(2), createdAtMs: now - 172800000, cheeredBy: ['ronak'] },

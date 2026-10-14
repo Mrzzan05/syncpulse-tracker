@@ -7,10 +7,11 @@ import {
   ShareNetwork, UserPlus, Copy, Heart,
   SunDim, MoonStars, Coffee, CloudRain, SpeakerSlash,
   Compass, Fire, Medal, Trophy, DownloadSimple, UploadSimple,
-  Timer, Waveform, Plant, Lightning, Crown, Buildings
+  Timer, Waveform, Plant, Lightning, Crown, Buildings,
+  ArrowsOutSimple, ArrowsInSimple, ListChecks
 } from '@phosphor-icons/react';
 import {
-  AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette, TimeLog
+  AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette, TimeLog, ExamItem
 } from './types';
 import { INITIAL_STATE } from './initialData';
 import { GET_COZY_THEME } from './themes';
@@ -25,12 +26,23 @@ const migrateState = (raw: any): AppState => {
   }
   const todayDay = getTodayWeekday();
   return {
-    version: 4,
+    version: 4.2,
     lastUpdatedMs: raw.lastUpdatedMs || Date.now(),
     members: raw.members,
     schedules: Array.isArray(raw.schedules) ? raw.schedules : INITIAL_STATE.schedules,
     goals: Array.isArray(raw.goals)
-      ? raw.goals.map((g: any) => ({ ...g, targetHours: Math.max(1, Number(g.targetHours) || 10) }))
+      ? raw.goals.map((g: any) => {
+          const fallbackGoal = INITIAL_STATE.goals.find((ig) => ig.id === g.id);
+          return {
+            ...g,
+            targetHours: Math.max(1, Number(g.targetHours) || 10),
+            milestones: Array.isArray(g.milestones)
+              ? g.milestones
+              : fallbackGoal
+              ? fallbackGoal.milestones
+              : []
+          };
+        })
       : INITIAL_STATE.goals,
     tasks: Array.isArray(raw.tasks)
       ? raw.tasks.map((t: any) => ({ ...t, day: t.day || todayDay }))
@@ -67,10 +79,17 @@ export default function App() {
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'schedule' | 'analytics'>('dashboard');
 
+  // Zen Focus Room Fullscreen Mode
+  const [isFocusRoomOpen, setIsFocusRoomOpen] = useState<boolean>(false);
+
   const realTodayName = getTodayWeekday();
   const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
   const [timelineDay, setTimelineDay] = useState<string>(realTodayName);
   const [selectedHeatCell, setSelectedHeatCell] = useState<{ date: string; mins: number; member: string } | null>(null);
+  const [showAllSquadExams, setShowAllSquadExams] = useState<boolean>(false);
+
+  // Milestone draft inputs per goal ID
+  const [milestoneInputs, setMilestoneInputs] = useState<Record<string, string>>({});
 
   const [nowMinutes, setNowMinutes] = useState<number>(() => {
     const d = new Date();
@@ -167,17 +186,20 @@ export default function App() {
   const [showMemberModal, setShowMemberModal] = useState<boolean>(false);
   const [showGoalModal, setShowGoalModal] = useState<boolean>(false);
   const [showScheduleModal, setShowScheduleModal] = useState<boolean>(false);
+  const [showExamModal, setShowExamModal] = useState<boolean>(false);
   const [showSyncModal, setShowSyncModal] = useState<boolean>(false);
   const [scheduleError, setScheduleError] = useState<string>('');
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        setIsFocusRoomOpen(false);
         setShowTutorial(false);
         setShowShareModal(false);
         setShowMemberModal(false);
         setShowGoalModal(false);
         setShowScheduleModal(false);
+        setShowExamModal(false);
         setShowSyncModal(false);
       }
     };
@@ -297,6 +319,13 @@ export default function App() {
     endTime: '10:30',
     details: '',
     category: 'Core' as ScheduleItem['category']
+  });
+  const [examForm, setExamForm] = useState({
+    title: '',
+    date: '1405/11/01',
+    time: '10:00',
+    professor: '',
+    type: 'Core' as ExamItem['type']
   });
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskTime, setNewTaskTime] = useState('17:00');
@@ -491,7 +520,10 @@ export default function App() {
       category: 'Short-Term',
       targetHours: 40,
       loggedMinutes: 0,
-      deadline: 'Ongoing'
+      deadline: 'Ongoing',
+      milestones: [
+        { id: uid('ms'), title: 'Complete first week of steady focus', completed: false }
+      ]
     };
     commitState((prev) => ({
       ...prev,
@@ -512,11 +544,13 @@ export default function App() {
       goals: prev.goals.filter((g) => g.userId !== id),
       schedules: prev.schedules.filter((s) => s.userId !== id),
       tasks: prev.tasks.filter((t) => t.userId !== id),
+      exams: prev.exams.filter((ex) => ex.userId !== id),
       logs: prev.logs.filter((l) => l.userId !== id)
     }));
     setActiveUser('mehrsan');
   };
 
+  // Goal & Milestone CRUD
   const openCreateGoal = () => {
     setEditingGoal(null);
     setGoalForm({ title: '', category: 'Short-Term', targetHours: 40, deadline: 'Ongoing' });
@@ -553,7 +587,8 @@ export default function App() {
         category: goalForm.category,
         targetHours: safeTarget,
         loggedMinutes: 0,
-        deadline: goalForm.deadline || 'Ongoing'
+        deadline: goalForm.deadline || 'Ongoing',
+        milestones: []
       };
       commitState((prev) => ({ ...prev, goals: [...prev.goals, created] }));
     }
@@ -565,6 +600,75 @@ export default function App() {
     commitState((prev) => ({ ...prev, goals: prev.goals.filter((g) => g.id !== goal.id) }));
   };
 
+  const addMilestone = (goalId: string) => {
+    const text = (milestoneInputs[goalId] || '').trim();
+    if (!text) return;
+    commitState((prev) => ({
+      ...prev,
+      goals: prev.goals.map((g) =>
+        g.id === goalId
+          ? {
+              ...g,
+              milestones: [...(g.milestones || []), { id: uid('ms'), title: text, completed: false }]
+            }
+          : g
+      )
+    }));
+    setMilestoneInputs((prev) => ({ ...prev, [goalId]: '' }));
+  };
+
+  const toggleMilestone = (goalId: string, msId: string) => {
+    commitState((prev) => ({
+      ...prev,
+      goals: prev.goals.map((g) => {
+        if (g.id !== goalId) return g;
+        return {
+          ...g,
+          milestones: (g.milestones || []).map((m) => {
+            if (m.id !== msId) return m;
+            if (!m.completed) triggerConfetti();
+            return { ...m, completed: !m.completed };
+          })
+        };
+      })
+    }));
+  };
+
+  const deleteMilestone = (goalId: string, msId: string) => {
+    commitState((prev) => ({
+      ...prev,
+      goals: prev.goals.map((g) =>
+        g.id === goalId
+          ? { ...g, milestones: (g.milestones || []).filter((m) => m.id !== msId) }
+          : g
+      )
+    }));
+  };
+
+  // Exam CRUD
+  const saveExamItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!examForm.title.trim()) return;
+    const newEx: ExamItem = {
+      id: uid('exam'),
+      userId: activeUser,
+      title: examForm.title.trim(),
+      date: examForm.date.trim() || '1405/11/01',
+      time: examForm.time || '10:00',
+      professor: examForm.professor.trim() || 'Course Exam',
+      type: examForm.type
+    };
+    commitState((prev) => ({ ...prev, exams: [...prev.exams, newEx] }));
+    setExamForm({ title: '', date: '1405/11/01', time: '10:00', professor: '', type: 'Core' });
+    setShowExamModal(false);
+  };
+
+  const deleteExamItem = (ex: ExamItem) => {
+    if (!window.confirm(`Remove exam "${ex.title}"?`)) return;
+    commitState((prev) => ({ ...prev, exams: prev.exams.filter((item) => item.id !== ex.id) }));
+  };
+
+  // Schedule CRUD
   const toggleClassAttendance = (sched: ScheduleItem) => {
     const attended = sched.attendedDates.includes(todayStr);
     const sourceKey = `class-${sched.id}-${todayStr}`;
@@ -784,6 +888,9 @@ export default function App() {
   const activeStats = memberMetrics[activeUser] || memberMetrics[state.members[0].id];
   const userGoals = state.goals.filter((g) => g.userId === activeUser);
   const userDayTasks = state.tasks.filter((t) => t.userId === activeUser && t.day === timelineDay);
+  const displayedExams = showAllSquadExams
+    ? state.exams
+    : state.exams.filter((ex) => ex.userId === activeUser);
 
   const activeBadges = useMemo(() => {
     const userLogs = state.logs.filter((l) => l.userId === activeUser);
@@ -932,7 +1039,7 @@ export default function App() {
 
   const navItems = [
     { id: 'dashboard', label: 'Today’s Flow', icon: Compass, badge: `${dailyStream.filter(i => i.kind !== 'gap' && !i.completed).length}` },
-    { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: `${userGoals.length}` },
+    { id: 'goals', label: 'Goals & Milestones', icon: Target, badge: `${userGoals.length}` },
     { id: 'schedule', label: 'Weekly Classes', icon: CalendarBlank },
     { id: 'analytics', label: 'Heatmaps & Badges', icon: Trophy, badge: `${activeBadges.filter(b => b.unlocked).length}/6` },
   ];
@@ -983,17 +1090,19 @@ export default function App() {
       {/* DESKTOP LEFT SIDEBAR */}
       <aside className={`hidden lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:flex lg:flex-col border-r backdrop-blur-2xl z-30 p-5 justify-between overflow-y-auto cozy-transition ${theme.sidebarBg}`}>
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
-              {currentMember.theme === 'lavender-blush' ? (
-                <Heart weight="duotone" className="w-5 h-5 text-white" />
-              ) : (
-                <Coffee weight="duotone" className="w-5 h-5 text-white" />
-              )}
-            </div>
-            <div>
-              <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
-              <span className={`text-xs font-mono ${theme.textMuted}`}>Cozy Sanctuary</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
+                {currentMember.theme === 'lavender-blush' ? (
+                  <Heart weight="duotone" className="w-5 h-5 text-white" />
+                ) : (
+                  <Coffee weight="duotone" className="w-5 h-5 text-white" />
+                )}
+              </div>
+              <div>
+                <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
+                <span className={`text-xs font-mono ${theme.textMuted}`}>Cozy Sanctuary</span>
+              </div>
             </div>
           </div>
 
@@ -1074,7 +1183,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation Views (Phosphor Duotone when idle, Fill when active!) */}
+          {/* Navigation Views */}
           <nav className="space-y-1" aria-label="Main Navigation">
             <span className={`px-1 text-xs font-mono uppercase tracking-wider block mb-1.5 ${theme.textMuted}`}>
               Workspace Views
@@ -1102,6 +1211,18 @@ export default function App() {
                 </button>
               );
             })}
+
+            {/* Launch Zen Focus Room Button */}
+            <button
+              onClick={() => setIsFocusRoomOpen(true)}
+              className={`w-full mt-2 px-3.5 py-2.5 rounded-2xl text-xs font-semibold flex items-center justify-between border transition-all ${theme.softBadge} hover:opacity-90`}
+            >
+              <span className="flex items-center gap-2.5">
+                <ArrowsOutSimple weight="duotone" className="w-4 h-4" />
+                Enter Zen Focus Room
+              </span>
+              <Sparkle weight="fill" className="w-3.5 h-3.5" />
+            </button>
           </nav>
 
           {/* Cozy Soundscape Widget */}
@@ -1199,9 +1320,12 @@ export default function App() {
                     .join(' • ')}
                 </span>
               </div>
-              <span className="font-mono text-xs flex items-center gap-1">
-                <Sparkle weight="fill" className="w-3.5 h-3.5" /> Co-Op Live
-              </span>
+              <button
+                onClick={() => setIsFocusRoomOpen(true)}
+                className="font-mono text-xs underline flex items-center gap-1"
+              >
+                <Sparkle weight="fill" className="w-3.5 h-3.5" /> Join Focus Room
+              </button>
             </div>
           )}
 
@@ -1289,12 +1413,20 @@ export default function App() {
                   Lv.{activeStats.level} ({activeStats.totalHours}h)
                 </span>
               </div>
-              <button
-                onClick={() => setShowSyncModal(true)}
-                className={`text-xs font-mono flex items-center gap-1.5 ${theme.textMuted} hover:underline`}
-              >
-                <DownloadSimple weight="duotone" className="w-4 h-4" /> Backup / Sync
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsFocusRoomOpen(true)}
+                  className={`text-xs font-semibold px-3 py-1 rounded-xl border flex items-center gap-1.5 ${theme.softBadge}`}
+                >
+                  <ArrowsOutSimple weight="duotone" className="w-3.5 h-3.5" /> Focus Room
+                </button>
+                <button
+                  onClick={() => setShowSyncModal(true)}
+                  className={`text-xs font-mono flex items-center gap-1.5 ${theme.textMuted} hover:underline`}
+                >
+                  <DownloadSimple weight="duotone" className="w-4 h-4" /> Backup
+                </button>
+              </div>
             </div>
           )}
 
@@ -1391,7 +1523,7 @@ export default function App() {
                     <div className={`p-8 rounded-2xl border text-center space-y-2 ${theme.innerCardBg}`}>
                       <p className="font-serif italic text-xl">An open, unhurried {timelineDay}</p>
                       <p className={`text-xs ${theme.textMuted}`}>
-                        No fixed classes or tasks plotted for {timelineDay}. Plot a task above or launch the focus timer!
+                        No fixed classes or tasks plotted for {timelineDay}. Plot a task above or launch the focus room!
                       </p>
                     </div>
                   ) : (
@@ -1430,10 +1562,11 @@ export default function App() {
                                     setTimerStartedAtMs(Date.now());
                                     setIsTimerRunning(true);
                                     updatePresence(true);
+                                    setIsFocusRoomOpen(true);
                                   }}
                                   className={`text-xs font-mono px-2.5 py-1 rounded-xl border flex items-center gap-1 ${theme.softBadge}`}
                                 >
-                                  <Play weight="fill" className="w-3 h-3" /> Start 25m
+                                  <Play weight="fill" className="w-3 h-3" /> Focus Room
                                 </button>
                               </div>
                             </div>
@@ -1545,7 +1678,7 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right 5 Cols: Shared Squad Feed + Upcoming Exams */}
+              {/* Right 5 Cols: Shared Squad Feed + Editable Exams CRUD */}
               <div className="lg:col-span-5 space-y-6">
                 <div className={`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
@@ -1558,7 +1691,7 @@ export default function App() {
                     </span>
                   </div>
 
-                  <div className="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
                     {state.logs.slice(0, 15).map((log) => {
                       const logMember = state.members.find((m) => m.id === log.userId);
                       if (!logMember) return null;
@@ -1602,42 +1735,86 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* University Exam Dates */}
+                {/* Editable University & Language Exams (CRUD for all members!) */}
                 <div className={`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
-                  <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
-                    <GraduationCap weight="duotone" className={`w-5 h-5 ${theme.accentText}`} />
-                    University Exams (1405)
-                  </h3>
-                  <div className="space-y-2.5">
-                    {state.exams.map((ex) => (
-                      <div
-                        key={ex.id}
-                        className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs ${theme.innerCardBg}`}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div>
+                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                        <GraduationCap weight="duotone" className={`w-5 h-5 ${theme.accentText}`} />
+                        Exams & Deadlines
+                      </h3>
+                      <button
+                        onClick={() => setShowAllSquadExams(!showAllSquadExams)}
+                        className={`text-xs font-mono underline ${theme.textMuted}`}
                       >
-                        <div>
-                          <span className="font-semibold block">{ex.title}</span>
-                          <span className={`text-xs ${theme.textMuted}`}>Prof. {ex.professor}</span>
-                        </div>
-                        <div className="text-right font-mono">
-                          <span className={`font-bold block ${theme.accentText}`}>{ex.date}</span>
-                          <span className={`text-xs ${theme.textMuted}`}>{ex.time}</span>
-                        </div>
-                      </div>
-                    ))}
+                        {showAllSquadExams ? `Showing All Squad • Filter ${currentMember.name}` : `Showing ${currentMember.name} • Show All`}
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => setShowExamModal(true)}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-semibold flex items-center gap-1 border ${theme.softBadge}`}
+                    >
+                      <Plus weight="bold" className="w-3.5 h-3.5" /> Add Exam
+                    </button>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    {displayedExams.length === 0 ? (
+                      <p className={`text-xs italic py-4 text-center ${theme.textMuted}`}>
+                        No upcoming exams listed for {currentMember.name}. Click "+ Add Exam" to add one!
+                      </p>
+                    ) : (
+                      displayedExams.map((ex) => {
+                        const exOwner = state.members.find((m) => m.id === ex.userId);
+                        return (
+                          <div
+                            key={ex.id}
+                            className={`p-3.5 rounded-2xl border flex items-center justify-between gap-2 text-xs ${theme.innerCardBg}`}
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5">
+                                {showAllSquadExams && exOwner && (
+                                  <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded border ${theme.softBadge}`}>
+                                    {exOwner.name}
+                                  </span>
+                                )}
+                                <span className="font-semibold truncate">{ex.title}</span>
+                              </div>
+                              <span className={`text-xs block mt-0.5 ${theme.textMuted}`}>
+                                {ex.professor} • {ex.type}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <div className="text-right font-mono">
+                                <span className={`font-bold block ${theme.accentText}`}>{ex.date}</span>
+                                <span className={`text-xs ${theme.textMuted}`}>{ex.time}</span>
+                              </div>
+                              <button
+                                aria-label={`Delete exam ${ex.title}`}
+                                onClick={() => deleteExamItem(ex)}
+                                className="p-1 opacity-50 hover:text-rose-400 hover:opacity-100"
+                              >
+                                <Trash weight="duotone" className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* VIEW 2: GOALS & TIME BANK */}
+          {/* VIEW 2: GOALS, TIME BANK & INTERACTIVE MILESTONES */}
           {activeTab === 'goals' && (
             <div className="space-y-6">
               <div className={`flex flex-wrap items-center justify-between gap-4 p-6 rounded-3xl border ${theme.cardBg}`}>
                 <div>
-                  <h3 className="font-serif italic text-2xl">Shared Dreams & Time Bank</h3>
+                  <h3 className="font-serif italic text-2xl">Shared Dreams, Time Bank & Milestones</h3>
                   <p className={`text-xs ${theme.textMuted}`}>
-                    Log quick study blocks (+15m, +30m, +1h) or customize short & long-term goals.
+                    Break big dreams into small milestone steps, or tap +15m, +30m, +1h to bank study hours.
                   </p>
                 </div>
                 <button
@@ -1673,8 +1850,11 @@ export default function App() {
                           const safeTarget = Math.max(1, g.targetHours);
                           const hrs = +(g.loggedMinutes / 60).toFixed(1);
                           const pct = Math.min(100, Math.round((hrs / safeTarget) * 100));
+                          const milestones = g.milestones || [];
+                          const doneMsCount = milestones.filter((m) => m.completed).length;
+
                           return (
-                            <div key={g.id} className={`p-4 rounded-2xl border space-y-2.5 ${theme.innerCardBg}`}>
+                            <div key={g.id} className={`p-4 rounded-2xl border space-y-3 ${theme.innerCardBg}`}>
                               <div className="flex items-start justify-between gap-2">
                                 <div>
                                   <span className={`text-xs font-mono uppercase px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
@@ -1703,32 +1883,96 @@ export default function App() {
                                 </div>
                               </div>
 
-                              <div className="flex items-center justify-between text-xs font-mono pt-1">
-                                <span>{hrs}h / {safeTarget}h ({pct}%)</span>
-                                <div className="flex gap-1.5">
-                                  <button
-                                    onClick={() => logGoalMinutes(member.id, g.id, g.title, 15)}
-                                    className={`px-2 py-1 rounded-lg border ${theme.cardBg}`}
-                                  >
-                                    +15m
-                                  </button>
-                                  <button
-                                    onClick={() => logGoalMinutes(member.id, g.id, g.title, 30)}
-                                    className={`px-2 py-1 rounded-lg border ${theme.cardBg}`}
-                                  >
-                                    +30m
-                                  </button>
-                                  <button
-                                    onClick={() => logGoalMinutes(member.id, g.id, g.title, 60)}
-                                    className={`px-2 py-1 rounded-lg border font-bold ${mStyle.softBadge}`}
-                                  >
-                                    +1h
-                                  </button>
+                              {/* Hours Progress Bar */}
+                              <div className="space-y-1.5">
+                                <div className="flex items-center justify-between text-xs font-mono">
+                                  <span>{hrs}h / {safeTarget}h ({pct}%)</span>
+                                  <div className="flex gap-1.5">
+                                    <button
+                                      onClick={() => logGoalMinutes(member.id, g.id, g.title, 15)}
+                                      className={`px-2 py-1 rounded-lg border ${theme.cardBg}`}
+                                    >
+                                      +15m
+                                    </button>
+                                    <button
+                                      onClick={() => logGoalMinutes(member.id, g.id, g.title, 30)}
+                                      className={`px-2 py-1 rounded-lg border ${theme.cardBg}`}
+                                    >
+                                      +30m
+                                    </button>
+                                    <button
+                                      onClick={() => logGoalMinutes(member.id, g.id, g.title, 60)}
+                                      className={`px-2 py-1 rounded-lg border font-bold ${mStyle.softBadge}`}
+                                    >
+                                      +1h
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className={`w-full h-2.5 rounded-full overflow-hidden ${theme.trackBg}`}>
+                                  <div className={`h-full rounded-full ${mStyle.progressBar}`} style={{ width: `${pct}%` }} />
                                 </div>
                               </div>
 
-                              <div className={`w-full h-2.5 rounded-full overflow-hidden ${theme.trackBg}`}>
-                                <div className={`h-full rounded-full ${mStyle.progressBar}`} style={{ width: `${pct}%` }} />
+                              {/* Interactive Goal Milestones (Sub-steps) */}
+                              <div className={`pt-3 border-t ${theme.divider} space-y-2`}>
+                                <div className="flex items-center justify-between text-xs font-mono">
+                                  <span className={`flex items-center gap-1.5 ${theme.textMuted}`}>
+                                    <ListChecks weight="duotone" className="w-4 h-4" />
+                                    Milestones ({doneMsCount}/{milestones.length})
+                                  </span>
+                                </div>
+
+                                <div className="space-y-1.5">
+                                  {milestones.map((ms) => (
+                                    <div
+                                      key={ms.id}
+                                      className="flex items-center justify-between gap-2 text-xs py-1 px-2 rounded-xl hover:bg-black/5"
+                                    >
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleMilestone(g.id, ms.id)}
+                                        className="flex items-center gap-2 text-left flex-1"
+                                      >
+                                        <CheckCircle
+                                          weight={ms.completed ? 'fill' : 'duotone'}
+                                          className={`w-4 h-4 shrink-0 ${ms.completed ? 'text-emerald-500' : theme.textMuted}`}
+                                        />
+                                        <span className={ms.completed ? 'line-through opacity-55' : ''}>
+                                          {ms.title}
+                                        </span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        aria-label="Delete milestone"
+                                        onClick={() => deleteMilestone(g.id, ms.id)}
+                                        className="opacity-40 hover:opacity-100 hover:text-rose-400"
+                                      >
+                                        <X weight="bold" className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <div className="flex gap-1.5 pt-1">
+                                  <input
+                                    type="text"
+                                    placeholder="Add a milestone step..."
+                                    value={milestoneInputs[g.id] || ''}
+                                    onChange={(e) =>
+                                      setMilestoneInputs((prev) => ({ ...prev, [g.id]: e.target.value }))
+                                    }
+                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addMilestone(g.id))}
+                                    className={`flex-1 border rounded-xl px-2.5 py-1.5 text-xs focus:outline-none ${theme.cardBg}`}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => addMilestone(g.id)}
+                                    className={`px-2.5 py-1.5 rounded-xl text-xs font-semibold border ${mStyle.softBadge}`}
+                                  >
+                                    + Step
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           );
@@ -1895,7 +2139,7 @@ export default function App() {
                 })}
               </div>
 
-              {/* Badges with Phosphor Duotone Vector Icons */}
+              {/* Badges */}
               <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
@@ -2025,17 +2269,18 @@ export default function App() {
                 </button>
               )}
               <button
-                onClick={() => resetTimer()}
-                aria-label="Reset Timer"
+                onClick={() => setIsFocusRoomOpen(true)}
+                aria-label="Open Fullscreen Zen Focus Room"
+                title="Open Fullscreen Zen Focus Room"
                 className={`p-2 rounded-xl border ${theme.innerCardBg}`}
               >
-                <ArrowCounterClockwise weight="duotone" className="w-4 h-4" />
+                <ArrowsOutSimple weight="duotone" className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR (Phosphor Duotone -> Fill) */}
+        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR */}
         <nav
           aria-label="Mobile Navigation"
           className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl grid grid-cols-4 px-2 py-1.5 ${theme.sidebarBg}`}
@@ -2058,6 +2303,256 @@ export default function App() {
           })}
         </nav>
       </div>
+
+      {/* ============================================================================
+          FULL-SCREEN ZEN FOCUS ROOM OVERLAY (FLOCUS / LIFEAT INSPIRED)
+      ============================================================================ */}
+      {isFocusRoomOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className={`fixed inset-0 z-50 flex flex-col justify-between p-6 sm:p-10 overflow-y-auto cozy-transition paper-grain ${theme.pageBg} ${theme.textMain}`}
+        >
+          {/* Breathing Ambient Orbs inside Focus Room */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+            <div className={`cozy-orb absolute top-10 left-10 w-[500px] h-[500px] rounded-full blur-[140px] ${theme.orb1}`} />
+            <div className={`cozy-orb absolute bottom-10 right-10 w-[520px] h-[520px] rounded-full blur-[150px] ${theme.orb2}`} style={{ animationDelay: '-4s' }} />
+          </div>
+
+          {/* Top Bar */}
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${theme.primaryBtn}`}>
+                <Sparkle weight="fill" className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="font-serif italic text-2xl leading-none">
+                  {currentMember.name}'s Zen Focus Sanctuary
+                </h2>
+                <span className={`text-xs font-mono ${theme.textMuted}`}>
+                  Local Time: {fromMins(nowMinutes)} • 🔥 {activeStats.streak} Day Streak
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsLatteMode(!isLatteMode)}
+                className={`px-3.5 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 ${theme.cardBg}`}
+              >
+                {isLatteMode ? <MoonStars weight="duotone" className="w-4 h-4" /> : <SunDim weight="duotone" className="w-4 h-4 text-amber-300" />}
+                {isLatteMode ? 'Night' : 'Latte'}
+              </button>
+              <button
+                onClick={() => setIsFocusRoomOpen(false)}
+                className={`px-4 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 ${theme.cardBg}`}
+              >
+                <ArrowsInSimple weight="duotone" className="w-4 h-4" />
+                Exit Focus Room (Esc)
+              </button>
+            </div>
+          </div>
+
+          {/* Center Giant Clock & Mindful Controls */}
+          <div className="relative z-10 max-w-2xl mx-auto w-full text-center space-y-6 my-auto py-8">
+            <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl border backdrop-blur-md">
+              {(['stopwatch', 'pomodoro', 'break'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => resetTimer(mode)}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-semibold transition ${
+                    timerMode === mode ? theme.primaryBtn : `${theme.textMuted} hover:opacity-100`
+                  }`}
+                >
+                  {mode === 'stopwatch' ? '⏱️ Open Stopwatch' : mode === 'pomodoro' ? '🍅 25m Pomodoro' : '☕ 5m Break'}
+                </button>
+              ))}
+            </div>
+
+            <div className="font-mono text-7xl sm:text-8xl md:text-9xl font-bold tracking-tight select-none">
+              {String(Math.floor(displaySeconds / 60)).padStart(2, '0')}:
+              {String(displaySeconds % 60).padStart(2, '0')}
+            </div>
+
+            {currentMember.statusNote && (
+              <p className={`font-serif italic text-2xl sm:text-3xl ${theme.textMuted}`}>
+                "{currentMember.statusNote}"
+              </p>
+            )}
+
+            <div className="max-w-md mx-auto">
+              <label htmlFor="zen-goal-select" className="sr-only">Choose Goal to Credit</label>
+              <select
+                id="zen-goal-select"
+                value={selectedGoalId}
+                onChange={(e) => setSelectedGoalId(e.target.value)}
+                className={`w-full border rounded-2xl px-4 py-3 text-sm text-center focus:outline-none ${theme.cardBg}`}
+              >
+                <option value="">-- Nourishing Goal ({currentMember.name}) --</option>
+                {userGoals.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.title} ({(g.loggedMinutes / 60).toFixed(1)}h / {g.targetHours}h)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+              <button
+                onClick={toggleTimer}
+                className={`px-8 py-4 rounded-3xl font-semibold text-sm flex items-center gap-2 shadow-xl transition transform hover:scale-105 ${theme.primaryBtn}`}
+              >
+                {isTimerRunning ? <Pause weight="fill" className="w-5 h-5" /> : <Play weight="fill" className="w-5 h-5" />}
+                {isTimerRunning ? 'Pause Session' : 'Start Mindful Focus'}
+              </button>
+
+              {timerMode !== 'break' && (
+                <button
+                  onClick={handleSaveTimerSession}
+                  disabled={!canLogSession}
+                  className={`px-6 py-4 rounded-3xl font-semibold text-sm border flex items-center gap-2 transition disabled:opacity-40 ${theme.softBadge}`}
+                >
+                  <Check weight="bold" className="w-5 h-5" />
+                  Log Session (+{Math.floor(elapsedSecForLog / 60)}m)
+                </button>
+              )}
+
+              <button
+                onClick={() => resetTimer()}
+                className={`p-4 rounded-3xl border ${theme.cardBg}`}
+                title="Reset Timer"
+              >
+                <ArrowCounterClockwise weight="duotone" className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Bar: Ambient Soundscape & Co-Op Squad Presence */}
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-current/10">
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-mono uppercase ${theme.textMuted}`}>Ambience:</span>
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'rain' ? 'off' : 'rain')}
+                className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 border transition ${
+                  ambientMode === 'rain' ? theme.primaryBtn : theme.cardBg
+                }`}
+              >
+                <CloudRain weight="duotone" className="w-4 h-4" /> Soft Rain
+              </button>
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'tone' ? 'off' : 'tone')}
+                className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 border transition ${
+                  ambientMode === 'tone' ? theme.primaryBtn : theme.cardBg
+                }`}
+              >
+                <Waveform weight="duotone" className="w-4 h-4" /> Warm Tone
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {state.members.map((m) => (
+                <div
+                  key={m.id}
+                  className={`px-3 py-1.5 rounded-2xl border text-xs flex items-center gap-2 ${theme.cardBg}`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${m.presence?.isFocusing ? 'bg-emerald-400 animate-ping' : 'bg-stone-500'}`} />
+                  <span className="font-bold">{m.name}:</span>
+                  <span className={theme.textMuted}>
+                    {m.presence?.isFocusing ? `Focusing (${m.presence.targetTitle})` : `${Math.floor(memberMetrics[m.id].todayMins / 60)}h ${memberMetrics[m.id].todayMins % 60}m today`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD EXAM MODAL */}
+      {showExamModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={saveExamItem} className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif italic text-2xl">Add Exam / Deadline ({currentMember.name})</h3>
+              <button type="button" aria-label="Close modal" onClick={() => setShowExamModal(false)}>
+                <X weight="bold" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label htmlFor="exam-title" className={`block text-xs mb-1 ${theme.textMuted}`}>Exam / Course Title</label>
+              <input
+                id="exam-title"
+                type="text"
+                required
+                placeholder="e.g., DELF B1 Exam / Compiler Final"
+                value={examForm.title}
+                onChange={(e) => setExamForm({ ...examForm, title: e.target.value })}
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="exam-date" className={`block text-xs mb-1 ${theme.textMuted}`}>Date (e.g., 1405/11/10)</label>
+                <input
+                  id="exam-date"
+                  type="text"
+                  required
+                  value={examForm.date}
+                  onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
+                  className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
+                />
+              </div>
+              <div>
+                <label htmlFor="exam-time" className={`block text-xs mb-1 ${theme.textMuted}`}>Time</label>
+                <input
+                  id="exam-time"
+                  type="time"
+                  value={examForm.time}
+                  onChange={(e) => setExamForm({ ...examForm, time: e.target.value })}
+                  className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label htmlFor="exam-prof" className={`block text-xs mb-1 ${theme.textMuted}`}>Professor / Location</label>
+                <input
+                  id="exam-prof"
+                  type="text"
+                  placeholder="e.g., Prof. Yousefi"
+                  value={examForm.professor}
+                  onChange={(e) => setExamForm({ ...examForm, professor: e.target.value })}
+                  className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
+                />
+              </div>
+              <div>
+                <label htmlFor="exam-type" className={`block text-xs mb-1 ${theme.textMuted}`}>Category</label>
+                <select
+                  id="exam-type"
+                  value={examForm.type}
+                  onChange={(e) => setExamForm({ ...examForm, type: e.target.value as ExamItem['type'] })}
+                  className={`w-full border rounded-2xl px-3 py-2.5 text-xs ${theme.innerCardBg}`}
+                >
+                  <option value="Core">Core</option>
+                  <option value="General">General</option>
+                  <option value="Language">Language</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setShowExamModal(false)} className={`px-4 py-2 rounded-2xl border text-xs ${theme.cardBg}`}>
+                Cancel
+              </button>
+              <button type="submit" className={`px-5 py-2 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>
+                Save Exam
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* BACKUP & CLOUD SYNC MODAL */}
       {showSyncModal && (
@@ -2370,7 +2865,7 @@ export default function App() {
           <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-4 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
-                SyncPulse v4.1 Guide
+                SyncPulse v4.2 Guide
               </span>
               <button aria-label="Close guide" onClick={() => setShowTutorial(false)}>
                 <X weight="bold" className="w-4 h-4" />
@@ -2378,10 +2873,10 @@ export default function App() {
             </div>
             <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary</h3>
             <ul className={`text-xs space-y-2 leading-relaxed ${theme.textMuted}`}>
-              <li>• <b>Visual Timeline:</b> Plots your classes and tasks for the selected day and highlights Free Focus Windows.</li>
-              <li>• <b>Persistent Timer:</b> Runs accurately even if you refresh the page or lock your phone. Supports Stopwatch, 25m Pomodoro, and 5m Breaks.</li>
-              <li>• <b>Fair XP & Streaks:</b> Every minute logged earns +10 XP. Unchecking a task cleanly reverses its XP.</li>
-              <li>• <b>Backup & PWA:</b> Export/Import JSON backups anytime, or install SyncPulse as an app from your browser menu!</li>
+              <li>• <b>Zen Focus Room:</b> Click "Enter Zen Focus Room" in the sidebar or timer dock for a distraction-free fullscreen clock with ambient rain.</li>
+              <li>• <b>Goal Milestones:</b> Open "Goals & Milestones" to break big dreams into smaller checkable sub-steps.</li>
+              <li>• <b>Editable Exams:</b> Both Mehrsan and Ronak can add or remove upcoming university or language exams.</li>
+              <li>• <b>Backup & PWA:</b> Export/Import JSON backups anytime, or install SyncPulse as an app!</li>
             </ul>
             <div className="flex justify-end pt-2">
               <button onClick={() => setShowTutorial(false)} className={`px-5 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>

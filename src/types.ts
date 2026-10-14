@@ -29,6 +29,12 @@ export interface ScheduleItem {
   attendedDates: string[];
 }
 
+export interface GoalMilestone {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
 export interface GoalItem {
   id: string;
   userId: string;
@@ -37,12 +43,13 @@ export interface GoalItem {
   targetHours: number;
   loggedMinutes: number;
   deadline: string;
+  milestones: GoalMilestone[];
 }
 
 export interface TaskItem {
   id: string;
   userId: string;
-  day: string; // Bound to specific day of week so tasks don't repeat on all days
+  day: string;
   title: string;
   reminderTime: string;
   completed: boolean;
@@ -57,18 +64,18 @@ export interface ExamItem {
   date: string;
   time: string;
   professor: string;
-  type: 'Core' | 'General';
+  type: 'Core' | 'General' | 'Language';
 }
 
 export interface TimeLog {
   id: string;
-  sourceKey?: string; // Prevents duplicate XP farming when toggling tasks/classes
+  sourceKey?: string;
   userId: string;
   targetTitle: string;
   minutes: number;
-  date: string; // Local YYYY-MM-DD
+  date: string;
   createdAtMs: number;
-  cheeredBy: string[]; // Array of member IDs who cheered (no self-cheer farming)
+  cheeredBy: string[];
 }
 
 export interface AppState {
