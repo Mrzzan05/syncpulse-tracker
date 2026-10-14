@@ -1,9 +1,64 @@
-// setup.mjs - SyncPulse v4.2 (Zen Focus Room + Goal Milestones + Editable Exams)
+// setup.mjs - SyncPulse v5.0 (Multi-Workspace SaaS Architecture + Private Room Isolation + Custom Onboarding)
 // Run with: node setup.mjs
 import fs from 'fs';
 import path from 'path';
 
 const files = {
+  'README.md': `<div align="center">
+
+# 🌿 SyncPulse — Cozy Co-Op Productivity & Time Sanctuary
+
+**A Warm-Minimalist Shared Workspace for Daily Focus, University Schedules, and Long-Term Goals.**  
+*Designed for individuals, study partners, and small squads (up to 4 companions).*
+
+[![Live Web App](https://img.shields.io/badge/✨_Live_Web_App-Launch_SyncPulse-8B5CF6?style=for-the-badge)](https://mrzzan05.github.io/syncpulse-tracker/)
+[![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Phosphor Icons](https://img.shields.io/badge/Phosphor_Icons-Duotone-C084FC?style=for-the-badge)](https://phosphoricons.com/)
+
+</div>
+
+---
+
+## ✨ Overview
+
+**SyncPulse** is an open-source collaborative productivity web application inspired by **Notion**, **Linear**, **Toggl Track**, **Structured**, and **Flocus**. Embracing **Warm Minimalism**, SyncPulse gives anyone—solo learners, couples, or study squads—a private, customizable sanctuary to plot daily timelines, track goal hours, maintain streaks, and study together in a fullscreen Zen Focus Room.
+
+🔗 **Launch Your Own Sanctuary:** [**https://mrzzan05.github.io/syncpulse-tracker/**](https://mrzzan05.github.io/syncpulse-tracker/)
+
+---
+
+## 🌟 Key Features
+
+### 🏠 1. Multi-Workspace & Private Room Architecture (v5.0)
+* **Custom Sanctuary Onboarding:** Any visitor can create their own blank workspace, customize companion names, and pick personal color palettes.
+* **Isolated Room Codes:** Sync across devices using a private **Room Key** (\`/sanctuaries/{roomKey}.json\`), ensuring every group's data remains completely isolated.
+* **Full JSON Portability:** Export and import full workspace backups anytime.
+
+### 🎨 2. Dynamic Personal Themes & Dual Lighting
+* **4 Curated Cozy Palettes:** *Espresso & Warm Sage* ☕, *Velvet Lavender & Rose* 💜, *Fireside Terracotta* 🍑, and *Matcha Oat Milk* 🍵.
+* **Warm Latte ☀️ & Cozy Night 🌙 Modes:** Smoothly adapts to daylight or candlelight environments.
+
+### ⏳ 3. Visual Daily Timeline & Fullscreen Zen Focus Room
+* **Structured-Style Daily Stream:** Merges weekly classes and daily tasks chronologically, highlights live sessions, and detects **Free Focus Windows** (45m+ gaps).
+* **Zen Focus Room:** Fullscreen distraction-free clock with **Stopwatch / 25m Pomodoro / 5m Break** modes and built-in Web Audio **Soft Rain & Warm Tone** soundscapes.
+
+### 🔥 4. 28-Day Habit Heatmaps, Milestones & RPG Badges
+* **GitHub & Duolingo-Inspired Analytics:** Track daily streaks, earn **+10 XP** per focused minute, check off sub-step **Goal Milestones**, and unlock 6 achievement badges.
+
+---
+
+## 🚀 Quick Start Locally
+
+\`\`\`bash
+git clone https://github.com/Mrzzan05/syncpulse-tracker.git
+cd syncpulse-tracker
+npm install
+npm run dev
+\`\`\`
+`,
+
   'src/types.ts': `export type ThemePalette = 'warm-sage' | 'lavender-blush' | 'peach-terracotta' | 'matcha-cream';
 
 export interface ActivePresence {
@@ -86,6 +141,9 @@ export interface TimeLog {
 
 export interface AppState {
   version: number;
+  isConfigured: boolean;
+  workspaceName: string;
+  roomCode: string;
   lastUpdatedMs: number;
   members: Member[];
   schedules: ScheduleItem[];
@@ -96,159 +154,340 @@ export interface AppState {
 }
 `,
 
-  'src/initialData.ts': `import { AppState } from './types';
-import { getLocalDateStr, getPastLocalDateStr, getTodayWeekday } from './utils';
+  'src/initialData.ts': `import { AppState, ThemePalette } from './types';
+import { getLocalDateStr, getPastLocalDateStr, getTodayWeekday, uid } from './utils';
 
-const now = Date.now();
-const today = getLocalDateStr();
-const todayDay = getTodayWeekday();
+// 1. Generic Demo Template for public visitors who click "Try Demo"
+export const CREATE_DEMO_STATE = (): AppState => {
+  const now = Date.now();
+  const today = getLocalDateStr();
+  const todayDay = getTodayWeekday();
+  return {
+    version: 5,
+    isConfigured: true,
+    workspaceName: 'Cozy Study Loft',
+    roomCode: 'public-demo',
+    lastUpdatedMs: now,
+    members: [
+      {
+        id: 'alex',
+        name: 'Alex',
+        tagline: 'Software Eng & Algorithms',
+        avatar: 'A',
+        theme: 'warm-sage',
+        statusNote: 'Focusing on clean code & deep work ☕',
+        presence: null
+      },
+      {
+        id: 'claire',
+        name: 'Claire',
+        tagline: 'Design & Language Immersion',
+        avatar: 'C',
+        theme: 'lavender-blush',
+        statusNote: 'Consistency over intensity ✨',
+        presence: null
+      }
+    ],
+    schedules: [
+      { id: 'd-s1', userId: 'alex', day: todayDay, title: 'Algorithms & Data Structures', startTime: '09:00', endTime: '11:00', details: 'Main Lecture Hall', category: 'Core', attendedDates: [] },
+      { id: 'd-s2', userId: 'claire', day: todayDay, title: 'UI/UX Design Critique', startTime: '10:00', endTime: '12:00', details: 'Studio B', category: 'University', attendedDates: [] }
+    ],
+    goals: [
+      {
+        id: 'd-g1',
+        userId: 'alex',
+        title: 'Build Full-Stack Portfolio App',
+        category: 'Long-Term',
+        targetHours: 80,
+        loggedMinutes: 900,
+        deadline: 'This Semester',
+        milestones: [
+          { id: 'dms-1', title: 'Design system & state architecture', completed: true },
+          { id: 'dms-2', title: 'Deploy live production build', completed: false }
+        ]
+      },
+      {
+        id: 'd-g2',
+        userId: 'claire',
+        title: 'French B2 Fluency',
+        category: 'Long-Term',
+        targetHours: 120,
+        loggedMinutes: 1200,
+        deadline: 'This Year',
+        milestones: [
+          { id: 'dms-3', title: 'Complete A2 grammar foundations', completed: true },
+          { id: 'dms-4', title: 'Practice 30 speaking sessions', completed: false }
+        ]
+      }
+    ],
+    tasks: [
+      { id: 'd-t1', userId: 'alex', day: todayDay, title: 'Review lecture notes & solve 2 problems', reminderTime: '16:00', completed: false, estimatedMinutes: 45, createdAt: today },
+      { id: 'd-t2', userId: 'claire', day: todayDay, title: 'Listen to 30m native podcast', reminderTime: '18:00', completed: false, estimatedMinutes: 30, createdAt: today }
+    ],
+    exams: [
+      { id: 'd-ex1', userId: 'alex', title: 'Midterm Algorithms Assessment', date: '2026/11/15', time: '10:00', professor: 'Dr. Miller', type: 'Core' }
+    ],
+    logs: [
+      { id: 'd-l1', userId: 'alex', targetTitle: 'Build Full-Stack Portfolio App', minutes: 60, date: getPastLocalDateStr(1), createdAtMs: now - 86400000, cheeredBy: ['claire'] },
+      { id: 'd-l2', userId: 'claire', targetTitle: 'French B2 Fluency', minutes: 75, date: today, createdAtMs: now - 3600000, cheeredBy: ['alex'] }
+    ]
+  };
+};
 
-export const INITIAL_STATE: AppState = {
-  version: 4.2,
-  lastUpdatedMs: now,
-  members: [
+// 2. Custom Blank Sanctuary Generator for ANY new user/group
+export const CREATE_CUSTOM_SANCTUARY = (
+  workspaceName: string,
+  roomCode: string,
+  p1Name: string,
+  p1Tagline: string,
+  p1Theme: ThemePalette,
+  p2Name?: string,
+  p2Tagline?: string,
+  p2Theme?: ThemePalette
+): AppState => {
+  const now = Date.now();
+  const today = getLocalDateStr();
+  const todayDay = getTodayWeekday();
+  const id1 = uid('member');
+  const members = [
     {
-      id: 'mehrsan',
-      name: 'Mehrsan',
-      tagline: 'Computer Eng • Deep Learning & Web',
-      avatar: 'M',
-      theme: 'warm-sage',
-      statusNote: 'Building steady habits, one focused hour at a time ☕',
-      presence: null
-    },
-    {
-      id: 'ronak',
-      name: 'Ronak',
-      tagline: 'French B2 Journey • English & Uni',
-      avatar: 'R',
-      theme: 'lavender-blush',
-      statusNote: 'Dreaming in French & leveling up every single day 💜✨',
+      id: id1,
+      name: p1Name.trim() || 'Me',
+      tagline: p1Tagline.trim() || 'Focused Learner',
+      avatar: (p1Name.trim()[0] || 'M').toUpperCase(),
+      theme: p1Theme,
+      statusNote: 'Ready to begin my mindful journey ✨',
       presence: null
     }
-  ],
-  schedules: [
-    { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Yousefi • Room 1205', category: 'Core', attendedDates: [] },
-    { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Karimi • Room 102', category: 'General', attendedDates: [] },
-    { id: 'm-s4', userId: 'mehrsan', day: 'Sunday', title: 'Special Topics (Deep Learning)', startTime: '08:30', endTime: '10:30', details: 'Prof. Yousefi • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s5', userId: 'mehrsan', day: 'Sunday', title: 'Principles of Compiler Design', startTime: '14:00', endTime: '16:00', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s6', userId: 'mehrsan', day: 'Monday', title: 'Fundamentals of Info Security', startTime: '12:30', endTime: '14:00', details: 'Prof. Tajbakhsh • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s7', userId: 'mehrsan', day: 'Tuesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s8', userId: 'mehrsan', day: 'Tuesday', title: 'Electrical & Electronic Circuits Lab', startTime: '12:30', endTime: '14:00', details: 'Room 210', category: 'Lab', attendedDates: [] },
-    { id: 'm-s9', userId: 'mehrsan', day: 'Wednesday', title: 'Fundamentals of Info Security', startTime: '08:30', endTime: '10:30', details: 'Prof. Tajbakhsh • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s10', userId: 'mehrsan', day: 'Wednesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
+  ];
 
-    { id: 'r-s1', userId: 'ronak', day: 'Saturday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-    { id: 'r-s2', userId: 'ronak', day: 'Sunday', title: 'University Classes Block', startTime: '08:30', endTime: '12:30', details: 'Morning Campus Sessions', category: 'University', attendedDates: [] },
-    { id: 'r-s3', userId: 'ronak', day: 'Monday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
-    { id: 'r-s4', userId: 'ronak', day: 'Monday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-    { id: 'r-s5', userId: 'ronak', day: 'Tuesday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
-    { id: 'r-s6', userId: 'ronak', day: 'Wednesday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-  ],
-  goals: [
+  const goals = [
     {
-      id: 'm-g1',
-      userId: 'mehrsan',
-      title: 'B.Sc. Final Project (3 Credits)',
-      category: 'Long-Term',
-      targetHours: 120,
-      loggedMinutes: 1440,
-      deadline: 'End of Semester',
-      milestones: [
-        { id: 'ms-1', title: 'Finalize architecture & supervisor approval', completed: true },
-        { id: 'ms-2', title: 'Complete core prototype & database schema', completed: true },
-        { id: 'ms-3', title: 'Run evaluation tests & write final thesis', completed: false }
-      ]
-    },
-    {
-      id: 'm-g2',
-      userId: 'mehrsan',
-      title: 'Master Deep Learning & Neural Nets',
-      category: 'Long-Term',
-      targetHours: 80,
-      loggedMinutes: 960,
-      deadline: '1405/11/14',
-      milestones: [
-        { id: 'ms-4', title: 'Master CNNs & Optimization techniques', completed: true },
-        { id: 'ms-5', title: 'Implement Transformer / Attention mini-project', completed: false }
-      ]
-    },
-    {
-      id: 'm-g3',
-      userId: 'mehrsan',
-      title: 'Full-Stack Web Dev Projects',
-      category: 'Short-Term',
+      id: uid('goal'),
+      userId: id1,
+      title: 'Primary Focus Goal',
+      category: 'Long-Term' as const,
       targetHours: 50,
-      loggedMinutes: 720,
+      loggedMinutes: 0,
       deadline: 'Ongoing',
       milestones: [
-        { id: 'ms-6', title: 'Ship SyncPulse Co-Op Sanctuary v4', completed: true },
-        { id: 'ms-7', title: 'Complete course project deliverables', completed: false }
+        { id: uid('ms'), title: 'Complete my first focused session', completed: false }
       ]
-    },
+    }
+  ];
 
-    {
-      id: 'r-g1',
-      userId: 'ronak',
-      title: 'Master French up to B2 Level',
-      category: 'Long-Term',
-      targetHours: 400,
-      loggedMinutes: 3600,
-      deadline: 'Until B.Sc. Graduation (~3 Years)',
+  if (p2Name && p2Name.trim()) {
+    const id2 = uid('member');
+    members.push({
+      id: id2,
+      name: p2Name.trim(),
+      tagline: (p2Tagline || '').trim() || 'Study Companion',
+      avatar: p2Name.trim()[0].toUpperCase(),
+      theme: p2Theme || 'lavender-blush',
+      statusNote: 'Growing stronger together 💜',
+      presence: null
+    });
+    goals.push({
+      id: uid('goal'),
+      userId: id2,
+      title: 'Primary Focus Goal',
+      category: 'Long-Term' as const,
+      targetHours: 50,
+      loggedMinutes: 0,
+      deadline: 'Ongoing',
       milestones: [
-        { id: 'ms-8', title: 'Complete A1 Foundations & pronunciation', completed: true },
-        { id: 'ms-9', title: 'Finish A2 Elementary grammar & daily speaking', completed: false },
-        { id: 'ms-10', title: 'Reach B1 Intermediate fluency', completed: false },
-        { id: 'ms-11', title: 'Achieve B2 Upper-Intermediate certification', completed: false }
+        { id: uid('ms'), title: 'Complete my first focused session', completed: false }
       ]
-    },
-    {
-      id: 'r-g2',
-      userId: 'ronak',
-      title: 'English Immersion (Movies, YouTube & Media)',
-      category: 'Habit',
-      targetHours: 150,
-      loggedMinutes: 2100,
-      deadline: 'Daily Routine',
-      milestones: [
-        { id: 'ms-12', title: 'Watch 20 hours of native English YouTube/vlogs', completed: true },
-        { id: 'ms-13', title: 'Finish 5 full movies without Persian subtitles', completed: false }
-      ]
-    },
-    {
-      id: 'r-g3',
-      userId: 'ronak',
-      title: 'Launch English Teaching Career',
-      category: 'Career',
-      targetHours: 60,
-      loggedMinutes: 600,
-      deadline: 'This Year',
-      milestones: [
-        { id: 'ms-14', title: 'Prepare teaching methodology & sample lesson plan', completed: true },
-        { id: 'ms-15', title: 'Start tutoring first students / language institute', completed: false }
-      ]
-    },
-  ],
-  tasks: [
-    { id: 'm-t1', userId: 'mehrsan', day: todayDay, title: 'Review Compiler Design Lexical Analysis notes', reminderTime: '18:00', completed: false, estimatedMinutes: 45, createdAt: today },
-    { id: 'r-t1', userId: 'ronak', day: todayDay, title: 'Watch 1hr English YouTube / Movie', reminderTime: '20:00', completed: false, estimatedMinutes: 60, createdAt: today },
-  ],
-  exams: [
-    { id: 'ex-1', userId: 'mehrsan', title: 'Principles of Compiler Design', date: '1405/10/26', time: '11:00', professor: 'Damanafshan', type: 'Core' },
-    { id: 'ex-2', userId: 'mehrsan', title: 'Fundamentals of Info Security', date: '1405/10/30', time: '11:00', professor: 'Tajbakhsh', type: 'Core' },
-    { id: 'ex-3', userId: 'mehrsan', title: 'Analytical History of Early Islam', date: '1405/11/05', time: '14:00', professor: 'Karimi', type: 'General' },
-    { id: 'ex-4', userId: 'mehrsan', title: 'Web Programming', date: '1405/11/10', time: '09:00', professor: 'Azimi', type: 'Core' },
-    { id: 'ex-5', userId: 'mehrsan', title: 'Special Topics (Deep Learning)', date: '1405/11/14', time: '09:00', professor: 'Yousefi', type: 'Core' },
-    { id: 'ex-6', userId: 'ronak', title: 'French Level Assessment Exam', date: '1405/10/28', time: '21:00', professor: 'French Institute', type: 'Language' },
-  ],
-  logs: [
-    { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastLocalDateStr(2), createdAtMs: now - 172800000, cheeredBy: ['ronak'] },
-    { id: 'l-2', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 120, date: getPastLocalDateStr(2), createdAtMs: now - 170000000, cheeredBy: ['mehrsan'] },
-    { id: 'l-3', userId: 'mehrsan', targetTitle: 'Full-Stack Web Dev Projects', minutes: 110, date: getPastLocalDateStr(1), createdAtMs: now - 86400000, cheeredBy: ['ronak'] },
-    { id: 'l-4', userId: 'ronak', targetTitle: 'English Immersion (Movies, YouTube & Media)', minutes: 95, date: getPastLocalDateStr(1), createdAtMs: now - 82000000, cheeredBy: ['mehrsan'] },
-    { id: 'l-5', userId: 'mehrsan', targetTitle: 'B.Sc. Final Project (3 Credits)', minutes: 60, date: today, createdAtMs: now - 7200000, cheeredBy: ['ronak'] },
-    { id: 'l-6', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 75, date: today, createdAtMs: now - 3600000, cheeredBy: ['mehrsan'] },
-  ]
+    });
+  }
+
+  return {
+    version: 5,
+    isConfigured: true,
+    workspaceName: workspaceName.trim() || 'Our Cozy Sanctuary',
+    roomCode: roomCode.trim() || uid('room'),
+    lastUpdatedMs: now,
+    members,
+    schedules: [],
+    goals,
+    tasks: [
+      {
+        id: uid('task'),
+        userId: id1,
+        day: todayDay,
+        title: 'Customize my goals and weekly schedule',
+        reminderTime: '18:00',
+        completed: false,
+        estimatedMinutes: 30,
+        createdAt: today
+      }
+    ],
+    exams: [],
+    logs: []
+  };
+};
+
+// 3. Mehrsan & Ronak's Private Preset (Unlocked via secret code e.g. "mr-1405" or "mehrsan-ronak")
+export const CREATE_MEHRSAN_RONAK_PRESET = (customRoomCode = 'mehrsan-ronak-1405'): AppState => {
+  const now = Date.now();
+  const today = getLocalDateStr();
+  const todayDay = getTodayWeekday();
+
+  return {
+    version: 5,
+    isConfigured: true,
+    workspaceName: 'Mehrsan & Ronak Sanctuary',
+    roomCode: customRoomCode,
+    lastUpdatedMs: now,
+    members: [
+      {
+        id: 'mehrsan',
+        name: 'Mehrsan',
+        tagline: 'Computer Eng • Deep Learning & Web',
+        avatar: 'M',
+        theme: 'warm-sage',
+        statusNote: 'Building steady habits, one focused hour at a time ☕',
+        presence: null
+      },
+      {
+        id: 'ronak',
+        name: 'Ronak',
+        tagline: 'French B2 Journey • English & Uni',
+        avatar: 'R',
+        theme: 'lavender-blush',
+        statusNote: 'Dreaming in French & leveling up every single day 💜✨',
+        presence: null
+      }
+    ],
+    schedules: [
+      { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Yousefi • Room 1205', category: 'Core', attendedDates: [] },
+      { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Karimi • Room 102', category: 'General', attendedDates: [] },
+      { id: 'm-s4', userId: 'mehrsan', day: 'Sunday', title: 'Special Topics (Deep Learning)', startTime: '08:30', endTime: '10:30', details: 'Prof. Yousefi • Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s5', userId: 'mehrsan', day: 'Sunday', title: 'Principles of Compiler Design', startTime: '14:00', endTime: '16:00', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s6', userId: 'mehrsan', day: 'Monday', title: 'Fundamentals of Info Security', startTime: '12:30', endTime: '14:00', details: 'Prof. Tajbakhsh • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s7', userId: 'mehrsan', day: 'Tuesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s8', userId: 'mehrsan', day: 'Tuesday', title: 'Electrical & Electronic Circuits Lab', startTime: '12:30', endTime: '14:00', details: 'Room 210', category: 'Lab', attendedDates: [] },
+      { id: 'm-s9', userId: 'mehrsan', day: 'Wednesday', title: 'Fundamentals of Info Security', startTime: '08:30', endTime: '10:30', details: 'Prof. Tajbakhsh • Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s10', userId: 'mehrsan', day: 'Wednesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
+
+      { id: 'r-s1', userId: 'ronak', day: 'Saturday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
+      { id: 'r-s2', userId: 'ronak', day: 'Sunday', title: 'University Classes Block', startTime: '08:30', endTime: '12:30', details: 'Morning Campus Sessions', category: 'University', attendedDates: [] },
+      { id: 'r-s3', userId: 'ronak', day: 'Monday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
+      { id: 'r-s4', userId: 'ronak', day: 'Monday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
+      { id: 'r-s5', userId: 'ronak', day: 'Tuesday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
+      { id: 'r-s6', userId: 'ronak', day: 'Wednesday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
+    ],
+    goals: [
+      {
+        id: 'm-g1',
+        userId: 'mehrsan',
+        title: 'B.Sc. Final Project (3 Credits)',
+        category: 'Long-Term',
+        targetHours: 120,
+        loggedMinutes: 1440,
+        deadline: 'End of Semester',
+        milestones: [
+          { id: 'ms-1', title: 'Finalize architecture & supervisor approval', completed: true },
+          { id: 'ms-2', title: 'Complete core prototype & database schema', completed: true },
+          { id: 'ms-3', title: 'Run evaluation tests & write final thesis', completed: false }
+        ]
+      },
+      {
+        id: 'm-g2',
+        userId: 'mehrsan',
+        title: 'Master Deep Learning & Neural Nets',
+        category: 'Long-Term',
+        targetHours: 80,
+        loggedMinutes: 960,
+        deadline: '1405/11/14',
+        milestones: [
+          { id: 'ms-4', title: 'Master CNNs & Optimization techniques', completed: true },
+          { id: 'ms-5', title: 'Implement Transformer / Attention mini-project', completed: false }
+        ]
+      },
+      {
+        id: 'm-g3',
+        userId: 'mehrsan',
+        title: 'Full-Stack Web Dev Projects',
+        category: 'Short-Term',
+        targetHours: 50,
+        loggedMinutes: 720,
+        deadline: 'Ongoing',
+        milestones: [
+          { id: 'ms-6', title: 'Ship SyncPulse Co-Op Sanctuary v5', completed: true },
+          { id: 'ms-7', title: 'Complete course project deliverables', completed: false }
+        ]
+      },
+      {
+        id: 'r-g1',
+        userId: 'ronak',
+        title: 'Master French up to B2 Level',
+        category: 'Long-Term',
+        targetHours: 400,
+        loggedMinutes: 3600,
+        deadline: 'Until B.Sc. Graduation (~3 Years)',
+        milestones: [
+          { id: 'ms-8', title: 'Complete A1 Foundations & pronunciation', completed: true },
+          { id: 'ms-9', title: 'Finish A2 Elementary grammar & daily speaking', completed: false },
+          { id: 'ms-10', title: 'Reach B1 Intermediate fluency', completed: false },
+          { id: 'ms-11', title: 'Achieve B2 Upper-Intermediate certification', completed: false }
+        ]
+      },
+      {
+        id: 'r-g2',
+        userId: 'ronak',
+        title: 'English Immersion (Movies, YouTube & Media)',
+        category: 'Habit',
+        targetHours: 150,
+        loggedMinutes: 2100,
+        deadline: 'Daily Routine',
+        milestones: [
+          { id: 'ms-12', title: 'Watch 20 hours of native English YouTube/vlogs', completed: true },
+          { id: 'ms-13', title: 'Finish 5 full movies without Persian subtitles', completed: false }
+        ]
+      },
+      {
+        id: 'r-g3',
+        userId: 'ronak',
+        title: 'Launch English Teaching Career',
+        category: 'Career',
+        targetHours: 60,
+        loggedMinutes: 600,
+        deadline: 'This Year',
+        milestones: [
+          { id: 'ms-14', title: 'Prepare teaching methodology & sample lesson plan', completed: true },
+          { id: 'ms-15', title: 'Start tutoring first students / language institute', completed: false }
+        ]
+      }
+    ],
+    tasks: [
+      { id: 'm-t1', userId: 'mehrsan', day: todayDay, title: 'Review Compiler Design Lexical Analysis notes', reminderTime: '18:00', completed: false, estimatedMinutes: 45, createdAt: today },
+      { id: 'r-t1', userId: 'ronak', day: todayDay, title: 'Watch 1hr English YouTube / Movie', reminderTime: '20:00', completed: false, estimatedMinutes: 60, createdAt: today }
+    ],
+    exams: [
+      { id: 'ex-1', userId: 'mehrsan', title: 'Principles of Compiler Design', date: '1405/10/26', time: '11:00', professor: 'Damanafshan', type: 'Core' },
+      { id: 'ex-2', userId: 'mehrsan', title: 'Fundamentals of Info Security', date: '1405/10/30', time: '11:00', professor: 'Tajbakhsh', type: 'Core' },
+      { id: 'ex-3', userId: 'mehrsan', title: 'Analytical History of Early Islam', date: '1405/11/05', time: '14:00', professor: 'Karimi', type: 'General' },
+      { id: 'ex-4', userId: 'mehrsan', title: 'Web Programming', date: '1405/11/10', time: '09:00', professor: 'Azimi', type: 'Core' },
+      { id: 'ex-5', userId: 'mehrsan', title: 'Special Topics (Deep Learning)', date: '1405/11/14', time: '09:00', professor: 'Yousefi', type: 'Core' },
+      { id: 'ex-6', userId: 'ronak', title: 'French Level Assessment Exam', date: '1405/10/28', time: '21:00', professor: 'French Institute', type: 'Language' }
+    ],
+    logs: [
+      { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastLocalDateStr(2), createdAtMs: now - 172800000, cheeredBy: ['ronak'] },
+      { id: 'l-2', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 120, date: getPastLocalDateStr(2), createdAtMs: now - 170000000, cheeredBy: ['mehrsan'] },
+      { id: 'l-3', userId: 'mehrsan', targetTitle: 'Full-Stack Web Dev Projects', minutes: 110, date: getPastLocalDateStr(1), createdAtMs: now - 86400000, cheeredBy: ['ronak'] },
+      { id: 'l-4', userId: 'ronak', targetTitle: 'English Immersion (Movies, YouTube & Media)', minutes: 95, date: getPastLocalDateStr(1), createdAtMs: now - 82000000, cheeredBy: ['mehrsan'] },
+      { id: 'l-5', userId: 'mehrsan', targetTitle: 'B.Sc. Final Project (3 Credits)', minutes: 60, date: today, createdAtMs: now - 7200000, cheeredBy: ['ronak'] },
+      { id: 'l-6', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 75, date: today, createdAtMs: now - 3600000, cheeredBy: ['mehrsan'] }
+    ]
+  };
+};
+
+// Default unconfigured state for brand-new visitors (triggers Welcome Setup Wizard)
+export const INITIAL_STATE: AppState = {
+  ...CREATE_DEMO_STATE(),
+  isConfigured: false
 };
 `,
 
@@ -262,12 +501,14 @@ import {
   SunDim, MoonStars, Coffee, CloudRain, SpeakerSlash,
   Compass, Fire, Medal, Trophy, DownloadSimple, UploadSimple,
   Timer, Waveform, Plant, Lightning, Crown, Buildings,
-  ArrowsOutSimple, ArrowsInSimple, ListChecks
+  ArrowsOutSimple, ArrowsInSimple, ListChecks, Key, UsersThree, MagicWand, GearSix
 } from '@phosphor-icons/react';
 import {
   AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette, TimeLog, ExamItem
 } from './types';
-import { INITIAL_STATE } from './initialData';
+import {
+  INITIAL_STATE, CREATE_DEMO_STATE, CREATE_CUSTOM_SANCTUARY, CREATE_MEHRSAN_RONAK_PRESET
+} from './initialData';
 import { GET_COZY_THEME } from './themes';
 import {
   DAYS, getLocalDateStr, getTodayWeekday, uid, toMins, fromMins,
@@ -280,69 +521,91 @@ const migrateState = (raw: any): AppState => {
   }
   const todayDay = getTodayWeekday();
   return {
-    version: 4.2,
+    version: 5,
+    isConfigured: raw.isConfigured !== undefined ? Boolean(raw.isConfigured) : true,
+    workspaceName: raw.workspaceName || 'Cozy Sanctuary',
+    roomCode: raw.roomCode || 'default-room',
     lastUpdatedMs: raw.lastUpdatedMs || Date.now(),
     members: raw.members,
-    schedules: Array.isArray(raw.schedules) ? raw.schedules : INITIAL_STATE.schedules,
+    schedules: Array.isArray(raw.schedules) ? raw.schedules : [],
     goals: Array.isArray(raw.goals)
-      ? raw.goals.map((g: any) => {
-          const fallbackGoal = INITIAL_STATE.goals.find((ig) => ig.id === g.id);
-          return {
-            ...g,
-            targetHours: Math.max(1, Number(g.targetHours) || 10),
-            milestones: Array.isArray(g.milestones)
-              ? g.milestones
-              : fallbackGoal
-              ? fallbackGoal.milestones
-              : []
-          };
-        })
-      : INITIAL_STATE.goals,
+      ? raw.goals.map((g: any) => ({
+          ...g,
+          targetHours: Math.max(1, Number(g.targetHours) || 10),
+          milestones: Array.isArray(g.milestones) ? g.milestones : []
+        }))
+      : [],
     tasks: Array.isArray(raw.tasks)
       ? raw.tasks.map((t: any) => ({ ...t, day: t.day || todayDay }))
-      : INITIAL_STATE.tasks,
-    exams: Array.isArray(raw.exams) ? raw.exams : INITIAL_STATE.exams,
+      : [],
+    exams: Array.isArray(raw.exams) ? raw.exams : [],
     logs: Array.isArray(raw.logs)
       ? raw.logs.map((l: any) => ({
           ...l,
           createdAtMs: l.createdAtMs || Date.now() - 3600000,
           cheeredBy: Array.isArray(l.cheeredBy) ? l.cheeredBy : []
         }))
-      : INITIAL_STATE.logs
+      : []
   };
+};
+
+// Build isolated cloud endpoint per Room Code so different groups never collide
+const buildCloudEndpoint = (baseUrl: string, roomCode: string): string => {
+  const safeRoom = (roomCode || 'default-room')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '-');
+  const trimmed = baseUrl.trim().replace(/\\/$/, '').replace(/\\.json$/, '');
+  return \`\${trimmed}/sanctuaries/\${safeRoom}.json\`;
 };
 
 export default function App() {
   const [state, setState] = useState<AppState>(() => {
-    const savedV4 = localStorage.getItem('syncpulse_v4');
-    const savedV3 = localStorage.getItem('syncpulse_v3');
-    const rawStr = savedV4 || savedV3;
-    if (rawStr) {
+    const savedV5 = localStorage.getItem('syncpulse_v5');
+    if (savedV5) {
       try {
-        return migrateState(JSON.parse(rawStr));
+        return migrateState(JSON.parse(savedV5));
       } catch {}
     }
     return INITIAL_STATE;
   });
 
-  const [activeUser, setActiveUser] = useState<string>('mehrsan');
+  const [activeUser, setActiveUser] = useState<string>(() => state.members[0]?.id || 'alex');
   const [isLatteMode, setIsLatteMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('syncpulse_latte');
     if (saved !== null) return saved === 'true';
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'schedule' | 'analytics'>('dashboard');
-
-  // Zen Focus Room Fullscreen Mode
   const [isFocusRoomOpen, setIsFocusRoomOpen] = useState<boolean>(false);
+
+  // Welcome / Onboarding Wizard State (For new public users or switching workspaces)
+  const [showOnboarding, setShowOnboarding] = useState<boolean>(() => !state.isConfigured);
+  const [onboardingMode, setOnboardingMode] = useState<'create' | 'code'>('create');
+  const [setupForm, setSetupForm] = useState({
+    workspaceName: 'Our Study Sanctuary',
+    roomCode: '',
+    p1Name: '',
+    p1Tagline: '',
+    p1Theme: 'warm-sage' as ThemePalette,
+    p2Name: '',
+    p2Tagline: '',
+    p2Theme: 'lavender-blush' as ThemePalette,
+    secretUnlockCode: ''
+  });
+
+  // Ensure activeUser always points to a valid member when workspace changes
+  useEffect(() => {
+    if (!state.members.some((m) => m.id === activeUser) && state.members[0]) {
+      setActiveUser(state.members[0].id);
+    }
+  }, [state.members, activeUser]);
 
   const realTodayName = getTodayWeekday();
   const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
   const [timelineDay, setTimelineDay] = useState<string>(realTodayName);
   const [selectedHeatCell, setSelectedHeatCell] = useState<{ date: string; mins: number; member: string } | null>(null);
   const [showAllSquadExams, setShowAllSquadExams] = useState<boolean>(false);
-
-  // Milestone draft inputs per goal ID
   const [milestoneInputs, setMilestoneInputs] = useState<Record<string, string>>({});
 
   const [nowMinutes, setNowMinutes] = useState<number>(() => {
@@ -438,6 +701,7 @@ export default function App() {
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [copiedShare, setCopiedShare] = useState<boolean>(false);
   const [showMemberModal, setShowMemberModal] = useState<boolean>(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showGoalModal, setShowGoalModal] = useState<boolean>(false);
   const [showScheduleModal, setShowScheduleModal] = useState<boolean>(false);
   const [showExamModal, setShowExamModal] = useState<boolean>(false);
@@ -455,11 +719,12 @@ export default function App() {
         setShowScheduleModal(false);
         setShowExamModal(false);
         setShowSyncModal(false);
+        if (state.isConfigured) setShowOnboarding(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [state.isConfigured]);
 
   // Persistent Wall-Clock Timer
   const [timerMode, setTimerMode] = useState<'stopwatch' | 'pomodoro' | 'break'>(() => {
@@ -585,17 +850,17 @@ export default function App() {
   const [newTaskTime, setNewTaskTime] = useState('17:00');
   const [newTaskMins, setNewTaskMins] = useState(45);
 
-  // Safe Debounced Cloud Sync
+  // Room-Isolated Cloud Sync
   const [syncUrl, setSyncUrl] = useState(() => localStorage.getItem('syncpulse_cloud_url') || '');
   const [syncError, setSyncError] = useState<string>('');
   const isTypingRef = useRef<boolean>(false);
   const syncTimeoutRef = useRef<any>(null);
 
   const currentMember = state.members.find((m) => m.id === activeUser) || state.members[0];
-  const theme = GET_COZY_THEME(currentMember.theme, isLatteMode);
+  const theme = GET_COZY_THEME(currentMember?.theme || 'warm-sage', isLatteMode);
 
   useEffect(() => {
-    localStorage.setItem('syncpulse_v4', JSON.stringify(state));
+    localStorage.setItem('syncpulse_v5', JSON.stringify(state));
   }, [state]);
 
   useEffect(() => {
@@ -603,12 +868,12 @@ export default function App() {
   }, [isLatteMode]);
 
   useEffect(() => {
-    if (!syncUrl) return;
-    const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : \`\${syncUrl.replace(/\\/$/, '')}/syncpulse_v4.json\`;
+    if (!syncUrl || !state.isConfigured) return;
+    const endpoint = buildCloudEndpoint(syncUrl, state.roomCode);
     const interval = setInterval(async () => {
       if (isTypingRef.current) return;
       try {
-        const res = await fetch(cleanUrl);
+        const res = await fetch(endpoint);
         if (res.ok) {
           const remoteData = await res.json();
           if (remoteData && Array.isArray(remoteData.members)) {
@@ -626,17 +891,17 @@ export default function App() {
       }
     }, 6000);
     return () => clearInterval(interval);
-  }, [syncUrl]);
+  }, [syncUrl, state.roomCode, state.isConfigured]);
 
   const commitState = (updater: (prev: AppState) => AppState, debounceMs = 200) => {
     setState((prev) => {
       const next = { ...updater(prev), lastUpdatedMs: Date.now() };
-      if (syncUrl) {
+      if (syncUrl && next.isConfigured) {
         if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
         syncTimeoutRef.current = setTimeout(async () => {
           try {
-            const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : \`\${syncUrl.replace(/\\/$/, '')}/syncpulse_v4.json\`;
-            await fetch(cleanUrl, {
+            const endpoint = buildCloudEndpoint(syncUrl, next.roomCode);
+            await fetch(endpoint, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(next),
@@ -649,6 +914,61 @@ export default function App() {
       }
       return next;
     });
+  };
+
+  // ============================================================================
+  // ONBOARDING WIZARD HANDLERS (PUBLIC USERS vs MEHRSAN & RONAK SECRET CODE)
+  // ============================================================================
+  const handleCreateCustomWorkspace = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!setupForm.p1Name.trim()) return;
+    const newState = CREATE_CUSTOM_SANCTUARY(
+      setupForm.workspaceName,
+      setupForm.roomCode || uid('room'),
+      setupForm.p1Name,
+      setupForm.p1Tagline,
+      setupForm.p1Theme,
+      setupForm.p2Name,
+      setupForm.p2Tagline,
+      setupForm.p2Theme
+    );
+    setState(newState);
+    setActiveUser(newState.members[0].id);
+    setShowOnboarding(false);
+  };
+
+  const handleUnlockByRoomCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    const code = setupForm.secretUnlockCode.trim().toLowerCase();
+    if (!code) return;
+
+    // Secret preset recognition for Mehrsan & Ronak
+    if (code === 'mr-1405' || code === 'mehrsan-ronak' || code === 'mehrsan' || code === 'ronak') {
+      const preset = CREATE_MEHRSAN_RONAK_PRESET(code);
+      setState(preset);
+      setActiveUser('mehrsan');
+      setShowOnboarding(false);
+      return;
+    }
+
+    // For any other room code, initialize a workspace bound to that room key
+    const customRoomState = CREATE_CUSTOM_SANCTUARY(
+      \`Sanctuary (\${code})\`,
+      code,
+      'Companion 1',
+      'Focused Learner',
+      'warm-sage'
+    );
+    setState(customRoomState);
+    setActiveUser(customRoomState.members[0].id);
+    setShowOnboarding(false);
+  };
+
+  const handleLoadDemoWorkspace = () => {
+    const demo = CREATE_DEMO_STATE();
+    setState(demo);
+    setActiveUser(demo.members[0].id);
+    setShowOnboarding(false);
   };
 
   const updatePresence = (isFocusing: boolean) => {
@@ -754,9 +1074,43 @@ export default function App() {
     }, 1500);
   };
 
-  const handleAddMember = (e: React.FormEvent) => {
+  // Member Add & Edit (Any companion can be renamed or restyled!)
+  const openAddMemberModal = () => {
+    setEditingMember(null);
+    setMemberForm({ name: '', tagline: '', theme: 'peach-terracotta' });
+    setShowMemberModal(true);
+  };
+
+  const openEditMemberModal = (m: Member) => {
+    setEditingMember(m);
+    setMemberForm({ name: m.name, tagline: m.tagline, theme: m.theme });
+    setShowMemberModal(true);
+  };
+
+  const handleSaveMember = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!memberForm.name.trim() || state.members.length >= 4) return;
+    if (!memberForm.name.trim()) return;
+
+    if (editingMember) {
+      commitState((prev) => ({
+        ...prev,
+        members: prev.members.map((m) =>
+          m.id === editingMember.id
+            ? {
+                ...m,
+                name: memberForm.name.trim(),
+                tagline: memberForm.tagline.trim() || 'Companion',
+                avatar: memberForm.name.trim()[0].toUpperCase(),
+                theme: memberForm.theme
+              }
+            : m
+        )
+      }));
+      setShowMemberModal(false);
+      return;
+    }
+
+    if (state.members.length >= 4) return;
     const id = uid(memberForm.name.trim().toLowerCase().replace(/\\s+/g, '-'));
     const newMember: Member = {
       id,
@@ -775,9 +1129,7 @@ export default function App() {
       targetHours: 40,
       loggedMinutes: 0,
       deadline: 'Ongoing',
-      milestones: [
-        { id: uid('ms'), title: 'Complete first week of steady focus', completed: false }
-      ]
+      milestones: [{ id: uid('ms'), title: 'Complete first week of steady focus', completed: false }]
     };
     commitState((prev) => ({
       ...prev,
@@ -785,23 +1137,27 @@ export default function App() {
       goals: [...prev.goals, starterGoal]
     }));
     setActiveUser(id);
-    setMemberForm({ name: '', tagline: '', theme: 'matcha-cream' });
     setShowMemberModal(false);
   };
 
   const removeMember = (id: string, name: string) => {
-    if (id === 'mehrsan' || id === 'ronak') return;
-    if (!window.confirm(\`Remove \${name} and all their goals/logs from the sanctuary?\`)) return;
-    commitState((prev) => ({
-      ...prev,
-      members: prev.members.filter((m) => m.id !== id),
-      goals: prev.goals.filter((g) => g.userId !== id),
-      schedules: prev.schedules.filter((s) => s.userId !== id),
-      tasks: prev.tasks.filter((t) => t.userId !== id),
-      exams: prev.exams.filter((ex) => ex.userId !== id),
-      logs: prev.logs.filter((l) => l.userId !== id)
-    }));
-    setActiveUser('mehrsan');
+    if (state.members.length <= 1) {
+      alert('A sanctuary needs at least 1 companion.');
+      return;
+    }
+    if (!window.confirm(\`Remove \${name} and all their goals/logs from this sanctuary?\`)) return;
+    commitState((prev) => {
+      const remaining = prev.members.filter((m) => m.id !== id);
+      return {
+        ...prev,
+        members: remaining,
+        goals: prev.goals.filter((g) => g.userId !== id),
+        schedules: prev.schedules.filter((s) => s.userId !== id),
+        tasks: prev.tasks.filter((t) => t.userId !== id),
+        exams: prev.exams.filter((ex) => ex.userId !== id),
+        logs: prev.logs.filter((l) => l.userId !== id)
+      };
+    });
   };
 
   // Goal & Milestone CRUD
@@ -907,13 +1263,13 @@ export default function App() {
       id: uid('exam'),
       userId: activeUser,
       title: examForm.title.trim(),
-      date: examForm.date.trim() || '1405/11/01',
+      date: examForm.date.trim() || '2026/11/01',
       time: examForm.time || '10:00',
-      professor: examForm.professor.trim() || 'Course Exam',
+      professor: examForm.professor.trim() || 'Assessment',
       type: examForm.type
     };
     commitState((prev) => ({ ...prev, exams: [...prev.exams, newEx] }));
-    setExamForm({ title: '', date: '1405/11/01', time: '10:00', professor: '', type: 'Core' });
+    setExamForm({ title: '', date: '2026/11/01', time: '10:00', professor: '', type: 'Core' });
     setShowExamModal(false);
   };
 
@@ -1045,7 +1401,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = \`syncpulse-backup-\${todayStr}.json\`;
+    a.download = \`syncpulse-\${state.roomCode}-\${todayStr}.json\`;
     a.click();
   };
 
@@ -1057,8 +1413,9 @@ export default function App() {
       try {
         const parsed = JSON.parse(String(ev.target?.result));
         commitState(() => migrateState(parsed));
-        alert('Backup restored successfully! ✨');
+        alert('Sanctuary backup restored! ✨');
         setShowSyncModal(false);
+        setShowOnboarding(false);
       } catch {
         alert('Invalid backup JSON file.');
       }
@@ -1139,7 +1496,10 @@ export default function App() {
     return map;
   }, [state.members, state.logs, state.goals, todayStr]);
 
-  const activeStats = memberMetrics[activeUser] || memberMetrics[state.members[0].id];
+  const activeStats = memberMetrics[activeUser] || memberMetrics[state.members[0]?.id] || {
+    todayMins: 0, totalMins: 0, totalHours: '0.0', streak: 0, level: 1, title: 'Rising Star',
+    totalXP: 0, currentLevelXP: 0, xpPerLevel: 6000, progressPct: 0, grid28: []
+  };
   const userGoals = state.goals.filter((g) => g.userId === activeUser);
   const userDayTasks = state.tasks.filter((t) => t.userId === activeUser && t.day === timelineDay);
   const displayedExams = showAllSquadExams
@@ -1171,7 +1531,7 @@ export default function App() {
       .map((g) => \`• \${g.title}: \${(g.loggedMinutes / 60).toFixed(1)}h / \${g.targetHours}h\`)
       .join('\\n');
 
-    return \`🌿 SyncPulse Cozy Log — \${currentMember.name}\\n🔥 Streak: \${activeStats.streak} Days | ⭐ Lv.\${activeStats.level} (\${activeStats.totalXP} XP)\\n⏱️ Today's Focus: \${Math.floor(activeStats.todayMins / 60)}h \${activeStats.todayMins % 60}m\\n🏆 Total Banked: \${activeStats.totalHours} hrs\\n\\n🎯 Active Goals:\\n\${topGoals}\`;
+    return \`🌿 \${state.workspaceName} — \${currentMember.name}\\n🔥 Streak: \${activeStats.streak} Days | ⭐ Lv.\${activeStats.level} (\${activeStats.totalXP} XP)\\n⏱️ Today's Focus: \${Math.floor(activeStats.todayMins / 60)}h \${activeStats.todayMins % 60}m\\n🏆 Total Banked: \${activeStats.totalHours} hrs\\n\\n🎯 Active Goals:\\n\${topGoals}\`;
   };
 
   const handleShareStatus = async () => {
@@ -1315,7 +1675,7 @@ export default function App() {
           <div className={\`w-7 h-7 rounded-xl flex items-center justify-center \${theme.primaryBtn}\`}>
             {currentMember.theme === 'lavender-blush' ? <Heart weight="fill" className="w-4 h-4 text-white" /> : <Coffee weight="fill" className="w-4 h-4 text-white" />}
           </div>
-          <span className="font-serif italic text-xl">SyncPulse</span>
+          <span className="font-serif italic text-xl truncate max-w-[130px]">{state.workspaceName}</span>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -1323,7 +1683,6 @@ export default function App() {
             <button
               key={m.id}
               onClick={() => setActiveUser(m.id)}
-              aria-label={\`Switch to \${m.name}\`}
               className={\`px-2.5 py-1 rounded-xl text-xs font-semibold border transition \${
                 m.id === activeUser ? theme.primaryBtn : \`\${theme.cardBg} \${theme.textMuted}\`
               }\`}
@@ -1332,11 +1691,11 @@ export default function App() {
             </button>
           ))}
           <button
-            onClick={() => setIsLatteMode(!isLatteMode)}
-            aria-label="Toggle Day/Night Mode"
+            onClick={() => setShowOnboarding(true)}
+            aria-label="Switch Sanctuary"
             className={\`p-1.5 rounded-xl border \${theme.cardBg}\`}
           >
-            {isLatteMode ? <MoonStars weight="duotone" className="w-4 h-4 text-purple-600" /> : <SunDim weight="duotone" className="w-4 h-4 text-amber-300" />}
+            <GearSix weight="duotone" className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -1345,17 +1704,19 @@ export default function App() {
       <aside className={\`hidden lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:flex lg:flex-col border-r backdrop-blur-2xl z-30 p-5 justify-between overflow-y-auto cozy-transition \${theme.sidebarBg}\`}>
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={\`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition \${theme.primaryBtn}\`}>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className={\`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 cozy-transition \${theme.primaryBtn}\`}>
                 {currentMember.theme === 'lavender-blush' ? (
                   <Heart weight="duotone" className="w-5 h-5 text-white" />
                 ) : (
                   <Coffee weight="duotone" className="w-5 h-5 text-white" />
                 )}
               </div>
-              <div>
-                <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
-                <span className={\`text-xs font-mono \${theme.textMuted}\`}>Cozy Sanctuary</span>
+              <div className="truncate">
+                <h1 className="font-serif italic text-2xl leading-none truncate">{state.workspaceName}</h1>
+                <span className={\`text-xs font-mono flex items-center gap-1 mt-0.5 \${theme.textMuted}\`}>
+                  <Key weight="duotone" className="w-3 h-3" /> {state.roomCode}
+                </span>
               </div>
             </div>
           </div>
@@ -1368,7 +1729,7 @@ export default function App() {
               </span>
               {state.members.length < 4 && (
                 <button
-                  onClick={() => setShowMemberModal(true)}
+                  onClick={openAddMemberModal}
                   className={\`text-xs font-semibold flex items-center gap-1 hover:underline \${theme.accentText}\`}
                 >
                   <UserPlus weight="duotone" className="w-3.5 h-3.5" /> Add
@@ -1404,10 +1765,10 @@ export default function App() {
                       <div className="truncate">
                         <p className="text-xs font-bold flex items-center gap-1 truncate">
                           {member.name}
-                          {member.id === 'ronak' && <Heart weight="fill" className="w-3 h-3 text-purple-400 inline" />}
+                          {member.theme === 'lavender-blush' && <Heart weight="fill" className="w-3 h-3 text-purple-400 inline shrink-0" />}
                         </p>
                         <p className={\`text-xs font-mono \${theme.textMuted}\`}>
-                          {Math.floor(mStat.todayMins / 60)}h {mStat.todayMins % 60}m today
+                          {Math.floor((mStat?.todayMins || 0) / 60)}h {(mStat?.todayMins || 0) % 60}m today
                         </p>
                       </div>
                     </div>
@@ -1415,9 +1776,21 @@ export default function App() {
                     <div className="flex items-center gap-1 shrink-0">
                       <span className={\`text-xs font-mono px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 \${theme.streakBadge}\`} title="Active Streak">
                         <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
-                        {mStat.streak}
+                        {mStat?.streak || 0}
                       </span>
-                      {member.id !== 'mehrsan' && member.id !== 'ronak' && (
+                      <button
+                        type="button"
+                        aria-label={\`Edit \${member.name}\`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditMemberModal(member);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 p-1 hover: opacity-100"
+                        title="Edit Profile & Theme"
+                      >
+                        <PencilSimple weight="duotone" className="w-3.5 h-3.5" />
+                      </button>
+                      {state.members.length > 1 && (
                         <button
                           type="button"
                           aria-label={\`Remove \${member.name}\`}
@@ -1466,7 +1839,6 @@ export default function App() {
               );
             })}
 
-            {/* Launch Zen Focus Room Button */}
             <button
               onClick={() => setIsFocusRoomOpen(true)}
               className={\`w-full mt-2 px-3.5 py-2.5 rounded-2xl text-xs font-semibold flex items-center justify-between border transition-all \${theme.softBadge} hover:opacity-90\`}
@@ -1544,16 +1916,17 @@ export default function App() {
           <div className="flex items-center justify-between text-xs pt-1 px-1">
             <button
               onClick={() => setShowSyncModal(true)}
-              className={\`flex items-center gap-1.5 \${theme.textMuted} hover:underline\`}
-            >
-              <CloudArrowUp weight="duotone" className={\`w-4 h-4 \${syncUrl ? 'text-emerald-500' : ''}\`} />
-              {syncUrl ? 'Sync & Backup' : 'Backup / Sync'}
-            </button>
-            <button
-              onClick={() => setShowTutorial(true)}
               className={\`flex items-center gap-1 \${theme.textMuted} hover:underline\`}
             >
-              <Question weight="duotone" className="w-4 h-4" /> Guide
+              <CloudArrowUp weight="duotone" className={\`w-4 h-4 \${syncUrl ? 'text-emerald-500' : ''}\`} />
+              Backup / Sync
+            </button>
+            <button
+              onClick={() => setShowOnboarding(true)}
+              className={\`flex items-center gap-1 \${theme.textMuted} hover:underline\`}
+              title="Create a new workspace or switch Room Code"
+            >
+              <UsersThree weight="duotone" className="w-4 h-4" /> Switch Space
             </button>
           </div>
         </div>
@@ -1738,7 +2111,7 @@ export default function App() {
                     <input
                       id="new-task-title"
                       type="text"
-                      placeholder={\`Plot task on \${timelineDay} (e.g., Practice French)...\`}
+                      placeholder={\`Plot task on \${timelineDay}...\`}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       className={\`flex-1 min-w-[160px] border rounded-2xl px-3.5 py-2 text-xs focus:outline-none \${theme.innerCardBg}\`}
@@ -1946,50 +2319,56 @@ export default function App() {
                   </div>
 
                   <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
-                    {state.logs.slice(0, 15).map((log) => {
-                      const logMember = state.members.find((m) => m.id === log.userId);
-                      if (!logMember) return null;
-                      const mStyle = GET_COZY_THEME(logMember.theme, isLatteMode);
-                      const isOwnLog = log.userId === activeUser;
-                      const hasCheered = log.cheeredBy.includes(activeUser);
-                      return (
-                        <div
-                          key={log.id}
-                          className={\`p-3.5 rounded-2xl border flex items-center justify-between gap-2 text-xs \${theme.innerCardBg}\`}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <span className={\`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border shrink-0 \${mStyle.softBadge}\`}>
-                              {logMember.avatar}
-                            </span>
-                            <div className="truncate">
-                              <p className="font-medium truncate">
-                                <span className="font-bold">{logMember.name}</span> • {log.targetTitle}
-                              </p>
-                              <span className={\`text-xs font-mono \${theme.textMuted}\`}>
-                                {formatRelativeTime(log.createdAtMs, log.date)} (+{log.minutes}m)
-                              </span>
-                            </div>
-                          </div>
-
-                          <button
-                            disabled={isOwnLog}
-                            onClick={() => toggleCheerLog(log.id)}
-                            aria-label={isOwnLog ? 'Your activity log' : 'Cheer companion'}
-                            title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer'}
-                            className={\`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 transition shrink-0 \${
-                              hasCheered ? theme.primaryBtn : mStyle.softBadge
-                            } \${isOwnLog ? 'opacity-70 cursor-default' : 'hover:scale-105'}\`}
+                    {state.logs.length === 0 ? (
+                      <p className={\`text-xs italic py-6 text-center \${theme.textMuted}\`}>
+                        No sessions logged yet in {state.workspaceName}. Complete a task or focus session to spark the feed!
+                      </p>
+                    ) : (
+                      state.logs.slice(0, 15).map((log) => {
+                        const logMember = state.members.find((m) => m.id === log.userId);
+                        if (!logMember) return null;
+                        const mStyle = GET_COZY_THEME(logMember.theme, isLatteMode);
+                        const isOwnLog = log.userId === activeUser;
+                        const hasCheered = log.cheeredBy.includes(activeUser);
+                        return (
+                          <div
+                            key={log.id}
+                            className={\`p-3.5 rounded-2xl border flex items-center justify-between gap-2 text-xs \${theme.innerCardBg}\`}
                           >
-                            <Heart weight={hasCheered || log.cheeredBy.length > 0 ? 'fill' : 'duotone'} className="w-3.5 h-3.5" />
-                            <span>{log.cheeredBy.length}</span>
-                          </button>
-                        </div>
-                      );
-                    })}
+                            <div className="flex items-center gap-3 min-w-0">
+                              <span className={\`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border shrink-0 \${mStyle.softBadge}\`}>
+                                {logMember.avatar}
+                              </span>
+                              <div className="truncate">
+                                <p className="font-medium truncate">
+                                  <span className="font-bold">{logMember.name}</span> • {log.targetTitle}
+                                </p>
+                                <span className={\`text-xs font-mono \${theme.textMuted}\`}>
+                                  {formatRelativeTime(log.createdAtMs, log.date)} (+{log.minutes}m)
+                                </span>
+                              </div>
+                            </div>
+
+                            <button
+                              disabled={isOwnLog}
+                              onClick={() => toggleCheerLog(log.id)}
+                              aria-label={isOwnLog ? 'Your activity log' : 'Cheer companion'}
+                              title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer'}
+                              className={\`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 transition shrink-0 \${
+                                hasCheered ? theme.primaryBtn : mStyle.softBadge
+                              } \${isOwnLog ? 'opacity-70 cursor-default' : 'hover:scale-105'}\`}
+                            >
+                              <Heart weight={hasCheered || log.cheeredBy.length > 0 ? 'fill' : 'duotone'} className="w-3.5 h-3.5" />
+                              <span>{log.cheeredBy.length}</span>
+                            </button>
+                          </div>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
 
-                {/* Editable University & Language Exams (CRUD for all members!) */}
+                {/* Editable Exams & Deadlines */}
                 <div className={\`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition \${theme.cardBg}\`}>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <div>
@@ -2001,7 +2380,7 @@ export default function App() {
                         onClick={() => setShowAllSquadExams(!showAllSquadExams)}
                         className={\`text-xs font-mono underline \${theme.textMuted}\`}
                       >
-                        {showAllSquadExams ? \`Showing All Squad • Filter \${currentMember.name}\` : \`Showing \${currentMember.name} • Show All\`}
+                        {showAllSquadExams ? \`Showing All • Filter \${currentMember.name}\` : \`Showing \${currentMember.name} • Show All\`}
                       </button>
                     </div>
                     <button
@@ -2015,7 +2394,7 @@ export default function App() {
                   <div className="space-y-2.5">
                     {displayedExams.length === 0 ? (
                       <p className={\`text-xs italic py-4 text-center \${theme.textMuted}\`}>
-                        No upcoming exams listed for {currentMember.name}. Click "+ Add Exam" to add one!
+                        No upcoming exams listed for {currentMember.name}.
                       </p>
                     ) : (
                       displayedExams.map((ex) => {
@@ -2094,7 +2473,7 @@ export default function App() {
                           {member.name}'s Goals
                         </h4>
                         <span className={\`text-xs font-mono \${theme.textMuted}\`}>
-                          {mStat.totalHours} hrs total
+                          {mStat?.totalHours || '0.0'} hrs total
                         </span>
                       </div>
 
@@ -2137,7 +2516,6 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* Hours Progress Bar */}
                               <div className="space-y-1.5">
                                 <div className="flex items-center justify-between text-xs font-mono">
                                   <span>{hrs}h / {safeTarget}h ({pct}%)</span>
@@ -2168,7 +2546,6 @@ export default function App() {
                                 </div>
                               </div>
 
-                              {/* Interactive Goal Milestones (Sub-steps) */}
                               <div className={\`pt-3 border-t \${theme.divider} space-y-2\`}>
                                 <div className="flex items-center justify-between text-xs font-mono">
                                   <span className={\`flex items-center gap-1.5 \${theme.textMuted}\`}>
@@ -2364,12 +2741,12 @@ export default function App() {
                         </div>
                         <span className={\`text-xs font-mono px-2.5 py-1 rounded-full border font-bold flex items-center gap-1 \${theme.streakBadge}\`}>
                           <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
-                          {mStat.streak}d
+                          {mStat?.streak || 0}d
                         </span>
                       </div>
 
                       <div className="grid grid-cols-7 gap-2 pt-1">
-                        {mStat.grid28.map((cell) => (
+                        {(mStat?.grid28 || []).map((cell) => (
                           <button
                             key={cell.dateStr}
                             type="button"
@@ -2477,7 +2854,6 @@ export default function App() {
                   )
                 }
                 className={\`px-2.5 py-1.5 rounded-xl text-xs font-mono border shrink-0 flex items-center gap-1 transition \${theme.softBadge}\`}
-                title="Switch Timer Mode (Stopwatch / 25m Focus / 5m Break)"
               >
                 <Timer weight="duotone" className="w-4 h-4" />
                 {timerMode === 'pomodoro' ? '25m' : timerMode === 'break' ? '5m' : 'Free'}
@@ -2515,7 +2891,6 @@ export default function App() {
                 <button
                   onClick={handleSaveTimerSession}
                   disabled={!canLogSession}
-                  title={canLogSession ? 'Log elapsed minutes' : 'Focus at least 1 minute to log'}
                   className={\`px-3 py-2 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition disabled:opacity-40 \${theme.softBadge}\`}
                 >
                   <Check weight="bold" className="w-3.5 h-3.5" />
@@ -2525,7 +2900,6 @@ export default function App() {
               <button
                 onClick={() => setIsFocusRoomOpen(true)}
                 aria-label="Open Fullscreen Zen Focus Room"
-                title="Open Fullscreen Zen Focus Room"
                 className={\`p-2 rounded-xl border \${theme.innerCardBg}\`}
               >
                 <ArrowsOutSimple weight="duotone" className="w-4 h-4" />
@@ -2534,7 +2908,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR */}
+        {/* MOBILE BOTTOM NAVIGATION */}
         <nav
           aria-label="Mobile Navigation"
           className={\`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl grid grid-cols-4 px-2 py-1.5 \${theme.sidebarBg}\`}
@@ -2559,21 +2933,214 @@ export default function App() {
       </div>
 
       {/* ============================================================================
-          FULL-SCREEN ZEN FOCUS ROOM OVERLAY (FLOCUS / LIFEAT INSPIRED)
+          WELCOME / MULTI-WORKSPACE ONBOARDING WIZARD (FOR PUBLIC VISITORS & ROOM CODES)
       ============================================================================ */}
+      {showOnboarding && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto"
+        >
+          <div className={\`border rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl my-auto \${theme.pageBg} \${theme.activeBorder}\`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className={\`text-xs font-mono px-3 py-1 rounded-full border inline-flex items-center gap-1.5 \${theme.softBadge}\`}>
+                  <Sparkle weight="fill" className="w-3.5 h-3.5" /> SyncPulse v5.0 Sanctuary Setup
+                </span>
+                <h2 className="font-serif italic text-3xl sm:text-4xl mt-2">
+                  Create Your Cozy Sanctuary
+                </h2>
+                <p className={\`text-xs mt-1 leading-relaxed \${theme.textMuted}\`}>
+                  Set up a fresh, private workspace for yourself and your study companions—or enter a private Room Code to unlock an existing sanctuary.
+                </p>
+              </div>
+              {state.isConfigured && (
+                <button
+                  onClick={() => setShowOnboarding(false)}
+                  aria-label="Close setup"
+                  className="p-1.5 rounded-xl border"
+                >
+                  <X weight="bold" className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Mode Tabs */}
+            <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl border">
+              <button
+                type="button"
+                onClick={() => setOnboardingMode('create')}
+                className={\`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition \${
+                  onboardingMode === 'create' ? theme.primaryBtn : theme.textMuted
+                }\`}
+              >
+                <MagicWand weight="duotone" className="w-4 h-4" /> New Custom Sanctuary
+              </button>
+              <button
+                type="button"
+                onClick={() => setOnboardingMode('code')}
+                className={\`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition \${
+                  onboardingMode === 'code' ? theme.primaryBtn : theme.textMuted
+                }\`}
+              >
+                <Key weight="duotone" className="w-4 h-4" /> Have a Private Room Code?
+              </button>
+            </div>
+
+            {onboardingMode === 'create' ? (
+              <form onSubmit={handleCreateCustomWorkspace} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Sanctuary Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={setupForm.workspaceName}
+                      onChange={(e) => setSetupForm({ ...setupForm, workspaceName: e.target.value })}
+                      placeholder="e.g., Cozy Study Loft"
+                      className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs \${theme.innerCardBg}\`}
+                    />
+                  </div>
+                  <div>
+                    <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Private Room Code (for Cloud Sync)</label>
+                    <input
+                      type="text"
+                      value={setupForm.roomCode}
+                      onChange={(e) => setSetupForm({ ...setupForm, roomCode: e.target.value })}
+                      placeholder="e.g., loft-2026 (auto-generated if blank)"
+                      className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
+                    />
+                  </div>
+                </div>
+
+                {/* Companion 1 (You) */}
+                <div className={\`p-4 rounded-2xl border space-y-3 \${theme.innerCardBg}\`}>
+                  <span className="text-xs font-bold block">1. Your Profile</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Your Name *"
+                      value={setupForm.p1Name}
+                      onChange={(e) => setSetupForm({ ...setupForm, p1Name: e.target.value })}
+                      className={\`border rounded-xl px-3 py-2 text-xs \${theme.cardBg}\`}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Focus (e.g., CS & AI)"
+                      value={setupForm.p1Tagline}
+                      onChange={(e) => setSetupForm({ ...setupForm, p1Tagline: e.target.value })}
+                      className={\`border rounded-xl px-3 py-2 text-xs \${theme.cardBg}\`}
+                    />
+                    <select
+                      value={setupForm.p1Theme}
+                      onChange={(e) => setSetupForm({ ...setupForm, p1Theme: e.target.value as ThemePalette })}
+                      className={\`border rounded-xl px-2.5 py-2 text-xs \${theme.cardBg}\`}
+                    >
+                      <option value="warm-sage">Espresso & Sage ☕</option>
+                      <option value="lavender-blush">Velvet Lavender 💜</option>
+                      <option value="peach-terracotta">Terracotta Peach 🍑</option>
+                      <option value="matcha-cream">Matcha Oat Milk 🍵</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Companion 2 (Optional Partner/Friend) */}
+                <div className={\`p-4 rounded-2xl border space-y-3 \${theme.innerCardBg}\`}>
+                  <span className="text-xs font-bold block">2. Study Companion (Optional — can add up to 4 later)</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <input
+                      type="text"
+                      placeholder="Companion's Name"
+                      value={setupForm.p2Name}
+                      onChange={(e) => setSetupForm({ ...setupForm, p2Name: e.target.value })}
+                      className={\`border rounded-xl px-3 py-2 text-xs \${theme.cardBg}\`}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Focus (e.g., Languages)"
+                      value={setupForm.p2Tagline}
+                      onChange={(e) => setSetupForm({ ...setupForm, p2Tagline: e.target.value })}
+                      className={\`border rounded-xl px-3 py-2 text-xs \${theme.cardBg}\`}
+                    />
+                    <select
+                      value={setupForm.p2Theme}
+                      onChange={(e) => setSetupForm({ ...setupForm, p2Theme: e.target.value as ThemePalette })}
+                      className={\`border rounded-xl px-2.5 py-2 text-xs \${theme.cardBg}\`}
+                    >
+                      <option value="lavender-blush">Velvet Lavender 💜</option>
+                      <option value="warm-sage">Espresso & Sage ☕</option>
+                      <option value="peach-terracotta">Terracotta Peach 🍑</option>
+                      <option value="matcha-cream">Matcha Oat Milk 🍵</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleLoadDemoWorkspace}
+                    className={\`px-4 py-2.5 rounded-2xl border text-xs font-semibold \${theme.cardBg}\`}
+                  >
+                    Explore Demo Template Instead
+                  </button>
+                  <button
+                    type="submit"
+                    className={\`px-6 py-3 rounded-2xl text-xs font-semibold flex items-center gap-2 \${theme.primaryBtn}\`}
+                  >
+                    <Sparkle weight="fill" className="w-4 h-4" /> Launch My Sanctuary
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleUnlockByRoomCode} className="space-y-4">
+                <div className={\`p-5 rounded-2xl border space-y-3 \${theme.innerCardBg}\`}>
+                  <label className="block text-xs font-semibold">
+                    Enter Your Private Sanctuary Code
+                  </label>
+                  <p className={\`text-xs leading-relaxed \${theme.textMuted}\`}>
+                    Enter your group's secret room code to load your preset or connect to your isolated cloud room.
+                  </p>
+                  <input
+                    type="text"
+                    required
+                    value={setupForm.secretUnlockCode}
+                    onChange={(e) => setSetupForm({ ...setupForm, secretUnlockCode: e.target.value })}
+                    placeholder="Enter secret room code..."
+                    className={\`w-full border rounded-2xl px-4 py-3 text-sm font-mono \${theme.cardBg}\`}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <label className={\`px-4 py-2.5 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 cursor-pointer \${theme.cardBg}\`}>
+                    <UploadSimple weight="duotone" className="w-4 h-4" /> Restore from JSON File
+                    <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
+                  </label>
+                  <button
+                    type="submit"
+                    className={\`px-6 py-3 rounded-2xl text-xs font-semibold flex items-center gap-2 \${theme.primaryBtn}\`}
+                  >
+                    <Key weight="fill" className="w-4 h-4" /> Unlock Sanctuary
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* FULLSCREEN ZEN FOCUS ROOM */}
       {isFocusRoomOpen && (
         <div
           role="dialog"
           aria-modal="true"
           className={\`fixed inset-0 z-50 flex flex-col justify-between p-6 sm:p-10 overflow-y-auto cozy-transition paper-grain \${theme.pageBg} \${theme.textMain}\`}
         >
-          {/* Breathing Ambient Orbs inside Focus Room */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
             <div className={\`cozy-orb absolute top-10 left-10 w-[500px] h-[500px] rounded-full blur-[140px] \${theme.orb1}\`} />
             <div className={\`cozy-orb absolute bottom-10 right-10 w-[520px] h-[520px] rounded-full blur-[150px] \${theme.orb2}\`} style={{ animationDelay: '-4s' }} />
           </div>
 
-          {/* Top Bar */}
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className={\`w-10 h-10 rounded-2xl flex items-center justify-center \${theme.primaryBtn}\`}>
@@ -2581,10 +3148,10 @@ export default function App() {
               </div>
               <div>
                 <h2 className="font-serif italic text-2xl leading-none">
-                  {currentMember.name}'s Zen Focus Sanctuary
+                  {currentMember.name}'s Zen Focus Room
                 </h2>
                 <span className={\`text-xs font-mono \${theme.textMuted}\`}>
-                  Local Time: {fromMins(nowMinutes)} • 🔥 {activeStats.streak} Day Streak
+                  {state.workspaceName} • 🔥 {activeStats.streak} Day Streak
                 </span>
               </div>
             </div>
@@ -2607,7 +3174,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Center Giant Clock & Mindful Controls */}
           <div className="relative z-10 max-w-2xl mx-auto w-full text-center space-y-6 my-auto py-8">
             <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl border backdrop-blur-md">
               {(['stopwatch', 'pomodoro', 'break'] as const).map((mode) => (
@@ -2618,7 +3184,7 @@ export default function App() {
                     timerMode === mode ? theme.primaryBtn : \`\${theme.textMuted} hover:opacity-100\`
                   }\`}
                 >
-                  {mode === 'stopwatch' ? '⏱️ Open Stopwatch' : mode === 'pomodoro' ? '🍅 25m Pomodoro' : '☕ 5m Break'}
+                  {mode === 'stopwatch' ? '⏱️ Stopwatch' : mode === 'pomodoro' ? '🍅 25m Pomodoro' : '☕ 5m Break'}
                 </button>
               ))}
             </div>
@@ -2635,9 +3201,7 @@ export default function App() {
             )}
 
             <div className="max-w-md mx-auto">
-              <label htmlFor="zen-goal-select" className="sr-only">Choose Goal to Credit</label>
               <select
-                id="zen-goal-select"
                 value={selectedGoalId}
                 onChange={(e) => setSelectedGoalId(e.target.value)}
                 className={\`w-full border rounded-2xl px-4 py-3 text-sm text-center focus:outline-none \${theme.cardBg}\`}
@@ -2674,14 +3238,12 @@ export default function App() {
               <button
                 onClick={() => resetTimer()}
                 className={\`p-4 rounded-3xl border \${theme.cardBg}\`}
-                title="Reset Timer"
               >
                 <ArrowCounterClockwise weight="duotone" className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Bottom Bar: Ambient Soundscape & Co-Op Squad Presence */}
           <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-current/10">
             <div className="flex items-center gap-2">
               <span className={\`text-xs font-mono uppercase \${theme.textMuted}\`}>Ambience:</span>
@@ -2712,7 +3274,7 @@ export default function App() {
                   <span className={\`w-2 h-2 rounded-full \${m.presence?.isFocusing ? 'bg-emerald-400 animate-ping' : 'bg-stone-500'}\`} />
                   <span className="font-bold">{m.name}:</span>
                   <span className={theme.textMuted}>
-                    {m.presence?.isFocusing ? \`Focusing (\${m.presence.targetTitle})\` : \`\${Math.floor(memberMetrics[m.id].todayMins / 60)}h \${memberMetrics[m.id].todayMins % 60}m today\`}
+                    {m.presence?.isFocusing ? \`Focusing (\${m.presence.targetTitle})\` : \`\${Math.floor((memberMetrics[m.id]?.todayMins || 0) / 60)}h \${(memberMetrics[m.id]?.todayMins || 0) % 60}m today\`}
                   </span>
                 </div>
               ))}
@@ -2721,183 +3283,15 @@ export default function App() {
         </div>
       )}
 
-      {/* ADD EXAM MODAL */}
-      {showExamModal && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={saveExamItem} className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif italic text-2xl">Add Exam / Deadline ({currentMember.name})</h3>
-              <button type="button" aria-label="Close modal" onClick={() => setShowExamModal(false)}>
-                <X weight="bold" className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div>
-              <label htmlFor="exam-title" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Exam / Course Title</label>
-              <input
-                id="exam-title"
-                type="text"
-                required
-                placeholder="e.g., DELF B1 Exam / Compiler Final"
-                value={examForm.title}
-                onChange={(e) => setExamForm({ ...examForm, title: e.target.value })}
-                className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs \${theme.innerCardBg}\`}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="exam-date" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Date (e.g., 1405/11/10)</label>
-                <input
-                  id="exam-date"
-                  type="text"
-                  required
-                  value={examForm.date}
-                  onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
-                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
-                />
-              </div>
-              <div>
-                <label htmlFor="exam-time" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Time</label>
-                <input
-                  id="exam-time"
-                  type="time"
-                  value={examForm.time}
-                  onChange={(e) => setExamForm({ ...examForm, time: e.target.value })}
-                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="exam-prof" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Professor / Location</label>
-                <input
-                  id="exam-prof"
-                  type="text"
-                  placeholder="e.g., Prof. Yousefi"
-                  value={examForm.professor}
-                  onChange={(e) => setExamForm({ ...examForm, professor: e.target.value })}
-                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs \${theme.innerCardBg}\`}
-                />
-              </div>
-              <div>
-                <label htmlFor="exam-type" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Category</label>
-                <select
-                  id="exam-type"
-                  value={examForm.type}
-                  onChange={(e) => setExamForm({ ...examForm, type: e.target.value as ExamItem['type'] })}
-                  className={\`w-full border rounded-2xl px-3 py-2.5 text-xs \${theme.innerCardBg}\`}
-                >
-                  <option value="Core">Core</option>
-                  <option value="General">General</option>
-                  <option value="Language">Language</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setShowExamModal(false)} className={\`px-4 py-2 rounded-2xl border text-xs \${theme.cardBg}\`}>
-                Cancel
-              </button>
-              <button type="submit" className={\`px-5 py-2 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}>
-                Save Exam
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* BACKUP & CLOUD SYNC MODAL */}
-      {showSyncModal && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif italic text-2xl">Data Backup & Cloud Sync</h3>
-              <button aria-label="Close modal" onClick={() => setShowSyncModal(false)}>
-                <X weight="bold" className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className={\`p-4 rounded-2xl border space-y-2.5 \${theme.innerCardBg}\`}>
-              <p className="text-xs font-semibold">Local JSON Backup (Safe & Offline)</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleExportJSON}
-                  className={\`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 \${theme.primaryBtn}\`}
-                >
-                  <DownloadSimple weight="duotone" className="w-4 h-4" /> Export Backup
-                </button>
-                <label className={\`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer \${theme.cardBg}\`}>
-                  <UploadSimple weight="duotone" className="w-4 h-4" /> Import JSON
-                  <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
-                </label>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="sync-url-input" className={\`block text-xs \${theme.textMuted}\`}>
-                Optional Real-Time REST Database URL
-              </label>
-              <input
-                id="sync-url-input"
-                type="url"
-                value={syncUrl}
-                onChange={(e) => setSyncUrl(e.target.value)}
-                placeholder="https://your-project-default-rtdb.firebaseio.com/"
-                className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
-              />
-              {syncError && <p className="text-xs text-amber-400">{syncError}</p>}
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => {
-                  localStorage.setItem('syncpulse_cloud_url', syncUrl.trim());
-                  setShowSyncModal(false);
-                }}
-                className={\`px-5 py-2.5 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}
-              >
-                Save Settings
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* SHARE STATUS MODAL */}
-      {showShareModal && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
-            <div className="flex items-center justify-between">
-              <h3 className="font-serif italic text-2xl">Share {currentMember.name}'s Snapshot</h3>
-              <button aria-label="Close modal" onClick={() => setShowShareModal(false)}>
-                <X weight="bold" className="w-4 h-4" />
-              </button>
-            </div>
-
-            <pre className={\`p-4 rounded-2xl border text-xs font-mono whitespace-pre-wrap leading-relaxed \${theme.innerCardBg}\`}>
-              {generateShareText()}
-            </pre>
-
-            <button
-              onClick={handleShareStatus}
-              className={\`w-full py-3 rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 \${theme.primaryBtn}\`}
-            >
-              <Copy weight="duotone" className="w-4 h-4" />
-              {copiedShare ? 'Copied to Clipboard!' : 'Share / Copy Status Text'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ADD COMPANION MODAL */}
+      {/* ADD / EDIT COMPANION MODAL */}
       {showMemberModal && (
         <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <form onSubmit={handleAddMember} className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
+          <form onSubmit={handleSaveMember} className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
             <div className="flex items-center justify-between">
-              <h3 className="font-serif italic text-2xl">Invite Companion ({state.members.length}/4)</h3>
-              <button type="button" aria-label="Close modal" onClick={() => setShowMemberModal(false)}>
+              <h3 className="font-serif italic text-2xl">
+                {editingMember ? \`Edit \${editingMember.name}'s Profile\` : \`Invite Companion (\${state.members.length}/4)\`}
+              </h3>
+              <button type="button" onClick={() => setShowMemberModal(false)}>
                 <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
@@ -2933,10 +3327,10 @@ export default function App() {
                 onChange={(e) => setMemberForm({ ...memberForm, theme: e.target.value as ThemePalette })}
                 className={\`w-full border rounded-2xl px-3 py-2.5 text-xs \${theme.innerCardBg}\`}
               >
-                <option value="peach-terracotta">Warm Terracotta & Peach</option>
-                <option value="matcha-cream">Matcha Oat Milk</option>
-                <option value="lavender-blush">Velvet Lavender & Rose</option>
-                <option value="warm-sage">Espresso & Warm Sage</option>
+                <option value="warm-sage">Espresso & Warm Sage ☕</option>
+                <option value="lavender-blush">Velvet Lavender & Rose 💜</option>
+                <option value="peach-terracotta">Warm Terracotta & Peach 🍑</option>
+                <option value="matcha-cream">Matcha Oat Milk 🍵</option>
               </select>
             </div>
 
@@ -2945,10 +3339,215 @@ export default function App() {
                 Cancel
               </button>
               <button type="submit" className={\`px-5 py-2 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}>
-                Add Companion
+                {editingMember ? 'Save Changes' : 'Add Companion'}
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ADD EXAM MODAL */}
+      {showExamModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={saveExamItem} className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif italic text-2xl">Add Exam / Deadline ({currentMember.name})</h3>
+              <button type="button" onClick={() => setShowExamModal(false)}>
+                <X weight="bold" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Exam / Course Title</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g., DELF B1 Exam / Compiler Final"
+                value={examForm.title}
+                onChange={(e) => setExamForm({ ...examForm, title: e.target.value })}
+                className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs \${theme.innerCardBg}\`}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Date</label>
+                <input
+                  type="text"
+                  required
+                  value={examForm.date}
+                  onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
+                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
+                />
+              </div>
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Time</label>
+                <input
+                  type="time"
+                  value={examForm.time}
+                  onChange={(e) => setExamForm({ ...examForm, time: e.target.value })}
+                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono \${theme.innerCardBg}\`}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Professor / Location</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Room 102"
+                  value={examForm.professor}
+                  onChange={(e) => setExamForm({ ...examForm, professor: e.target.value })}
+                  className={\`w-full border rounded-2xl px-3.5 py-2.5 text-xs \${theme.innerCardBg}\`}
+                />
+              </div>
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Category</label>
+                <select
+                  value={examForm.type}
+                  onChange={(e) => setExamForm({ ...examForm, type: e.target.value as ExamItem['type'] })}
+                  className={\`w-full border rounded-2xl px-3 py-2.5 text-xs \${theme.innerCardBg}\`}
+                >
+                  <option value="Core">Core</option>
+                  <option value="General">General</option>
+                  <option value="Language">Language</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button type="button" onClick={() => setShowExamModal(false)} className={\`px-4 py-2 rounded-2xl border text-xs \${theme.cardBg}\`}>
+                Cancel
+              </button>
+              <button type="submit" className={\`px-5 py-2 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}>
+                Save Exam
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* ROOM-ISOLATED BACKUP & CLOUD SYNC MODAL */}
+      {showSyncModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif italic text-2xl">Room Sync & JSON Backup</h3>
+              <button onClick={() => setShowSyncModal(false)}>
+                <X weight="bold" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className={\`p-4 rounded-2xl border space-y-2.5 \${theme.innerCardBg}\`}>
+              <p className="text-xs font-semibold">Local JSON Backup</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleExportJSON}
+                  className={\`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 \${theme.primaryBtn}\`}
+                >
+                  <DownloadSimple weight="duotone" className="w-4 h-4" /> Export JSON
+                </button>
+                <label className={\`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer \${theme.cardBg}\`}>
+                  <UploadSimple weight="duotone" className="w-4 h-4" /> Import JSON
+                  <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>
+                  Sanctuary Name
+                </label>
+                <input
+                  type="text"
+                  value={state.workspaceName}
+                  onChange={(e) => commitState((prev) => ({ ...prev, workspaceName: e.target.value }))}
+                  className={\`w-full border rounded-2xl px-3.5 py-2 text-xs \${theme.innerCardBg}\`}
+                />
+              </div>
+
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>
+                  Secret Room Code (Isolates your cloud data from other users)
+                </label>
+                <input
+                  type="text"
+                  value={state.roomCode}
+                  onChange={(e) => commitState((prev) => ({ ...prev, roomCode: e.target.value }))}
+                  className={\`w-full border rounded-2xl px-3.5 py-2 text-xs font-mono \${theme.innerCardBg}\`}
+                />
+              </div>
+
+              <div>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>
+                  Realtime Database Base URL (Firebase / REST JSON)
+                </label>
+                <input
+                  type="url"
+                  value={syncUrl}
+                  onChange={(e) => setSyncUrl(e.target.value)}
+                  placeholder="https://your-project-default-rtdb.firebaseio.com/"
+                  className={\`w-full border rounded-2xl px-3.5 py-2 text-xs font-mono \${theme.innerCardBg}\`}
+                />
+                {syncUrl && (
+                  <p className={\`text-[11px] font-mono mt-1 truncate \${theme.textMuted}\`}>
+                    Path: {buildCloudEndpoint(syncUrl, state.roomCode)}
+                  </p>
+                )}
+                {syncError && <p className="text-xs text-amber-400 mt-1">{syncError}</p>}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSyncModal(false);
+                  setShowOnboarding(true);
+                }}
+                className={\`text-xs underline \${theme.textMuted}\`}
+              >
+                Create / Switch Sanctuary
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.setItem('syncpulse_cloud_url', syncUrl.trim());
+                  setShowSyncModal(false);
+                }}
+                className={\`px-5 py-2.5 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}
+              >
+                Save & Sync
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SHARE STATUS MODAL */}
+      {showShareModal && (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif italic text-2xl">Share {currentMember.name}'s Snapshot</h3>
+              <button onClick={() => setShowShareModal(false)}>
+                <X weight="bold" className="w-4 h-4" />
+              </button>
+            </div>
+
+            <pre className={\`p-4 rounded-2xl border text-xs font-mono whitespace-pre-wrap leading-relaxed \${theme.innerCardBg}\`}>
+              {generateShareText()}
+            </pre>
+
+            <button
+              onClick={handleShareStatus}
+              className={\`w-full py-3 rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 \${theme.primaryBtn}\`}
+            >
+              <Copy weight="duotone" className="w-4 h-4" />
+              {copiedShare ? 'Copied to Clipboard!' : 'Share / Copy Status Text'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -2960,15 +3559,14 @@ export default function App() {
               <h3 className="font-serif italic text-2xl">
                 {editingGoal ? 'Edit Goal' : \`New Goal for \${currentMember.name}\`}
               </h3>
-              <button type="button" aria-label="Close modal" onClick={() => setShowGoalModal(false)}>
+              <button type="button" onClick={() => setShowGoalModal(false)}>
                 <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
             <div>
-              <label htmlFor="goal-title" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Goal Title</label>
+              <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Goal Title</label>
               <input
-                id="goal-title"
                 type="text"
                 required
                 value={goalForm.title}
@@ -2979,9 +3577,8 @@ export default function App() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="goal-cat" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Category</label>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Category</label>
                 <select
-                  id="goal-cat"
                   value={goalForm.category}
                   onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value as GoalItem['category'] })}
                   className={\`w-full border rounded-2xl px-3 py-2.5 text-xs \${theme.innerCardBg}\`}
@@ -2993,9 +3590,8 @@ export default function App() {
                 </select>
               </div>
               <div>
-                <label htmlFor="goal-hrs" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Target Hours (Min 1)</label>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Target Hours (Min 1)</label>
                 <input
-                  id="goal-hrs"
                   type="number"
                   min={1}
                   required
@@ -3007,9 +3603,8 @@ export default function App() {
             </div>
 
             <div>
-              <label htmlFor="goal-deadline" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Horizon / Deadline</label>
+              <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Horizon / Deadline</label>
               <input
-                id="goal-deadline"
                 type="text"
                 value={goalForm.deadline}
                 onChange={(e) => setGoalForm({ ...goalForm, deadline: e.target.value })}
@@ -3035,15 +3630,14 @@ export default function App() {
           <form onSubmit={saveScheduleItem} className={\`border rounded-3xl max-w-md w-full p-6 space-y-4 \${theme.pageBg} \${theme.activeBorder}\`}>
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Add Class ({currentMember.name})</h3>
-              <button type="button" aria-label="Close modal" onClick={() => setShowScheduleModal(false)}>
+              <button type="button" onClick={() => setShowScheduleModal(false)}>
                 <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
             <div>
-              <label htmlFor="sched-title" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Title</label>
+              <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Title</label>
               <input
-                id="sched-title"
                 type="text"
                 required
                 value={scheduleForm.title}
@@ -3054,9 +3648,8 @@ export default function App() {
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label htmlFor="sched-day" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Day</label>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Day</label>
                 <select
-                  id="sched-day"
                   value={scheduleForm.day}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, day: e.target.value })}
                   className={\`w-full border rounded-2xl px-2.5 py-2.5 text-xs \${theme.innerCardBg}\`}
@@ -3067,9 +3660,8 @@ export default function App() {
                 </select>
               </div>
               <div>
-                <label htmlFor="sched-start" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Start</label>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Start</label>
                 <input
-                  id="sched-start"
                   type="time"
                   value={scheduleForm.startTime}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
@@ -3077,9 +3669,8 @@ export default function App() {
                 />
               </div>
               <div>
-                <label htmlFor="sched-end" className={\`block text-xs mb-1 \${theme.textMuted}\`}>End</label>
+                <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>End</label>
                 <input
-                  id="sched-end"
                   type="time"
                   value={scheduleForm.endTime}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
@@ -3091,9 +3682,8 @@ export default function App() {
             {scheduleError && <p className="text-xs text-rose-400">{scheduleError}</p>}
 
             <div>
-              <label htmlFor="sched-details" className={\`block text-xs mb-1 \${theme.textMuted}\`}>Details</label>
+              <label className={\`block text-xs mb-1 \${theme.textMuted}\`}>Details</label>
               <input
-                id="sched-details"
                 type="text"
                 value={scheduleForm.details}
                 onChange={(e) => setScheduleForm({ ...scheduleForm, details: e.target.value })}
@@ -3112,34 +3702,6 @@ export default function App() {
           </form>
         </div>
       )}
-
-      {/* QUICK GUIDE MODAL */}
-      {showTutorial && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
-          <div className={\`border rounded-3xl max-w-lg w-full p-7 space-y-4 shadow-2xl \${theme.pageBg} \${theme.activeBorder}\`}>
-            <div className="flex items-center justify-between">
-              <span className={\`text-xs font-mono px-3 py-1 rounded-full border \${theme.softBadge}\`}>
-                SyncPulse v4.2 Guide
-              </span>
-              <button aria-label="Close guide" onClick={() => setShowTutorial(false)}>
-                <X weight="bold" className="w-4 h-4" />
-              </button>
-            </div>
-            <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary</h3>
-            <ul className={\`text-xs space-y-2 leading-relaxed \${theme.textMuted}\`}>
-              <li>• <b>Zen Focus Room:</b> Click "Enter Zen Focus Room" in the sidebar or timer dock for a distraction-free fullscreen clock with ambient rain.</li>
-              <li>• <b>Goal Milestones:</b> Open "Goals & Milestones" to break big dreams into smaller checkable sub-steps.</li>
-              <li>• <b>Editable Exams:</b> Both Mehrsan and Ronak can add or remove upcoming university or language exams.</li>
-              <li>• <b>Backup & PWA:</b> Export/Import JSON backups anytime, or install SyncPulse as an app!</li>
-            </ul>
-            <div className="flex justify-end pt-2">
-              <button onClick={() => setShowTutorial(false)} className={\`px-5 py-2.5 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}>
-                Got It
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -3150,7 +3712,7 @@ for (const [filePath, content] of Object.entries(files)) {
   const fullPath = path.join(process.cwd(), filePath);
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   fs.writeFileSync(fullPath, content, 'utf8');
-  console.log('🌿 Updated:', filePath);
+  console.log('🏠 Updated:', filePath);
 }
 
-console.log('\n🎉 SyncPulse v4.2 (Zen Focus Room + Goal Milestones + Editable Exams) is ready!');
+console.log('\n🚀 SyncPulse v5.0 (Multi-Workspace SaaS + Private Room Code Isolation) is ready!');

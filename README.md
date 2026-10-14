@@ -3,13 +3,13 @@
 # 🌿 SyncPulse — Cozy Co-Op Productivity & Time Sanctuary
 
 **A Warm-Minimalist Shared Workspace for Daily Focus, University Schedules, and Long-Term Goals.**  
-*Crafted with love for **Mehrsan & Ronak** (and up to 4 Squad Companions).*
+*Designed for individuals, study partners, and small squads (up to 4 companions).*
 
-[![Live Demo](https://img.shields.io/badge/✨_Live_Web_App-Visit_SyncPulse-8B5CF6?style=for-the-badge)](https://mrzzan05.github.io/syncpulse-tracker/)
+[![Live Web App](https://img.shields.io/badge/✨_Live_Web_App-Launch_SyncPulse-8B5CF6?style=for-the-badge)](https://mrzzan05.github.io/syncpulse-tracker/)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vitejs.dev/)
+[![Phosphor Icons](https://img.shields.io/badge/Phosphor_Icons-Duotone-C084FC?style=for-the-badge)](https://phosphoricons.com/)
 
 </div>
 
@@ -17,44 +17,37 @@
 
 ## ✨ Overview
 
-**SyncPulse** is a collaborative productivity web application inspired by world-class tools like **Notion**, **Linear**, **Toggl Track**, **Structured**, and **Duolingo**. Instead of cold, stressful neon dashboards, SyncPulse embraces **Warm Minimalism**—offering a calm, cozy environment where companions can track their study hours, check into university/language classes, maintain daily streaks, and cheer each other on in real time.
+**SyncPulse** is an open-source collaborative productivity web application inspired by **Notion**, **Linear**, **Toggl Track**, **Structured**, and **Flocus**. Embracing **Warm Minimalism**, SyncPulse gives anyone—solo learners, couples, or study squads—a private, customizable sanctuary to plot daily timelines, track goal hours, maintain streaks, and study together in a fullscreen Zen Focus Room.
 
-🔗 **Try it Live:** [**https://mrzzan05.github.io/syncpulse-tracker/**](https://mrzzan05.github.io/syncpulse-tracker/)
+🔗 **Launch Your Own Sanctuary:** [**https://mrzzan05.github.io/syncpulse-tracker/**](https://mrzzan05.github.io/syncpulse-tracker/)
 
 ---
 
 ## 🌟 Key Features
 
-### 🎨 1. Dynamic Personal Themes & Dual Lighting
-* **Companion-Specific Aesthetics:** Switching profiles smoothly transforms the entire workspace palette:
-  * **Mehrsan:** *Cozy Espresso, Warm Sage & Soft Amber* ☕🌿
-  * **Ronak:** *Velvet Lavender, Amethyst & Dusty Rose* 💜✨
-  * **Additional Companions:** *Warm Terracotta* 🍑 & *Matcha Oat Milk* 🍵
-* **Warm Latte ☀️ & Cozy Night 🌙 Modes:** Switch effortlessly between an organic oat-milk daylight theme and a candlelight dark mode.
+### 🏠 1. Multi-Workspace & Private Room Architecture (v5.0)
+* **Custom Sanctuary Onboarding:** Any visitor can create their own blank workspace, customize companion names, and pick personal color palettes.
+* **Isolated Room Codes:** Sync across devices using a private **Room Key** (`/sanctuaries/{roomKey}.json`), ensuring every group's data remains completely isolated.
+* **Full JSON Portability:** Export and import full workspace backups anytime.
 
-### ⏳ 2. Visual Daily Timeline (*Structured* & *Amie* Inspired)
-* **Unified Day Stream:** Automatically merges your fixed university/language classes for the day with your scheduled daily tasks into a chronological vertical timeline.
-* **Live "NOW" Indicator & Countdowns:** Highlights what is happening right now, calculates time until your next session, and detects **Free Focus Windows** between classes.
+### 🎨 2. Dynamic Personal Themes & Dual Lighting
+* **4 Curated Cozy Palettes:** *Espresso & Warm Sage* ☕, *Velvet Lavender & Rose* 💜, *Fireside Terracotta* 🍑, and *Matcha Oat Milk* 🍵.
+* **Warm Latte ☀️ & Cozy Night 🌙 Modes:** Smoothly adapts to daylight or candlelight environments.
 
-### 🔥 3. Habit Heatmaps, Streaks & RPG Progression (*GitHub* & *Duolingo* Inspired)
-* **28-Day Contribution Heatmaps:** Side-by-side color-graded activity grids showing daily focus intensity for each companion.
-* **Live Streak Counter & XP Levels:** Earn **10 XP** for every focused minute, maintain multi-day streaks (🔥), and unlock 6 milestone **Achievement Badges**.
+### ⏳ 3. Visual Daily Timeline & Fullscreen Zen Focus Room
+* **Structured-Style Daily Stream:** Merges weekly classes and daily tasks chronologically, highlights live sessions, and detects **Free Focus Windows** (45m+ gaps).
+* **Zen Focus Room:** Fullscreen distraction-free clock with **Stopwatch / 25m Pomodoro / 5m Break** modes and built-in Web Audio **Soft Rain & Warm Tone** soundscapes.
 
-### 🧭 4. Notion/Linear-Inspired Sidebar & Floating Timer Dock
-* **Distraction-Free Sidebar Navigation:** Clean separation between daily flow, goal time-banks, weekly schedules, and visual analytics.
-* **Persistent Floating Focus Dock:** Inspired by *Toggl* and *Spotify*, the bottom floating timer (supporting both **Open Stopwatch** and **25m Cozy Pomodoro**) stays with you across all tabs.
+### 🔥 4. 28-Day Habit Heatmaps, Milestones & RPG Badges
+* **GitHub & Duolingo-Inspired Analytics:** Track daily streaks, earn **+10 XP** per focused minute, check off sub-step **Goal Milestones**, and unlock 6 achievement badges.
 
 ---
 
-## 🗺️ Development Roadmap
+## 🚀 Quick Start Locally
 
-- [x] **Phase 1:** Notion/Linear Sidebar Architecture + Persistent Floating Timer Dock + Pro Documentation
-- [x] **Phase 2:** Visual Daily Timeline (*Structured* style) with live "Now" indicator, Free Focus Windows & class countdowns
-- [x] **Phase 3:** 28-Day Habit Heatmap (*GitHub / Duolingo* style) + Streak Counter, XP Bar & Achievement Badges
-- [ ] **Phase 4:** One-Click Cloud Room Sync + JSON Data Backup/Restore + Installable PWA / Desktop & Mobile builds
-
----
-
-<div align="center">
-  <sub>Built with ☕ and 💜 by Mehrsan & Ronak</sub>
-</div>
+```bash
+git clone https://github.com/Mrzzan05/syncpulse-tracker.git
+cd syncpulse-tracker
+npm install
+npm run dev
+```

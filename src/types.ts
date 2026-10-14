@@ -80,6 +80,9 @@ export interface TimeLog {
 
 export interface AppState {
   version: number;
+  isConfigured: boolean;
+  workspaceName: string;
+  roomCode: string;
   lastUpdatedMs: number;
   members: Member[];
   schedules: ScheduleItem[];
