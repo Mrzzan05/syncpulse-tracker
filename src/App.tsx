@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import {
   Clock, Target, Calendar, CheckCircle2, Plus, Trash2, Edit3,
   Play, Pause, RotateCcw, TrendingUp, Bell, Sparkles,
-  Users, Cloud, Check, X, GraduationCap, Zap, HelpCircle,
-  Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart
+  Users, Cloud, Check, X, GraduationCap, HelpCircle,
+  Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
+  Sun, Moon, Coffee, CloudRain, VolumeX, Flame, Award
 } from 'lucide-react';
 import {
   INITIAL_STATE, AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette
@@ -12,99 +13,194 @@ import {
 
 const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-// Theme Configurations for smooth dynamic transitions
-const THEME_CONFIG: Record<ThemePalette, {
+// Warm, Calm & Cozy Theme System (Supports both Cozy Night & Warm Latte Day modes)
+interface CozyStyle {
   name: string;
+  pageBg: string;
+  cardBg: string;
+  innerCardBg: string;
+  textMain: string;
+  textMuted: string;
   orb1: string;
   orb2: string;
-  pageBg: string;
   primaryBtn: string;
   softBadge: string;
   activeBorder: string;
   progressBar: string;
   accentText: string;
   barColor: string;
-}> = {
-  'cyber-cyan': {
-    name: 'Cyber Cyan (Mehrsan)',
-    orb1: 'bg-cyan-500/20',
-    orb2: 'bg-blue-600/20',
-    pageBg: 'bg-[#060b16]',
-    primaryBtn: 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/25',
-    softBadge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-    activeBorder: 'border-cyan-500/50 shadow-xl shadow-cyan-950/40',
-    progressBar: 'bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600',
-    accentText: 'text-cyan-400',
-    barColor: 'from-cyan-500 to-blue-400'
-  },
-  'royal-violet': {
-    name: 'Amethyst Violet (Ronak 💜)',
-    orb1: 'bg-purple-500/30',
-    orb2: 'bg-fuchsia-500/25',
-    pageBg: 'bg-[#12071f]',
-    primaryBtn: 'bg-gradient-to-r from-purple-500 via-violet-500 to-fuchsia-500 hover:from-purple-400 hover:to-fuchsia-400 text-white shadow-lg shadow-purple-500/30',
-    softBadge: 'bg-purple-500/20 text-purple-200 border-purple-400/40',
-    activeBorder: 'border-purple-400/60 shadow-xl shadow-purple-950/60',
-    progressBar: 'bg-gradient-to-r from-purple-400 via-fuchsia-400 to-pink-500',
-    accentText: 'text-purple-300',
-    barColor: 'from-purple-500 to-fuchsia-400'
-  },
-  'sunset-coral': {
-    name: 'Sunset Rose',
-    orb1: 'bg-rose-500/25',
-    orb2: 'bg-amber-500/20',
-    pageBg: 'bg-[#160910]',
-    primaryBtn: 'bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white shadow-lg shadow-rose-500/25',
-    softBadge: 'bg-rose-500/20 text-rose-200 border-rose-400/30',
-    activeBorder: 'border-rose-400/50 shadow-xl shadow-rose-950/50',
-    progressBar: 'bg-gradient-to-r from-rose-400 to-amber-400',
-    accentText: 'text-rose-300',
-    barColor: 'from-rose-500 to-amber-400'
-  },
-  'emerald-mint': {
-    name: 'Emerald Mint',
-    orb1: 'bg-emerald-500/25',
-    orb2: 'bg-teal-500/20',
-    pageBg: 'bg-[#061411]',
-    primaryBtn: 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/25',
-    softBadge: 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30',
-    activeBorder: 'border-emerald-400/50 shadow-xl shadow-emerald-950/50',
-    progressBar: 'bg-gradient-to-r from-emerald-400 to-teal-400',
-    accentText: 'text-emerald-300',
-    barColor: 'from-emerald-500 to-teal-400'
+}
+
+const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
+  if (palette === 'lavender-blush') {
+    // Ronak's Warm Lavender, Soft Plum & Dusty Rose Palette 💜
+    return isLatte
+      ? {
+          name: 'Lavender Oat Latte 💜',
+          pageBg: 'bg-[#FAF5FF]',
+          cardBg: 'bg-white/85 border-purple-200/80 shadow-sm shadow-purple-950/5',
+          innerCardBg: 'bg-[#F5EEFC]/80 border-purple-200/60',
+          textMain: 'text-[#2E1B3B]',
+          textMuted: 'text-[#735A85]',
+          orb1: 'bg-purple-300/45',
+          orb2: 'bg-pink-300/40',
+          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B47AEA] to-[#D685B8] hover:opacity-95 text-white shadow-md shadow-purple-500/20',
+          softBadge: 'bg-purple-100 text-purple-800 border-purple-300/70',
+          activeBorder: 'border-purple-400/80 shadow-lg shadow-purple-300/30',
+          progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
+          accentText: 'text-[#8B47C2]',
+          barColor: 'from-[#9D65C9] to-[#E879F9]'
+        }
+      : {
+          name: 'Cozy Velvet Lavender 💜',
+          pageBg: 'bg-[#191124]',
+          cardBg: 'bg-[#251A34]/75 border-purple-300/15 shadow-xl shadow-black/30',
+          innerCardBg: 'bg-[#150E1E]/75 border-purple-300/10',
+          textMain: 'text-[#F7F1FF]',
+          textMuted: 'text-[#B9A5CC]',
+          orb1: 'bg-[#9D65C9]/25',
+          orb2: 'bg-[#E879F9]/20',
+          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B779E2] to-[#D977B4] hover:opacity-95 text-white shadow-lg shadow-purple-950/50',
+          softBadge: 'bg-purple-400/15 text-purple-200 border-purple-300/30',
+          activeBorder: 'border-purple-400/50 shadow-xl shadow-purple-950/60',
+          progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
+          accentText: 'text-[#DFB6FF]',
+          barColor: 'from-[#A855F7] to-[#F472B6]'
+        };
   }
+
+  if (palette === 'peach-terracotta') {
+    return isLatte
+      ? {
+          name: 'Warm Terracotta Latte',
+          pageBg: 'bg-[#FDF8F5]',
+          cardBg: 'bg-white/85 border-orange-200/80 shadow-sm',
+          innerCardBg: 'bg-[#FAF0EA]/80 border-orange-200/60',
+          textMain: 'text-[#362019]',
+          textMuted: 'text-[#856256]',
+          orb1: 'bg-amber-300/40',
+          orb2: 'bg-rose-300/35',
+          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-md shadow-orange-500/20',
+          softBadge: 'bg-orange-100 text-orange-900 border-orange-300/70',
+          activeBorder: 'border-orange-400/80 shadow-lg shadow-orange-200/40',
+          progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
+          accentText: 'text-[#C85A32]',
+          barColor: 'from-[#D97757] to-[#F59E0B]'
+        }
+      : {
+          name: 'Fireside Terracotta',
+          pageBg: 'bg-[#1D1513]',
+          cardBg: 'bg-[#2B1F1D]/75 border-orange-300/15',
+          innerCardBg: 'bg-[#16100E]/75 border-orange-300/10',
+          textMain: 'text-[#FDF4F0]',
+          textMuted: 'text-[#C4A89E]',
+          orb1: 'bg-orange-500/20',
+          orb2: 'bg-amber-500/15',
+          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-lg',
+          softBadge: 'bg-orange-400/15 text-orange-200 border-orange-300/30',
+          activeBorder: 'border-orange-400/50 shadow-xl',
+          progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
+          accentText: 'text-[#FDBA8C]',
+          barColor: 'from-[#EA580C] to-[#FBBF24]'
+        };
+  }
+
+  if (palette === 'matcha-cream') {
+    return isLatte
+      ? {
+          name: 'Matcha Oat Milk',
+          pageBg: 'bg-[#F6F9F4]',
+          cardBg: 'bg-white/85 border-emerald-200/80 shadow-sm',
+          innerCardBg: 'bg-[#ECF3E8]/80 border-emerald-200/60',
+          textMain: 'text-[#1B2E22]',
+          textMuted: 'text-[#5A7864]',
+          orb1: 'bg-emerald-300/35',
+          orb2: 'bg-lime-300/30',
+          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-md',
+          softBadge: 'bg-emerald-100 text-emerald-900 border-emerald-300/70',
+          activeBorder: 'border-emerald-400/80 shadow-lg',
+          progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
+          accentText: 'text-[#387558]',
+          barColor: 'from-[#4E8C6F] to-[#84CC16]'
+        }
+      : {
+          name: 'Forest Matcha Night',
+          pageBg: 'bg-[#111B16]',
+          cardBg: 'bg-[#1A2821]/75 border-emerald-300/15',
+          innerCardBg: 'bg-[#0D1411]/75 border-emerald-300/10',
+          textMain: 'text-[#F0FAF4]',
+          textMuted: 'text-[#9CBAA8]',
+          orb1: 'bg-emerald-500/20',
+          orb2: 'bg-teal-500/15',
+          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-lg',
+          softBadge: 'bg-emerald-400/15 text-emerald-200 border-emerald-300/30',
+          activeBorder: 'border-emerald-400/50 shadow-xl',
+          progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
+          accentText: 'text-[#86EFAC]',
+          barColor: 'from-[#10B981] to-[#84CC16]'
+        };
+  }
+
+  // Default: 'warm-sage' (Mehrsan's Cozy Espresso, Warm Sage & Soft Amber)
+  return isLatte
+    ? {
+        name: 'Warm Oat & Sage ☕',
+        pageBg: 'bg-[#FBF9F5]',
+        cardBg: 'bg-white/85 border-[#E6DFD3] shadow-sm shadow-stone-900/5',
+        innerCardBg: 'bg-[#F4EFE6]/85 border-[#E2D9C8]',
+        textMain: 'text-[#292524]',
+        textMuted: 'text-[#78716C]',
+        orb1: 'bg-amber-200/50',
+        orb2: 'bg-teal-200/45',
+        primaryBtn: 'bg-gradient-to-r from-[#4A6B65] via-[#5B7F78] to-[#B87D4B] hover:opacity-95 text-white shadow-md shadow-stone-500/15',
+        softBadge: 'bg-[#EFECE6] text-[#4A6B65] border-[#D6CFC2]',
+        activeBorder: 'border-[#5B7F78]/70 shadow-lg shadow-stone-300/40',
+        progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
+        accentText: 'text-[#4A6B65]',
+        barColor: 'from-[#4A6B65] to-[#D99B52]'
+      }
+    : {
+        name: 'Cozy Espresso & Amber ☕',
+        pageBg: 'bg-[#161514]',
+        cardBg: 'bg-[#22201E]/80 border-[#383430] shadow-xl shadow-black/30',
+        innerCardBg: 'bg-[#181615]/85 border-[#2E2A27]',
+        textMain: 'text-[#F5F2EB]',
+        textMuted: 'text-[#A8A29E]',
+        orb1: 'bg-[#D99B52]/18',
+        orb2: 'bg-[#5B7F78]/22',
+        primaryBtn: 'bg-gradient-to-r from-[#5B7F78] to-[#C88A4B] hover:opacity-95 text-white shadow-lg shadow-black/40',
+        softBadge: 'bg-[#2D2A26] text-[#E6CBA8] border-[#443F3A]',
+        activeBorder: 'border-[#C88A4B]/50 shadow-xl shadow-black/50',
+        progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
+        accentText: 'text-[#E6B88A]',
+        barColor: 'from-[#5B7F78] to-[#E09F5A]'
+      };
 };
 
 const TUTORIAL_STEPS = [
   {
-    title: 'Welcome to SyncPulse Squad! ✨',
-    subtitle: 'Your shared space for daily focus, classes & big dreams.',
-    description: 'Everything here is designed to keep you and your friends motivated without feeling overwhelmed. Let’s take a 20-second tour!',
-    highlight: 'Switch between Mehrsan, Ronak, or up to 4 friends at the top. Notice how the entire app theme transforms for each person! 💜💙'
+    title: 'Welcome to Your Cozy Sanctuary ☕✨',
+    subtitle: 'Designed with Warm Minimalism for calm, stress-free productivity.',
+    description: 'We replaced harsh neon colors with soothing, organic tones. Switch between Cozy Night 🌙 and Warm Latte ☀️ anytime at the top!',
+    highlight: 'Click Ronak’s card to see the entire room softly glow in warm Lavender & Dusty Rose 💜, or Mehrsan’s for Cozy Espresso & Sage.'
   },
   {
-    title: 'Step 1: Track Time & Build Momentum ⏱️',
-    subtitle: 'Time invested is your biggest motivation.',
-    description: 'Whenever you study or work on a goal, either run the Live Stopwatch at the top OR click the quick [+15m] [+30m] [+1h] buttons on any goal card.',
-    highlight: 'Every minute you log fills your progress bar and appears in the Shared Squad Feed so your friends can cheer you on!'
+    title: 'Focus with Built-in Ambient Sounds 🌧️',
+    subtitle: 'Cozy Pomodoro + Soft Rain & Zen Audio.',
+    description: 'Use the top sound bar to play soothing Soft Rain or Warm Zen frequencies while your timer runs—no external app needed!',
+    highlight: 'When you finish studying, click "Log Time" or use the quick [+15m] [+30m] [+1h] buttons on any goal.'
   },
   {
-    title: 'Step 2: Customize Goals, Tasks & Classes 🎯',
-    subtitle: '100% Editable — Nothing is locked.',
-    description: 'Have a new short-term or long-term goal? Click "+ New Goal" to add it, edit target hours, or delete old ones. In the Schedule tab, check-in to your university or language classes to earn +90m automatic credit!',
-    highlight: 'Checking off daily tasks and classes triggers celebratory confetti and boosts your daily hours.'
-  },
-  {
-    title: 'Step 3: Invite Friends & Share Status 🚀',
-    subtitle: 'Up to 4 Squad Members + Instant Share Cards.',
-    description: 'Click "+ Add Member" to bring a 3rd or 4th friend into this organization. Want to show your progress on Telegram or Instagram? Click "Share Status" to generate a sleek summary card!',
-    highlight: 'You can reopen this guide anytime by clicking the "Tutorial" button in the top navigation bar.'
+    title: 'Cheer Each Other On & Share Joy 💜👏',
+    subtitle: 'Up to 4 Squad Members + Heart Reactions.',
+    description: 'In the Shared Squad Activity Feed, tap the heart button next to any logged session to send warm encouragement to your partner!',
+    highlight: 'Everything—goals, classes, tasks, and personal status notes—can be added, edited, or deleted anytime.'
   }
 ];
 
 export default function App() {
   const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('syncpulse_v2');
+    const saved = localStorage.getItem('syncpulse_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -115,31 +211,97 @@ export default function App() {
   });
 
   const [activeUser, setActiveUser] = useState<string>('mehrsan');
+  const [isLatteMode, setIsLatteMode] = useState<boolean>(() => {
+    return localStorage.getItem('syncpulse_latte') === 'true';
+  });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'schedule' | 'analytics'>('dashboard');
   const [selectedDay, setSelectedDay] = useState<string>(() => {
     const jsDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
     return DAYS.includes(jsDay) ? jsDay : 'Saturday';
   });
 
-  // Tutorial Modal State (auto-shows first time)
+  // Web Audio API Cozy Ambient Sound Generator (No external MP3 needed!)
+  const [ambientMode, setAmbientMode] = useState<'off' | 'rain' | 'zen'>('off');
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    if (ambientMode === 'off') {
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close();
+        audioCtxRef.current = null;
+      }
+      return;
+    }
+
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AudioCtx();
+    audioCtxRef.current = ctx;
+
+    if (ambientMode === 'rain') {
+      // Warm Pink/Brown Noise for soothing rain sound
+      const bufferSize = 2 * ctx.sampleRate;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        output[i] = (lastOut + 0.02 * white) / 1.02;
+        lastOut = output[i];
+        output[i] *= 0.12; // Gentle volume
+      }
+      const whiteNoise = ctx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+      whiteNoise.loop = true;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 650;
+
+      whiteNoise.connect(filter);
+      filter.connect(ctx.destination);
+      whiteNoise.start(0);
+    } else if (ambientMode === 'zen') {
+      // Warm 432Hz + 216Hz harmonic drone
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.value = 216;
+      osc2.frequency.value = 324;
+      gain.gain.value = 0.03;
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start();
+      osc2.start();
+    }
+
+    return () => {
+      ctx.close();
+    };
+  }, [ambientMode]);
+
+  // Tutorial Modal State
   const [showTutorial, setShowTutorial] = useState<boolean>(() => {
-    return !localStorage.getItem('syncpulse_tutorial_seen');
+    return !localStorage.getItem('syncpulse_v3_tutorial_seen');
   });
   const [tutorialStep, setTutorialStep] = useState<number>(0);
 
-  // Share Status Modal
+  // Share Modal
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [copiedShare, setCopiedShare] = useState<boolean>(false);
 
-  // Add Member Modal (Up to 4 Squad Members)
+  // Add Member Modal
   const [showMemberModal, setShowMemberModal] = useState<boolean>(false);
   const [memberForm, setMemberForm] = useState({
     name: '',
     tagline: '',
-    theme: 'sunset-coral' as ThemePalette
+    theme: 'peach-terracotta' as ThemePalette
   });
 
-  // Live Stopwatch
+  // Timer (Supports Stopwatch & 25m Cozy Pomodoro)
+  const [timerMode, setTimerMode] = useState<'stopwatch' | 'pomodoro'>('stopwatch');
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
   const [selectedGoalId, setSelectedGoalId] = useState<string>('');
@@ -173,24 +335,26 @@ export default function App() {
   const [syncUrl, setSyncUrl] = useState(() => localStorage.getItem('syncpulse_cloud_url') || '');
 
   const currentMember = state.members.find((m) => m.id === activeUser) || state.members[0];
-  const activeTheme = THEME_CONFIG[currentMember.theme] || THEME_CONFIG['cyber-cyan'];
+  const theme = GET_COZY_THEME(currentMember.theme, isLatteMode);
 
   useEffect(() => {
-    localStorage.setItem('syncpulse_v2', JSON.stringify(state));
+    localStorage.setItem('syncpulse_v3', JSON.stringify(state));
   }, [state]);
 
-  // Real-time Cloud Sync Polling
+  useEffect(() => {
+    localStorage.setItem('syncpulse_latte', String(isLatteMode));
+  }, [isLatteMode]);
+
+  // Cloud Sync Polling
   useEffect(() => {
     if (!syncUrl) return;
-    const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v2.json`;
+    const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v3.json`;
     const interval = setInterval(async () => {
       try {
         const res = await fetch(cleanUrl);
         if (res.ok) {
           const remoteData = await res.json();
-          if (remoteData && remoteData.members) {
-            setState(remoteData);
-          }
+          if (remoteData && remoteData.members) setState(remoteData);
         }
       } catch {}
     }, 5000);
@@ -201,7 +365,7 @@ export default function App() {
     setState(newState);
     if (!syncUrl) return;
     try {
-      const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v2.json`;
+      const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v3.json`;
       await fetch(cleanUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -210,20 +374,40 @@ export default function App() {
     } catch {}
   };
 
-  // Stopwatch Effect
+  // Timer Tick
   useEffect(() => {
     let interval: any;
     if (isTimerRunning) {
-      interval = setInterval(() => setTimerSeconds((prev) => prev + 1), 1000);
+      interval = setInterval(() => {
+        setTimerSeconds((prev) => {
+          if (timerMode === 'pomodoro') {
+            if (prev <= 1) {
+              setIsTimerRunning(false);
+              return 0;
+            }
+            return prev - 1;
+          }
+          return prev + 1;
+        });
+      }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning]);
+  }, [isTimerRunning, timerMode]);
+
+  const switchTimerMode = (mode: 'stopwatch' | 'pomodoro') => {
+    setIsTimerRunning(false);
+    setTimerMode(mode);
+    setTimerSeconds(mode === 'pomodoro' ? 25 * 60 : 0);
+  };
 
   const formatTimer = (totalSec: number) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
-    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    if (hrs > 0) {
+      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -231,10 +415,10 @@ export default function App() {
   const logTime = (userId: string, goalId: string | null, title: string, minutes: number) => {
     if (minutes <= 0) return;
     confetti({
-      particleCount: 60,
-      spread: 70,
+      particleCount: 50,
+      spread: 65,
       origin: { y: 0.75 },
-      colors: currentMember.theme === 'royal-violet' ? ['#c084fc', '#e879f9', '#f472b6'] : ['#38bdf8', '#818cf8', '#34d399']
+      colors: currentMember.theme === 'lavender-blush' ? ['#C084FC', '#F472B6', '#FDE68A'] : ['#84A98C', '#E09F5A', '#FDE68A']
     });
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -248,7 +432,8 @@ export default function App() {
       targetTitle: title,
       minutes,
       date: todayStr,
-      timestamp: `Today, ${nowTime}`
+      timestamp: `Today, ${nowTime}`,
+      cheers: 1
     };
 
     pushToCloud({
@@ -258,21 +443,38 @@ export default function App() {
     });
   };
 
+  const cheerLog = (logId: string) => {
+    const updatedLogs = state.logs.map((l) =>
+      l.id === logId ? { ...l, cheers: (l.cheers || 0) + 1 } : l
+    );
+    pushToCloud({ ...state, logs: updatedLogs });
+  };
+
   const handleSaveTimerSession = () => {
-    const mins = Math.max(1, Math.round(timerSeconds / 60));
+    const elapsedMins =
+      timerMode === 'pomodoro'
+        ? Math.max(1, Math.round((25 * 60 - timerSeconds) / 60))
+        : Math.max(1, Math.round(timerSeconds / 60));
     const userGoals = state.goals.filter((g) => g.userId === activeUser);
     const targetGoal = userGoals.find((g) => g.id === selectedGoalId) || userGoals[0];
     logTime(
       activeUser,
       targetGoal ? targetGoal.id : null,
-      targetGoal ? targetGoal.title : 'Deep Focus Session',
-      mins
+      targetGoal ? targetGoal.title : 'Cozy Focus Session',
+      elapsedMins
     );
     setIsTimerRunning(false);
-    setTimerSeconds(0);
+    setTimerSeconds(timerMode === 'pomodoro' ? 25 * 60 : 0);
   };
 
-  // Add Squad Member (Max 4)
+  const updateMemberStatus = (note: string) => {
+    const updated = state.members.map((m) =>
+      m.id === activeUser ? { ...m, statusNote: note } : m
+    );
+    pushToCloud({ ...state, members: updated });
+  };
+
+  // Add Member
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberForm.name.trim() || state.members.length >= 4) return;
@@ -282,7 +484,8 @@ export default function App() {
       name: memberForm.name.trim(),
       tagline: memberForm.tagline.trim() || 'Squad Member',
       avatar: memberForm.name.trim()[0].toUpperCase(),
-      theme: memberForm.theme
+      theme: memberForm.theme,
+      statusNote: 'Excited to grow together ✨'
     };
     const starterGoal: GoalItem = {
       id: 'g-' + Date.now(),
@@ -299,14 +502,13 @@ export default function App() {
       goals: [...state.goals, starterGoal]
     });
     setActiveUser(id);
-    setMemberForm({ name: '', tagline: '', theme: 'emerald-mint' });
+    setMemberForm({ name: '', tagline: '', theme: 'matcha-cream' });
     setShowMemberModal(false);
   };
 
   const removeMember = (id: string) => {
-    if (id === 'mehrsan' || id === 'ronak') return; // Keep core duo safe
-    const filtered = state.members.filter((m) => m.id !== id);
-    pushToCloud({ ...state, members: filtered });
+    if (id === 'mehrsan' || id === 'ronak') return;
+    pushToCloud({ ...state, members: state.members.filter((m) => m.id !== id) });
     setActiveUser('mehrsan');
   };
 
@@ -371,7 +573,7 @@ export default function App() {
     });
 
     if (!attended) {
-      confetti({ particleCount: 45, spread: 55, origin: { y: 0.8 } });
+      confetti({ particleCount: 40, spread: 55, origin: { y: 0.8 } });
       const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const newLog = {
         id: 'log-' + Date.now(),
@@ -379,7 +581,8 @@ export default function App() {
         targetTitle: `Attended: ${sched.title}`,
         minutes: 90,
         date: todayStr,
-        timestamp: `Today, ${nowTime}`
+        timestamp: `Today, ${nowTime}`,
+        cheers: 1
       };
       pushToCloud({ ...state, schedules: updatedSchedules, logs: [newLog, ...state.logs] });
     } else {
@@ -432,15 +635,16 @@ export default function App() {
       t.id === task.id ? { ...t, completed: becomingCompleted } : t
     );
     if (becomingCompleted) {
-      confetti({ particleCount: 45, spread: 60, origin: { y: 0.75 } });
+      confetti({ particleCount: 40, spread: 60, origin: { y: 0.75 } });
       const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       const newLog = {
         id: 'log-' + Date.now(),
         userId: task.userId,
-        targetTitle: `Task: ${task.title}`,
+        targetTitle: `Completed: ${task.title}`,
         minutes: task.estimatedMinutes,
         date: todayStr,
-        timestamp: `Today, ${nowTime}`
+        timestamp: `Today, ${nowTime}`,
+        cheers: 1
       };
       pushToCloud({ ...state, tasks: updatedTasks, logs: [newLog, ...state.logs] });
     } else {
@@ -464,8 +668,14 @@ export default function App() {
     return (goalMins / 60).toFixed(1);
   };
 
+  const getLevelInfo = (uid: string) => {
+    const totalHrs = Number(getTotalHours(uid));
+    const level = Math.max(1, Math.floor(totalHrs / 15) + 1);
+    return { level, title: level >= 5 ? 'Master Scholar ✨' : level >= 3 ? 'Steady Seeker 🌿' : 'Rising Star 🌱' };
+  };
+
   const closeTutorial = () => {
-    localStorage.setItem('syncpulse_tutorial_seen', 'true');
+    localStorage.setItem('syncpulse_v3_tutorial_seen', 'true');
     setShowTutorial(false);
     setTutorialStep(0);
   };
@@ -479,7 +689,7 @@ export default function App() {
       .map((g) => `• ${g.title}: ${(g.loggedMinutes / 60).toFixed(1)}h / ${g.targetHours}h`)
       .join('\n');
 
-    return `⚡ SyncPulse Daily Status — ${currentMember.name}\n⏱️ Today's Focus: ${Math.floor(todayMins / 60)}h ${todayMins % 60}m\n✅ Tasks Completed: ${completedTasks}\n🏆 Total Banked Hours: ${getTotalHours(activeUser)} hrs\n\n🎯 Active Goals:\n${topGoals}\n\nSynced with our Squad on SyncPulse!`;
+    return `🌿 SyncPulse Cozy Log — ${currentMember.name}\n⏱️ Today's Focus: ${Math.floor(todayMins / 60)}h ${todayMins % 60}m\n✅ Tasks Done: ${completedTasks}\n🏆 Total Banked: ${getTotalHours(activeUser)} hrs\n\n🎯 Current Goals:\n${topGoals}`;
   };
 
   const copyShareStatus = () => {
@@ -488,7 +698,6 @@ export default function App() {
     setTimeout(() => setCopiedShare(false), 2500);
   };
 
-  // 7-Day Analytics Data across all squad members
   const last7Days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -510,111 +719,185 @@ export default function App() {
 
   const userGoals = state.goals.filter((g) => g.userId === activeUser);
   const userTasks = state.tasks.filter((t) => t.userId === activeUser);
+  const levelInfo = getLevelInfo(activeUser);
 
   return (
-    <div className={`min-h-screen pb-16 relative theme-transition ${activeTheme.pageBg} text-slate-100`}>
-      {/* Animated Floating Ambient Background Orbs */}
+    <div className={`min-h-screen pb-20 relative cozy-transition paper-grain ${theme.pageBg} ${theme.textMain}`}>
+      {/* Soft Breathing Ambient Glow Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div
-          className={`ambient-orb absolute -top-28 -left-28 w-[420px] h-[420px] rounded-full blur-[130px] theme-transition ${activeTheme.orb1}`}
+          className={`cozy-orb absolute -top-24 -left-24 w-[450px] h-[450px] rounded-full blur-[135px] cozy-transition ${theme.orb1}`}
         />
         <div
-          className={`ambient-orb absolute top-1/4 -right-28 w-[460px] h-[460px] rounded-full blur-[140px] theme-transition ${activeTheme.orb2}`}
-          style={{ animationDelay: '-4s' }}
+          className={`cozy-orb absolute top-1/3 -right-24 w-[480px] h-[480px] rounded-full blur-[145px] cozy-transition ${theme.orb2}`}
+          style={{ animationDelay: '-5s' }}
         />
       </div>
 
-      {/* Top Navigation */}
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/40 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      {/* Cozy Top Header */}
+      <header className="sticky top-0 z-30 border-b border-current/10 backdrop-blur-xl bg-opacity-70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center theme-transition ${activeTheme.primaryBtn}`}>
-              {currentMember.theme === 'royal-violet' ? (
-                <Heart className="w-5 h-5 text-white fill-white/20" />
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
+              {currentMember.theme === 'lavender-blush' ? (
+                <Heart className="w-5 h-5 text-white fill-white/25" />
               ) : (
-                <Zap className="w-5 h-5 text-white" />
+                <Coffee className="w-5 h-5 text-white" />
               )}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-display text-xl font-bold tracking-tight text-white">
+                <h1 className="font-serif italic text-2xl tracking-wide">
                   SyncPulse
                 </h1>
-                <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border theme-transition ${activeTheme.softBadge}`}>
-                  {currentMember.name}'s Space
+                <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border cozy-transition ${theme.softBadge}`}>
+                  {theme.name}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
-                Squad Productivity & Time Accountability ({state.members.length}/4 Members)
+              <p className={`text-xs ${theme.textMuted}`}>
+                Cozy Shared Space • Lv.{levelInfo.level} {levelInfo.title}
               </p>
             </div>
           </div>
 
-          {/* Action Buttons: Tutorial, Share Status, Cloud Sync */}
-          <div className="flex items-center gap-2">
+          {/* Right Controls: Ambient Sound, Latte/Night Mode, Tutorial, Share */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Built-in Cozy Soundscape Pill */}
+            <div className={`flex items-center rounded-2xl p-1 border cozy-transition ${theme.cardBg}`}>
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'rain' ? 'off' : 'rain')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition ${
+                  ambientMode === 'rain' ? theme.primaryBtn : theme.textMuted
+                }`}
+                title="Play Soothing Rain Sound"
+              >
+                <CloudRain className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Rain</span>
+              </button>
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'zen' ? 'off' : 'zen')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition ${
+                  ambientMode === 'zen' ? theme.primaryBtn : theme.textMuted
+                }`}
+                title="Play Warm 432Hz Zen Sound"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Zen</span>
+              </button>
+              {ambientMode !== 'off' && (
+                <button
+                  onClick={() => setAmbientMode('off')}
+                  className="px-1.5 text-rose-400 hover:text-rose-500"
+                  title="Mute Sound"
+                >
+                  <VolumeX className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Warm Latte (Day) / Cozy Night Toggle */}
+            <button
+              onClick={() => setIsLatteMode(!isLatteMode)}
+              className={`px-3 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 cozy-transition ${theme.cardBg}`}
+              title="Switch between Warm Latte Day Mode and Cozy Night Mode"
+            >
+              {isLatteMode ? (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Night</span>
+                </>
+              ) : (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Latte</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={() => {
                 setTutorialStep(0);
                 setShowTutorial(true);
               }}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-slate-200 flex items-center gap-1.5 transition"
+              className={`px-3 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 cozy-transition ${theme.cardBg}`}
             >
-              <HelpCircle className="w-4 h-4 text-amber-300" />
-              <span>Tutorial</span>
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Guide</span>
             </button>
 
             <button
               onClick={() => setShowShareModal(true)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${activeTheme.primaryBtn}`}
+              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition ${theme.primaryBtn}`}
             >
               <Share2 className="w-3.5 h-3.5" />
-              <span>Share Status</span>
+              <span>Share</span>
             </button>
 
             <button
               onClick={() => setShowSyncModal(true)}
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-slate-300 flex items-center gap-1.5 transition"
-              title="Real-Time Squad Sync"
+              className={`p-2 rounded-2xl border text-xs cozy-transition ${theme.cardBg}`}
+              title="Cloud Sync Settings"
             >
-              <Cloud className={`w-4 h-4 ${syncUrl ? 'text-emerald-400' : 'text-slate-400'}`} />
-              <span className="hidden md:inline">{syncUrl ? 'Synced' : 'Cloud Sync'}</span>
+              <Cloud className={`w-4 h-4 ${syncUrl ? 'text-emerald-500' : theme.textMuted}`} />
             </button>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-6">
-        {/* SQUAD BAR (SWITCH PROFILES & WATCH THE THEME TRANSFORM + ADD UP TO 4 MEMBERS) */}
-        <section className="space-y-2">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-7 space-y-7">
+        {/* EDITORIAL WARM GREETING BANNER */}
+        <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <p className={`text-xs font-mono uppercase tracking-widest ${theme.accentText}`}>
+              ✨ {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+            </p>
+            <h2 className="font-serif italic text-3xl sm:text-4xl mt-1 tracking-tight">
+              Take a deep breath and enjoy your pace, {currentMember.name}.
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={currentMember.statusNote || ''}
+              onChange={(e) => updateMemberStatus(e.target.value)}
+              placeholder="Write your cozy status note..."
+              className={`text-xs px-3.5 py-2 rounded-2xl border w-full md:w-72 focus:outline-none cozy-transition ${theme.cardBg}`}
+            />
+          </div>
+        </section>
+
+        {/* SQUAD CARDS (UP TO 4 MEMBERS) */}
+        <section className="space-y-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+            <span className={`text-xs font-medium flex items-center gap-1.5 ${theme.textMuted}`}>
               <Users className="w-3.5 h-3.5" />
-              Select Squad Member (Click a card to switch space & theme)
+              Our Cozy Circle (Click a companion to enter their space & theme)
             </span>
             {state.members.length < 4 && (
               <button
                 onClick={() => setShowMemberModal(true)}
-                className="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1 bg-white/5 hover:bg-white/10 px-3 py-1 rounded-lg border border-white/10 transition"
+                className={`text-xs font-semibold flex items-center gap-1 px-3 py-1.5 rounded-2xl border cozy-transition ${theme.cardBg}`}
               >
                 <UserPlus className="w-3.5 h-3.5" />
-                + Add Friend ({state.members.length}/4)
+                + Invite Companion ({state.members.length}/4)
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {state.members.map((member) => {
               const isSelected = member.id === activeUser;
-              const mTheme = THEME_CONFIG[member.theme] || THEME_CONFIG['cyber-cyan'];
+              const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
               const todayMins = getTodayMinutes(member.id);
+              const mLv = getLevelInfo(member.id);
               return (
                 <div
                   key={member.id}
                   onClick={() => setActiveUser(member.id)}
-                  className={`cursor-pointer rounded-2xl p-4 border backdrop-blur-md transition-all duration-500 relative group ${
+                  className={`cursor-pointer rounded-3xl p-5 border backdrop-blur-md cozy-transition relative group ${
                     isSelected
-                      ? `bg-white/10 ${mTheme.activeBorder} scale-[1.01]`
-                      : 'bg-white/[0.03] border-white/10 hover:bg-white/[0.06]'
+                      ? `${mStyle.cardBg} ${mStyle.activeBorder} scale-[1.01]`
+                      : `${theme.cardBg} opacity-80 hover:opacity-100`
                   }`}
                 >
                   {member.id !== 'mehrsan' && member.id !== 'ronak' && (
@@ -623,8 +906,7 @@ export default function App() {
                         e.stopPropagation();
                         removeMember(member.id);
                       }}
-                      className="opacity-0 group-hover:opacity-100 absolute top-2.5 right-2.5 p-1 rounded-lg bg-black/40 text-slate-400 hover:text-rose-400"
-                      title="Remove Member"
+                      className="opacity-0 group-hover:opacity-100 absolute top-3 right-3 p-1 rounded-full hover:text-rose-400"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -632,31 +914,37 @@ export default function App() {
 
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-base border ${mTheme.softBadge}`}>
+                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-serif italic text-xl border ${mStyle.softBadge}`}>
                         {member.avatar}
                       </div>
                       <div>
-                        <h2 className="font-display font-bold text-sm text-white flex items-center gap-1.5">
+                        <h3 className="font-bold text-sm flex items-center gap-1">
                           {member.name}
-                          {member.id === 'ronak' && <span className="text-xs">💜</span>}
-                        </h2>
-                        <p className="text-[11px] text-slate-400 truncate max-w-[130px]">
+                          {member.id === 'ronak' && <span>💜</span>}
+                        </h3>
+                        <p className={`text-[11px] truncate max-w-[130px] ${theme.textMuted}`}>
                           {member.tagline}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] uppercase font-mono text-slate-400 block">Today</span>
-                      <span className={`font-mono font-bold text-sm ${mTheme.accentText}`}>
+                      <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today</span>
+                      <span className={`font-mono font-bold text-sm ${mStyle.accentText}`}>
                         {Math.floor(todayMins / 60)}h {todayMins % 60}m
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 pt-2 border-t border-white/10">
-                    <span>Banked: {getTotalHours(member.id)}h</span>
-                    <span className={isSelected ? mTheme.accentText : 'text-slate-500'}>
-                      {isSelected ? '● Active View' : 'Switch →'}
+                  {member.statusNote && (
+                    <p className={`text-[11px] italic mb-3 line-clamp-1 ${theme.textMuted}`}>
+                      "{member.statusNote}"
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between text-[11px] font-mono pt-2.5 border-t border-current/10">
+                    <span>Lv.{mLv.level} • {getTotalHours(member.id)}h banked</span>
+                    <span className={isSelected ? mStyle.accentText : theme.textMuted}>
+                      {isSelected ? '● Here' : 'Visit →'}
                     </span>
                   </div>
                 </div>
@@ -665,14 +953,14 @@ export default function App() {
           </div>
         </section>
 
-        {/* STEP-BY-STEP CLEAR NAVIGATION TABS */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white/[0.03] border border-white/10 p-2 rounded-2xl backdrop-blur-md">
+        {/* PILL NAVIGATION TABS */}
+        <div className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-3xl border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
           <div className="flex items-center gap-1.5 overflow-x-auto">
             {[
-              { id: 'dashboard', label: '1. Today’s Focus & Tasks', icon: Sparkles },
-              { id: 'goals', label: '2. Goals & Time Bank', icon: Target },
-              { id: 'schedule', label: '3. Weekly Class Schedule', icon: Calendar },
-              { id: 'analytics', label: '4. Squad Visual Charts', icon: TrendingUp },
+              { id: 'dashboard', label: '1. Cozy Focus & Daily Flow', icon: Coffee },
+              { id: 'goals', label: '2. Dreams & Time Bank', icon: Target },
+              { id: 'schedule', label: '3. Weekly Classes', icon: Calendar },
+              { id: 'analytics', label: '4. Visual Progress', icon: TrendingUp },
             ].map((tab) => {
               const Icon = tab.icon;
               const active = activeTab === tab.id;
@@ -680,10 +968,8 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${
-                    active
-                      ? activeTheme.primaryBtn
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${
+                    active ? theme.primaryBtn : `${theme.textMuted} hover:opacity-100`
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -694,34 +980,49 @@ export default function App() {
           </div>
         </div>
 
-        {/* TAB 1: DASHBOARD (CLEAR 3-PART WORKFLOW) */}
+        {/* TAB 1: DASHBOARD */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
-            {/* Hero Live Focus Timer Banner */}
-            <div className={`rounded-2xl p-5 border backdrop-blur-xl bg-white/[0.04] theme-transition ${activeTheme.activeBorder}`}>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
-                <div className="lg:col-span-5 space-y-1">
-                  <span className={`text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full border inline-flex items-center gap-1.5 ${activeTheme.softBadge}`}>
-                    <Clock className="w-3 h-3" /> Step 1 • Live Focus Stopwatch
-                  </span>
-                  <h3 className="font-display font-bold text-lg text-white pt-1">
-                    Ready to invest time, {currentMember.name}?
+            {/* COZY POMODORO & FOCUS TIMER */}
+            <div className={`rounded-3xl p-6 border backdrop-blur-xl cozy-transition ${theme.cardBg} ${theme.activeBorder}`}>
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div className="lg:col-span-5 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => switchTimerMode('stopwatch')}
+                      className={`text-xs font-mono px-3 py-1 rounded-full border transition ${
+                        timerMode === 'stopwatch' ? theme.softBadge : 'border-transparent opacity-60'
+                      }`}
+                    >
+                      ⏱️ Open Stopwatch
+                    </button>
+                    <button
+                      onClick={() => switchTimerMode('pomodoro')}
+                      className={`text-xs font-mono px-3 py-1 rounded-full border transition ${
+                        timerMode === 'pomodoro' ? theme.softBadge : 'border-transparent opacity-60'
+                      }`}
+                    >
+                      🍅 25m Cozy Pomodoro
+                    </button>
+                  </div>
+                  <h3 className="font-serif italic text-2xl pt-1">
+                    Mindful Time Investment
                   </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Pick a goal, start the timer while you study or practice, then click <b>Log Time</b> to save your minutes!
+                  <p className={`text-xs leading-relaxed ${theme.textMuted}`}>
+                    Select what you’re nurturing right now. When you finish, click <b>Log Session</b> to credit the minutes to your goal!
                   </p>
                 </div>
 
                 <div className="lg:col-span-4 flex flex-col items-center">
-                  <div className="font-mono text-4xl font-bold tracking-wider text-white mb-2">
+                  <div className="font-mono text-4xl sm:text-5xl font-semibold tracking-wider mb-3">
                     {formatTimer(timerSeconds)}
                   </div>
                   <select
                     value={selectedGoalId}
                     onChange={(e) => setSelectedGoalId(e.target.value)}
-                    className="w-full max-w-xs bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                    className={`w-full max-w-xs border rounded-2xl px-3.5 py-2 text-xs focus:outline-none cozy-transition ${theme.innerCardBg}`}
                   >
-                    <option value="">-- Credit Time to Goal --</option>
+                    <option value="">-- Choose Goal to Nourish --</option>
                     {userGoals.map((g) => (
                       <option key={g.id} value={g.id}>
                         {g.title} ({(g.loggedMinutes / 60).toFixed(1)}h / {g.targetHours}h)
@@ -730,32 +1031,27 @@ export default function App() {
                   </select>
                 </div>
 
-                <div className="lg:col-span-3 flex items-center justify-center lg:justify-end gap-2">
+                <div className="lg:col-span-3 flex items-center justify-center lg:justify-end gap-2.5">
                   <button
                     onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    className={`px-4 py-2.5 rounded-xl font-semibold text-xs flex items-center gap-1.5 transition ${
-                      isTimerRunning
-                        ? 'bg-amber-500/20 text-amber-200 border border-amber-400/40'
-                        : activeTheme.primaryBtn
-                    }`}
+                    className={`px-5 py-3 rounded-2xl font-semibold text-xs flex items-center gap-1.5 transition ${theme.primaryBtn}`}
                   >
                     {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {isTimerRunning ? 'Pause' : 'Start Timer'}
+                    {isTimerRunning ? 'Pause' : 'Start Focus'}
                   </button>
                   <button
                     onClick={handleSaveTimerSession}
-                    disabled={timerSeconds === 0}
-                    className="px-4 py-2.5 rounded-xl font-semibold text-xs bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 text-white flex items-center gap-1 transition"
+                    className={`px-4 py-3 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition ${theme.softBadge}`}
                   >
                     <Check className="w-4 h-4" />
-                    Log Time
+                    Log Session
                   </button>
                   <button
                     onClick={() => {
                       setIsTimerRunning(false);
-                      setTimerSeconds(0);
+                      setTimerSeconds(timerMode === 'pomodoro' ? 25 * 60 : 0);
                     }}
-                    className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10"
+                    className={`p-3 rounded-2xl border ${theme.innerCardBg}`}
                     title="Reset"
                   >
                     <RotateCcw className="w-4 h-4" />
@@ -765,94 +1061,93 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left 7 cols: Goals Quick Log + Daily Checklist */}
+              {/* Left 7 cols: Active Goals + Gentle Checklist */}
               <div className="lg:col-span-7 space-y-6">
-                {/* Goals & Quick Time Buttons */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-md">
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-display font-bold text-base text-white flex items-center gap-2">
-                        <Target className={`w-4 h-4 ${activeTheme.accentText}`} />
-                        {currentMember.name}'s Active Goals (Quick Time Log)
+                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                        <Target className={`w-5 h-5 ${theme.accentText}`} />
+                        {currentMember.name}'s Goals & Time Bank
                       </h3>
-                      <p className="text-xs text-slate-400">
-                        Forgot to run the stopwatch? Tap +15m, +30m, or +1h to log your effort instantly.
+                      <p className={`text-xs ${theme.textMuted}`}>
+                        Tap +15m, +30m, or +1h anytime to gently log your progress
                       </p>
                     </div>
                     <button
                       onClick={openCreateGoal}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 ${activeTheme.primaryBtn}`}
+                      className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 ${theme.primaryBtn}`}
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      New Goal
+                      Add Goal
                     </button>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3.5">
                     {userGoals.map((goal) => {
                       const hoursDone = +(goal.loggedMinutes / 60).toFixed(1);
                       const pct = Math.min(100, Math.round((hoursDone / goal.targetHours) * 100));
                       return (
                         <div
                           key={goal.id}
-                          className="p-4 rounded-xl bg-black/40 border border-white/10 hover:border-white/20 transition"
+                          className={`p-4 rounded-2xl border cozy-transition ${theme.innerCardBg}`}
                         >
-                          <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                          <div className="flex flex-wrap items-start justify-between gap-2 mb-2.5">
                             <div>
-                              <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border mr-2 ${activeTheme.softBadge}`}>
+                              <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full border mr-2 ${theme.softBadge}`}>
                                 {goal.category}
                               </span>
-                              <span className="text-[11px] text-slate-400 font-mono">
-                                Horizon: {goal.deadline}
+                              <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                                {goal.deadline}
                               </span>
-                              <h4 className="font-semibold text-sm text-white mt-1">
+                              <h4 className="font-semibold text-sm mt-1">
                                 {goal.title}
                               </h4>
                             </div>
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => logTime(activeUser, goal.id, goal.title, 15)}
-                                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-[11px] font-mono text-slate-200"
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
                               >
                                 +15m
                               </button>
                               <button
                                 onClick={() => logTime(activeUser, goal.id, goal.title, 30)}
-                                className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/15 border border-white/10 text-[11px] font-mono text-slate-200"
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
                               >
                                 +30m
                               </button>
                               <button
                                 onClick={() => logTime(activeUser, goal.id, goal.title, 60)}
-                                className={`px-2.5 py-1 rounded-lg border text-[11px] font-mono font-semibold ${activeTheme.softBadge}`}
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono font-semibold ${theme.softBadge}`}
                               >
                                 +1h
                               </button>
                               <button
                                 onClick={() => openEditGoal(goal)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+                                className={`p-1.5 rounded-xl opacity-60 hover:opacity-100`}
                               >
                                 <Edit3 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => deleteGoal(goal.id)}
-                                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/10"
+                                className="p-1.5 rounded-xl opacity-60 hover:text-rose-400 hover:opacity-100"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           </div>
 
-                          <div className="mt-2">
-                            <div className="flex justify-between text-xs font-mono mb-1">
-                              <span className="text-slate-300">
+                          <div>
+                            <div className="flex justify-between text-xs font-mono mb-1.5">
+                              <span className={theme.textMuted}>
                                 {hoursDone} hrs invested of {goal.targetHours} hrs
                               </span>
-                              <span className={`font-bold ${activeTheme.accentText}`}>{pct}%</span>
+                              <span className={`font-bold ${theme.accentText}`}>{pct}%</span>
                             </div>
-                            <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+                            <div className="w-full h-2.5 rounded-full bg-current/10 overflow-hidden">
                               <div
-                                className={`h-full rounded-full transition-all duration-700 ${activeTheme.progressBar}`}
+                                className={`h-full rounded-full transition-all duration-700 ${theme.progressBar}`}
                                 style={{ width: `${pct}%` }}
                               />
                             </div>
@@ -863,84 +1158,79 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Daily Checklist & Reminders */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-md">
-                  <h3 className="font-display font-bold text-base text-white flex items-center gap-2 mb-1">
-                    <Bell className="w-4 h-4 text-amber-400" />
-                    {currentMember.name}'s Daily Tasks & Reminders
+                {/* Daily Gentle Checklist */}
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
+                  <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-1">
+                    <Bell className={`w-5 h-5 ${theme.accentText}`} />
+                    Today's Gentle Intentions & Reminders
                   </h3>
-                  <p className="text-xs text-slate-400 mb-4">
-                    Check off a task to automatically add its estimated minutes to your daily total!
+                  <p className={`text-xs mb-4 ${theme.textMuted}`}>
+                    Small daily wins build big confidence. Check off an item to earn its time credit!
                   </p>
 
                   <form onSubmit={addTask} className="flex flex-wrap gap-2 mb-4">
                     <input
                       type="text"
-                      placeholder={`Add a task for ${currentMember.name}...`}
+                      placeholder={`Add a gentle task for ${currentMember.name}...`}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
-                      className="flex-1 min-w-[180px] bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none"
+                      className={`flex-1 min-w-[180px] border rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none ${theme.innerCardBg}`}
                     />
                     <input
                       type="time"
                       value={newTaskTime}
                       onChange={(e) => setNewTaskTime(e.target.value)}
-                      className="bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-slate-200"
+                      className={`border rounded-2xl px-3 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
                     />
                     <select
                       value={newTaskMins}
                       onChange={(e) => setNewTaskMins(Number(e.target.value))}
-                      className="bg-black/50 border border-white/15 rounded-xl px-2.5 py-2 text-xs font-mono text-slate-200"
+                      className={`border rounded-2xl px-2.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
                     >
                       <option value={15}>+15m</option>
                       <option value={30}>+30m</option>
                       <option value={45}>+45m</option>
                       <option value={60}>+1h</option>
-                      <option value={90}>+1.5h</option>
                     </select>
                     <button
                       type="submit"
-                      className={`px-4 py-2 rounded-xl font-semibold text-xs ${activeTheme.primaryBtn}`}
+                      className={`px-4 py-2.5 rounded-2xl font-semibold text-xs ${theme.primaryBtn}`}
                     >
-                      Add Task
+                      Add
                     </button>
                   </form>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {userTasks.map((task) => (
                       <div
                         key={task.id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-black/40 border border-white/10"
+                        className={`flex items-center justify-between p-3.5 rounded-2xl border ${theme.innerCardBg}`}
                       >
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => toggleTask(task)}
-                            className={`w-5 h-5 rounded-md flex items-center justify-center border transition ${
+                            className={`w-5 h-5 rounded-lg flex items-center justify-center border transition ${
                               task.completed
-                                ? 'bg-emerald-500 border-emerald-500 text-slate-950'
-                                : 'border-slate-500 hover:border-white'
+                                ? 'bg-emerald-500 border-emerald-500 text-white'
+                                : 'border-current/30'
                             }`}
                           >
                             {task.completed && <Check className="w-3.5 h-3.5 stroke-[3]" />}
                           </button>
                           <div>
-                            <p
-                              className={`text-xs sm:text-sm font-medium ${
-                                task.completed ? 'line-through text-slate-500' : 'text-slate-100'
-                              }`}
-                            >
+                            <p className={`text-xs sm:text-sm font-medium ${task.completed ? 'line-through opacity-50' : ''}`}>
                               {task.title}
                             </p>
-                            <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400 mt-0.5">
+                            <div className={`flex items-center gap-2 text-[11px] font-mono mt-0.5 ${theme.textMuted}`}>
                               <span>⏰ {task.reminderTime}</span>
                               <span>•</span>
-                              <span className={activeTheme.accentText}>+{task.estimatedMinutes}m credit</span>
+                              <span className={theme.accentText}>+{task.estimatedMinutes}m</span>
                             </div>
                           </div>
                         </div>
                         <button
                           onClick={() => deleteTask(task.id)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400"
+                          className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -950,48 +1240,52 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right 5 cols: Shared Squad Live Feed & Exam Countdown */}
+              {/* Right 5 cols: Shared Squad Feed with Heart Cheers + Exams */}
               <div className="lg:col-span-5 space-y-6">
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-md">
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-display font-bold text-base text-white flex items-center gap-2">
-                      <Users className={`w-4 h-4 ${activeTheme.accentText}`} />
-                      Squad Live Activity Feed
+                    <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                      <Heart className={`w-5 h-5 ${theme.accentText}`} />
+                      Shared Warmth & Activity
                     </h3>
-                    <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                      Live Updates
+                    <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
+                      Live Moments
                     </span>
                   </div>
 
-                  <div className="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
                     {state.logs.slice(0, 14).map((log) => {
                       const logMember = state.members.find((m) => m.id === log.userId);
-                      const mTheme = THEME_CONFIG[logMember?.theme || 'cyber-cyan'];
+                      const mStyle = GET_COZY_THEME(logMember?.theme || 'warm-sage', isLatteMode);
                       return (
                         <div
                           key={log.id}
-                          className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between text-xs"
+                          className={`p-3.5 rounded-2xl border flex items-center justify-between gap-2 text-xs ${theme.innerCardBg}`}
                         >
-                          <div className="flex items-center gap-2.5">
+                          <div className="flex items-center gap-3">
                             <span
-                              className={`w-7 h-7 rounded-lg font-display font-bold flex items-center justify-center border ${mTheme.softBadge}`}
+                              className={`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border ${mStyle.softBadge}`}
                             >
                               {logMember ? logMember.avatar : 'S'}
                             </span>
                             <div>
-                              <p className="text-slate-100 font-medium">
-                                <span className="font-bold">{logMember?.name}: </span>
-                                {log.targetTitle}
+                              <p className="font-medium">
+                                <span className="font-bold">{logMember?.name}</span> • {log.targetTitle}
                               </p>
-                              <span className="text-[11px] text-slate-400 font-mono">
-                                {log.timestamp}
+                              <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                                {log.timestamp} (+{log.minutes}m)
                               </span>
                             </div>
                           </div>
-                          <span className={`font-mono font-bold text-xs px-2.5 py-1 rounded-lg border ${mTheme.softBadge}`}>
-                            +{log.minutes}m
-                          </span>
+
+                          <button
+                            onClick={() => cheerLog(log.id)}
+                            className={`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 hover:scale-105 transition ${mStyle.softBadge}`}
+                            title="Send a warm cheer!"
+                          >
+                            <span>💜</span>
+                            <span>{log.cheers || 1}</span>
+                          </button>
                         </div>
                       );
                     })}
@@ -999,28 +1293,24 @@ export default function App() {
                 </div>
 
                 {/* University Exam Dates */}
-                <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 backdrop-blur-md">
-                  <h3 className="font-display font-bold text-base text-white flex items-center gap-2 mb-3">
-                    <GraduationCap className={`w-4 h-4 ${activeTheme.accentText}`} />
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
+                  <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
+                    <GraduationCap className={`w-5 h-5 ${theme.accentText}`} />
                     Upcoming University Exams (1405)
                   </h3>
                   <div className="space-y-2.5">
                     {state.exams.map((ex) => (
                       <div
                         key={ex.id}
-                        className="p-3 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between text-xs"
+                        className={`p-3.5 rounded-2xl border flex items-center justify-between text-xs ${theme.innerCardBg}`}
                       >
                         <div>
-                          <span className="font-semibold text-slate-100 block">
-                            {ex.title}
-                          </span>
-                          <span className="text-slate-400 text-[11px]">
-                            Prof. {ex.professor}
-                          </span>
+                          <span className="font-semibold block">{ex.title}</span>
+                          <span className={`text-[11px] ${theme.textMuted}`}>Prof. {ex.professor}</span>
                         </div>
                         <div className="text-right font-mono">
-                          <span className={`font-bold block ${activeTheme.accentText}`}>{ex.date}</span>
-                          <span className="text-slate-400 text-[11px]">⏰ {ex.time}</span>
+                          <span className={`font-bold block ${theme.accentText}`}>{ex.date}</span>
+                          <span className={`text-[11px] ${theme.textMuted}`}>⏰ {ex.time}</span>
                         </div>
                       </div>
                     ))}
@@ -1031,44 +1321,44 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 2: ALL SQUAD GOALS & TIME BANK */}
+        {/* TAB 2: GOALS & TIME BANK */}
         {activeTab === 'goals' && (
           <div className="space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white/[0.03] border border-white/10 p-5 rounded-2xl">
+            <div className={`flex flex-wrap items-center justify-between gap-4 p-6 rounded-3xl border ${theme.cardBg}`}>
               <div>
-                <h3 className="font-display font-bold text-lg text-white">
-                  Squad Goals & Time Bank Manager
+                <h3 className="font-serif italic text-2xl">
+                  Shared Dreams & Time Bank
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Every member can freely add, edit, or delete short-term and long-term goals.
+                <p className={`text-xs ${theme.textMuted}`}>
+                  Add, edit, or refine short-term and long-term milestones for anyone in the circle.
                 </p>
               </div>
               <button
                 onClick={openCreateGoal}
-                className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 ${activeTheme.primaryBtn}`}
+                className={`px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${theme.primaryBtn}`}
               >
                 <Plus className="w-4 h-4" />
-                Add Goal for {currentMember.name}
+                New Goal for {currentMember.name}
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {state.members.map((member) => {
-                const mTheme = THEME_CONFIG[member.theme];
+                const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
                 return (
                   <div
                     key={member.id}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-4"
+                    className={`rounded-3xl p-6 border space-y-4 ${theme.cardBg}`}
                   >
-                    <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                      <h4 className="font-display font-bold text-base text-white flex items-center gap-2">
-                        <span className={`w-6 h-6 rounded-md text-xs flex items-center justify-center border ${mTheme.softBadge}`}>
+                    <div className="flex items-center justify-between border-b border-current/10 pb-3">
+                      <h4 className="font-serif italic text-2xl flex items-center gap-2">
+                        <span className={`w-7 h-7 rounded-xl text-sm flex items-center justify-center border ${mStyle.softBadge}`}>
                           {member.avatar}
                         </span>
                         {member.name}'s Goals
                       </h4>
-                      <span className="text-xs font-mono text-slate-400">
-                        Total Banked: {getTotalHours(member.id)} hrs
+                      <span className={`text-xs font-mono ${theme.textMuted}`}>
+                        {getTotalHours(member.id)} hrs banked
                       </span>
                     </div>
 
@@ -1080,61 +1370,48 @@ export default function App() {
                         return (
                           <div
                             key={g.id}
-                            className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2"
+                            className={`p-4 rounded-2xl border space-y-2 ${theme.innerCardBg}`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div>
-                                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded border ${mTheme.softBadge}`}>
+                                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
                                   {g.category}
                                 </span>
-                                <h5 className="font-semibold text-sm text-white mt-1">
-                                  {g.title}
-                                </h5>
-                                <p className="text-[11px] text-slate-400 font-mono">
+                                <h5 className="font-semibold text-sm mt-1">{g.title}</h5>
+                                <p className={`text-[11px] font-mono ${theme.textMuted}`}>
                                   Horizon: {g.deadline}
                                 </p>
                               </div>
                               <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => openEditGoal(g)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
-                                >
+                                <button onClick={() => openEditGoal(g)} className="p-1.5 opacity-60 hover:opacity-100">
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
-                                <button
-                                  onClick={() => deleteGoal(g.id)}
-                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/10"
-                                >
+                                <button onClick={() => deleteGoal(g.id)} className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </div>
 
                             <div className="flex items-center justify-between text-xs font-mono pt-1">
-                              <span>
-                                {hrs}h / {g.targetHours}h ({pct}%)
-                              </span>
+                              <span>{hrs}h / {g.targetHours}h ({pct}%)</span>
                               <div className="flex gap-1.5">
                                 <button
                                   onClick={() => logTime(member.id, g.id, g.title, 30)}
-                                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200"
+                                  className={`px-2 py-0.5 rounded-lg border ${theme.cardBg}`}
                                 >
                                   +30m
                                 </button>
                                 <button
                                   onClick={() => logTime(member.id, g.id, g.title, 60)}
-                                  className="px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 text-slate-200"
+                                  className={`px-2 py-0.5 rounded-lg border ${mStyle.softBadge}`}
                                 >
                                   +1h
                                 </button>
                               </div>
                             </div>
 
-                            <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full ${mTheme.progressBar}`}
-                                style={{ width: `${pct}%` }}
-                              />
+                            <div className="w-full h-2 rounded-full bg-current/10 overflow-hidden">
+                              <div className={`h-full rounded-full ${mStyle.progressBar}`} style={{ width: `${pct}%` }} />
                             </div>
                           </div>
                         );
@@ -1149,16 +1426,14 @@ export default function App() {
         {/* TAB 3: WEEKLY SCHEDULE */}
         {activeTab === 'schedule' && (
           <div className="space-y-5">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-white/[0.03] border border-white/10 p-4 rounded-2xl">
+            <div className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-3xl border ${theme.cardBg}`}>
               <div className="flex items-center gap-1.5 overflow-x-auto">
                 {DAYS.map((day) => (
                   <button
                     key={day}
                     onClick={() => setSelectedDay(day)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition ${
-                      selectedDay === day
-                        ? activeTheme.primaryBtn
-                        : 'bg-black/40 text-slate-400 hover:text-white'
+                    className={`px-3.5 py-2 rounded-2xl text-xs font-semibold transition ${
+                      selectedDay === day ? theme.primaryBtn : `${theme.innerCardBg} ${theme.textMuted}`
                     }`}
                   >
                     {day}
@@ -1170,7 +1445,7 @@ export default function App() {
                   setScheduleForm({ ...scheduleForm, day: selectedDay });
                   setShowScheduleModal(true);
                 }}
-                className={`px-3.5 py-2 rounded-xl font-semibold text-xs flex items-center gap-1.5 ${activeTheme.primaryBtn}`}
+                className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 ${theme.primaryBtn}`}
               >
                 <Plus className="w-3.5 h-3.5" />
                 Add Class for {currentMember.name}
@@ -1179,25 +1454,22 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {state.members.map((member) => {
-                const mTheme = THEME_CONFIG[member.theme];
+                const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
                 const dayItems = state.schedules
                   .filter((s) => s.userId === member.id && s.day === selectedDay)
                   .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
                 return (
-                  <div
-                    key={member.id}
-                    className="bg-white/[0.03] border border-white/10 rounded-2xl p-5 space-y-3"
-                  >
-                    <h4 className="font-display font-bold text-base text-white flex items-center gap-2">
-                      <span className={`w-6 h-6 rounded-md text-xs flex items-center justify-center border ${mTheme.softBadge}`}>
+                  <div key={member.id} className={`rounded-3xl p-6 border space-y-3 ${theme.cardBg}`}>
+                    <h4 className="font-serif italic text-2xl flex items-center gap-2">
+                      <span className={`w-7 h-7 rounded-xl text-sm flex items-center justify-center border ${mStyle.softBadge}`}>
                         {member.avatar}
                       </span>
-                      {member.name}'s {selectedDay} Classes
+                      {member.name}'s {selectedDay}
                     </h4>
                     {dayItems.length === 0 ? (
-                      <p className="text-xs text-slate-500 py-6 text-center">
-                        No fixed classes on {selectedDay}. Open for self-paced goals!
+                      <p className={`text-xs py-6 text-center italic ${theme.textMuted}`}>
+                        A free, unhurried {selectedDay} — wonderful for self-paced goals ☕
                       </p>
                     ) : (
                       dayItems.map((item) => {
@@ -1205,29 +1477,25 @@ export default function App() {
                         return (
                           <div
                             key={item.id}
-                            className="p-4 rounded-xl bg-black/40 border border-white/10 flex items-center justify-between gap-3"
+                            className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${theme.innerCardBg}`}
                           >
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className={`font-mono text-xs font-bold ${mTheme.accentText}`}>
+                                <span className={`font-mono text-xs font-bold ${mStyle.accentText}`}>
                                   {item.startTime} - {item.endTime}
                                 </span>
-                                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-slate-300">
+                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
                                   {item.category}
                                 </span>
                               </div>
-                              <h5 className="font-semibold text-sm text-white mt-1">
-                                {item.title}
-                              </h5>
-                              <p className="text-xs text-slate-400">{item.details}</p>
+                              <h5 className="font-semibold text-sm mt-1">{item.title}</h5>
+                              <p className={`text-xs ${theme.textMuted}`}>{item.details}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => toggleClassAttendance(item)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition ${
-                                  attendedToday
-                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                    : 'bg-white/10 hover:bg-white/15 text-slate-200'
+                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition ${
+                                  attendedToday ? mStyle.softBadge : theme.cardBg
                                 }`}
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1235,7 +1503,7 @@ export default function App() {
                               </button>
                               <button
                                 onClick={() => deleteScheduleItem(item.id)}
-                                className="p-1.5 text-slate-500 hover:text-rose-400"
+                                className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
@@ -1251,48 +1519,48 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 4: SQUAD VISUAL ANALYTICS */}
+        {/* TAB 4: VISUAL PROGRESS */}
         {activeTab === 'analytics' && (
-          <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
+          <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
               <div>
-                <h3 className="font-display font-bold text-lg text-white">
-                  7-Day Squad Time Investment Chart
+                <h3 className="font-serif italic text-2xl">
+                  7-Day Gentle Consistency Rhythm
                 </h3>
-                <p className="text-xs text-slate-400">
-                  Side-by-side daily minutes logged by every squad member
+                <p className={`text-xs ${theme.textMuted}`}>
+                  Comparing daily focused minutes side-by-side across your circle
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
                 {state.members.map((m) => (
-                  <span key={m.id} className={`flex items-center gap-1.5 ${THEME_CONFIG[m.theme].accentText}`}>
+                  <span key={m.id} className={`flex items-center gap-1.5 ${GET_COZY_THEME(m.theme, isLatteMode).accentText}`}>
                     ● {m.name}
                   </span>
                 ))}
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-white/10">
+            <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-current/10">
               {last7Days.map((d) => (
                 <div key={d.dateStr} className="flex flex-col items-center h-full justify-end">
                   <div className="w-full flex items-end justify-center gap-1.5 h-48">
                     {d.memberTotals.map((mt) => {
                       const hPct = Math.round((mt.mins / maxChartMins) * 100);
-                      const barGrad = THEME_CONFIG[mt.member.theme].barColor;
+                      const barGrad = GET_COZY_THEME(mt.member.theme, isLatteMode).barColor;
                       return (
                         <div
                           key={mt.member.id}
-                          className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-lg transition-all duration-500 relative group`}
-                          style={{ height: `${Math.max(6, hPct)}%` }}
+                          className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-xl transition-all duration-500 relative group`}
+                          style={{ height: `${Math.max(8, hPct)}%` }}
                         >
-                          <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-black px-1.5 py-0.5 rounded border border-white/20 whitespace-nowrap z-20">
+                          <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-1.5 py-0.5 rounded whitespace-nowrap z-20">
                             {mt.member.name[0]}: {mt.mins}m
                           </span>
                         </div>
                       );
                     })}
                   </div>
-                  <span className="text-xs font-mono text-slate-400 mt-2">{d.label}</span>
+                  <span className={`text-xs font-mono mt-2 ${theme.textMuted}`}>{d.label}</span>
                 </div>
               ))}
             </div>
@@ -1300,43 +1568,40 @@ export default function App() {
         )}
       </main>
 
-      {/* INTERACTIVE ONBOARDING TUTORIAL MODAL */}
+      {/* TUTORIAL MODAL */}
       {showTutorial && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className={`bg-slate-900 border rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-2xl ${activeTheme.activeBorder}`}>
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-5 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
-              <span className={`text-xs font-mono px-3 py-1 rounded-full border ${activeTheme.softBadge}`}>
-                Quick Guide • Step {tutorialStep + 1} of {TUTORIAL_STEPS.length}
+              <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
+                Cozy Tour • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
               </span>
-              <button
-                onClick={closeTutorial}
-                className="text-slate-400 hover:text-white text-xs font-mono"
-              >
-                Skip ✕
+              <button onClick={closeTutorial} className={`text-xs font-mono ${theme.textMuted}`}>
+                Close ✕
               </button>
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-display font-bold text-xl text-white">
+              <h3 className="font-serif italic text-3xl">
                 {TUTORIAL_STEPS[tutorialStep].title}
               </h3>
-              <p className={`text-xs font-semibold ${activeTheme.accentText}`}>
+              <p className={`text-xs font-semibold ${theme.accentText}`}>
                 {TUTORIAL_STEPS[tutorialStep].subtitle}
               </p>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed pt-1">
+              <p className={`text-xs sm:text-sm leading-relaxed pt-1 ${theme.textMuted}`}>
                 {TUTORIAL_STEPS[tutorialStep].description}
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/50 border border-white/10 text-xs text-slate-200 leading-relaxed">
-              💡 <b>Pro Tip:</b> {TUTORIAL_STEPS[tutorialStep].highlight}
+            <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${theme.innerCardBg}`}>
+              🌿 <b>Note:</b> {TUTORIAL_STEPS[tutorialStep].highlight}
             </div>
 
             <div className="flex items-center justify-between pt-2">
               <button
                 onClick={() => setTutorialStep((s) => Math.max(0, s - 1))}
                 disabled={tutorialStep === 0}
-                className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 disabled:opacity-30 text-xs font-semibold text-slate-300 flex items-center gap-1"
+                className={`px-4 py-2 rounded-2xl border disabled:opacity-30 text-xs font-semibold flex items-center gap-1 ${theme.cardBg}`}
               >
                 <ChevronLeft className="w-4 h-4" /> Back
               </button>
@@ -1344,16 +1609,16 @@ export default function App() {
               {tutorialStep < TUTORIAL_STEPS.length - 1 ? (
                 <button
                   onClick={() => setTutorialStep((s) => s + 1)}
-                  className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 ${activeTheme.primaryBtn}`}
+                  className={`px-5 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-1.5 ${theme.primaryBtn}`}
                 >
-                  Next Step <ChevronRight className="w-4 h-4" />
+                  Next <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
                   onClick={closeTutorial}
-                  className={`px-6 py-2.5 rounded-xl text-xs font-semibold ${activeTheme.primaryBtn}`}
+                  className={`px-6 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}
                 >
-                  Let's Go! 🚀
+                  Enter Cozy Space ✨
                 </button>
               )}
             </div>
@@ -1361,41 +1626,40 @@ export default function App() {
         </div>
       )}
 
-      {/* SHARE STATUS CARD MODAL */}
+      {/* SHARE STATUS MODAL */}
       {showShareModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/15 rounded-3xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
+          <div className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-white flex items-center gap-2">
-                <Share2 className="w-4 h-4" /> Share {currentMember.name}'s Status
+              <h3 className="font-serif italic text-2xl">
+                Share {currentMember.name}'s Cozy Snapshot
               </h3>
-              <button onClick={() => setShowShareModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowShareModal(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Visual Snapshot Card */}
-            <div className={`p-5 rounded-2xl border bg-gradient-to-br from-black/80 to-slate-950 space-y-3 ${activeTheme.activeBorder}`}>
+            <div className={`p-5 rounded-2xl border space-y-3 ${theme.innerCardBg}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <div className={`w-9 h-9 rounded-xl font-display font-bold flex items-center justify-center border ${activeTheme.softBadge}`}>
+                  <div className={`w-10 h-10 rounded-2xl font-serif italic text-xl flex items-center justify-center border ${theme.softBadge}`}>
                     {currentMember.avatar}
                   </div>
                   <div>
-                    <h4 className="font-display font-bold text-sm text-white">{currentMember.name}</h4>
-                    <span className="text-[11px] text-slate-400">{currentMember.tagline}</span>
+                    <h4 className="font-bold text-sm">{currentMember.name}</h4>
+                    <span className={`text-[11px] ${theme.textMuted}`}>{currentMember.tagline}</span>
                   </div>
                 </div>
-                <span className={`text-xs font-mono px-2.5 py-1 rounded-lg border ${activeTheme.softBadge}`}>
+                <span className={`text-xs font-mono px-2.5 py-1 rounded-xl border ${theme.softBadge}`}>
                   Today: {Math.floor(getTodayMinutes(activeUser) / 60)}h {getTodayMinutes(activeUser) % 60}m
                 </span>
               </div>
 
-              <div className="space-y-1.5 pt-2 border-t border-white/10 text-xs">
+              <div className="space-y-1.5 pt-2 border-t border-current/10 text-xs">
                 {userGoals.slice(0, 3).map((g) => (
-                  <div key={g.id} className="flex justify-between font-mono text-slate-300">
+                  <div key={g.id} className="flex justify-between font-mono">
                     <span className="truncate max-w-[200px]">{g.title}</span>
-                    <span className={activeTheme.accentText}>
+                    <span className={theme.accentText}>
                       {(g.loggedMinutes / 60).toFixed(1)}h / {g.targetHours}h
                     </span>
                   </div>
@@ -1405,81 +1669,74 @@ export default function App() {
 
             <button
               onClick={copyShareStatus}
-              className={`w-full py-2.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 ${activeTheme.primaryBtn}`}
+              className={`w-full py-3 rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 ${theme.primaryBtn}`}
             >
               <Copy className="w-4 h-4" />
-              {copiedShare ? 'Copied to Clipboard! ✅' : 'Copy Status Text for Telegram / Socials'}
+              {copiedShare ? 'Copied to Clipboard! ✨' : 'Copy Snapshot for Telegram / Stories'}
             </button>
           </div>
         </div>
       )}
 
-      {/* ADD SQUAD MEMBER MODAL (UP TO 4 PEOPLE) */}
+      {/* ADD COMPANION MODAL */}
       {showMemberModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4">
           <form
             onSubmit={handleAddMember}
-            className="bg-slate-900 border border-white/15 rounded-3xl max-w-md w-full p-6 space-y-4"
+            className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-white">
-                Add Friend to Squad ({state.members.length}/4)
+              <h3 className="font-serif italic text-2xl">
+                Invite Companion ({state.members.length}/4)
               </h3>
-              <button type="button" onClick={() => setShowMemberModal(false)} className="text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setShowMemberModal(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Friend's Name</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Name</label>
               <input
                 type="text"
                 required
                 value={memberForm.name}
                 onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
-                placeholder="e.g., Sara or Ali"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., Sara"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Main Focus / Tagline</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Focus / Tagline</label>
               <input
                 type="text"
                 value={memberForm.tagline}
                 onChange={(e) => setMemberForm({ ...memberForm, tagline: e.target.value })}
-                placeholder="e.g., Design & IELTS Prep"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., Art & Literature"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Personal Theme Color</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Cozy Aesthetic Palette</label>
               <select
                 value={memberForm.theme}
                 onChange={(e) => setMemberForm({ ...memberForm, theme: e.target.value as ThemePalette })}
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-white"
+                className={`w-full border rounded-2xl px-3 py-2.5 text-xs ${theme.innerCardBg}`}
               >
-                <option value="sunset-coral">Sunset Rose & Coral</option>
-                <option value="emerald-mint">Emerald Mint</option>
-                <option value="royal-violet">Amethyst Violet 💜</option>
-                <option value="cyber-cyan">Cyber Cyan 💙</option>
+                <option value="peach-terracotta">Warm Terracotta & Peach 🍑</option>
+                <option value="matcha-cream">Matcha Oat Milk 🍵</option>
+                <option value="lavender-blush">Velvet Lavender & Rose 💜</option>
+                <option value="warm-sage">Espresso & Warm Sage ☕</option>
               </select>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowMemberModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 text-xs text-slate-300"
-              >
+              <button type="button" onClick={() => setShowMemberModal(false)} className={`px-4 py-2 rounded-2xl border text-xs ${theme.cardBg}`}>
                 Cancel
               </button>
-              <button
-                type="submit"
-                className={`px-4 py-2 rounded-xl text-xs font-semibold ${activeTheme.primaryBtn}`}
-              >
-                Add to Squad
+              <button type="submit" className={`px-5 py-2 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>
+                Add Companion
               </button>
             </div>
           </form>
@@ -1488,39 +1745,39 @@ export default function App() {
 
       {/* ADD / EDIT GOAL MODAL */}
       {showGoalModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={saveGoal}
-            className="bg-slate-900 border border-white/15 rounded-2xl max-w-md w-full p-6 space-y-4"
+            className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-white">
+              <h3 className="font-serif italic text-2xl">
                 {editingGoal ? 'Edit Goal' : `New Goal for ${currentMember.name}`}
               </h3>
-              <button type="button" onClick={() => setShowGoalModal(false)} className="text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setShowGoalModal(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Goal Title</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Goal Title</label>
               <input
                 type="text"
                 required
                 value={goalForm.title}
                 onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
-                placeholder="e.g., Master French B2 / Finish Thesis"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., Master French B2"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Category</label>
+                <label className={`block text-xs mb-1 ${theme.textMuted}`}>Category</label>
                 <select
                   value={goalForm.category}
                   onChange={(e) => setGoalForm({ ...goalForm, category: e.target.value as GoalItem['category'] })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-white"
+                  className={`w-full border rounded-2xl px-3 py-2.5 text-xs ${theme.innerCardBg}`}
                 >
                   <option value="Short-Term">Short-Term</option>
                   <option value="Long-Term">Long-Term</option>
@@ -1529,40 +1786,33 @@ export default function App() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Target Hours</label>
+                <label className={`block text-xs mb-1 ${theme.textMuted}`}>Target Hours</label>
                 <input
                   type="number"
                   min={1}
                   value={goalForm.targetHours}
                   onChange={(e) => setGoalForm({ ...goalForm, targetHours: Number(e.target.value) })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs font-mono text-white"
+                  className={`w-full border rounded-2xl px-3 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Deadline / Horizon</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Horizon / Deadline</label>
               <input
                 type="text"
                 value={goalForm.deadline}
                 onChange={(e) => setGoalForm({ ...goalForm, deadline: e.target.value })}
-                placeholder="e.g., 6 Months / End of Semester"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., This Semester"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowGoalModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 text-xs text-slate-300"
-              >
+              <button type="button" onClick={() => setShowGoalModal(false)} className={`px-4 py-2 rounded-2xl border text-xs ${theme.cardBg}`}>
                 Cancel
               </button>
-              <button
-                type="submit"
-                className={`px-4 py-2 rounded-xl text-xs font-semibold ${activeTheme.primaryBtn}`}
-              >
+              <button type="submit" className={`px-5 py-2 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>
                 Save Goal
               </button>
             </div>
@@ -1572,39 +1822,39 @@ export default function App() {
 
       {/* ADD SCHEDULE MODAL */}
       {showScheduleModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <form
             onSubmit={saveScheduleItem}
-            className="bg-slate-900 border border-white/15 rounded-2xl max-w-md w-full p-6 space-y-4"
+            className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}
           >
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-white">
+              <h3 className="font-serif italic text-2xl">
                 Add Class / Session ({currentMember.name})
               </h3>
-              <button type="button" onClick={() => setShowScheduleModal(false)} className="text-slate-400 hover:text-white">
+              <button type="button" onClick={() => setShowScheduleModal(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Title</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Title</label>
               <input
                 type="text"
                 required
                 value={scheduleForm.title}
                 onChange={(e) => setScheduleForm({ ...scheduleForm, title: e.target.value })}
-                placeholder="e.g., French Conversation Class"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., French Conversation"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Day</label>
+                <label className={`block text-xs mb-1 ${theme.textMuted}`}>Day</label>
                 <select
                   value={scheduleForm.day}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, day: e.target.value })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-2.5 py-2 text-xs text-white"
+                  className={`w-full border rounded-2xl px-2.5 py-2.5 text-xs ${theme.innerCardBg}`}
                 >
                   {DAYS.map((d) => (
                     <option key={d} value={d}>{d}</option>
@@ -1612,48 +1862,41 @@ export default function App() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Start</label>
+                <label className={`block text-xs mb-1 ${theme.textMuted}`}>Start</label>
                 <input
                   type="time"
                   value={scheduleForm.startTime}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, startTime: e.target.value })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-2.5 py-2 text-xs font-mono text-white"
+                  className={`w-full border rounded-2xl px-2.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
                 />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 mb-1">End</label>
+                <label className={`block text-xs mb-1 ${theme.textMuted}`}>End</label>
                 <input
                   type="time"
                   value={scheduleForm.endTime}
                   onChange={(e) => setScheduleForm({ ...scheduleForm, endTime: e.target.value })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-2.5 py-2 text-xs font-mono text-white"
+                  className={`w-full border rounded-2xl px-2.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs text-slate-400 mb-1">Details</label>
+              <label className={`block text-xs mb-1 ${theme.textMuted}`}>Details</label>
               <input
                 type="text"
                 value={scheduleForm.details}
                 onChange={(e) => setScheduleForm({ ...scheduleForm, details: e.target.value })}
-                placeholder="e.g., Room 102 / Online"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white"
+                placeholder="e.g., Room 102"
+                className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs ${theme.innerCardBg}`}
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowScheduleModal(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 text-xs text-slate-300"
-              >
+              <button type="button" onClick={() => setShowScheduleModal(false)} className={`px-4 py-2 rounded-2xl border text-xs ${theme.cardBg}`}>
                 Cancel
               </button>
-              <button
-                type="submit"
-                className={`px-4 py-2 rounded-xl text-xs font-semibold ${activeTheme.primaryBtn}`}
-              >
+              <button type="submit" className={`px-5 py-2 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>
                 Save Class
               </button>
             </div>
@@ -1663,25 +1906,25 @@ export default function App() {
 
       {/* CLOUD SYNC MODAL */}
       {showSyncModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-white/15 rounded-2xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
-              <h3 className="font-display font-bold text-base text-white">
-                Real-Time Squad Cloud Sync
+              <h3 className="font-serif italic text-2xl">
+                Real-Time Cloud Sync
               </h3>
-              <button onClick={() => setShowSyncModal(false)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setShowSyncModal(false)}>
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Paste a free Firebase Realtime Database URL so all up to 4 Squad members stay synced in real-time across laptops and phones.
+            <p className={`text-xs leading-relaxed ${theme.textMuted}`}>
+              Paste a free Firebase Realtime Database URL to keep everyone’s logs, cheers, and goals synced live across devices.
             </p>
             <input
               type="url"
               value={syncUrl}
               onChange={(e) => setSyncUrl(e.target.value)}
               placeholder="https://your-project-default-rtdb.firebaseio.com/"
-              className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs font-mono text-white"
+              className={`w-full border rounded-2xl px-3.5 py-2.5 text-xs font-mono ${theme.innerCardBg}`}
             />
             <div className="flex justify-end gap-2">
               <button
@@ -1690,9 +1933,9 @@ export default function App() {
                   setShowSyncModal(false);
                   if (syncUrl.trim()) pushToCloud(state);
                 }}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold ${activeTheme.primaryBtn}`}
+                className={`px-5 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}
               >
-                Save & Sync Squad
+                Save & Connect
               </button>
             </div>
           </div>

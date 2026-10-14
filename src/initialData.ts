@@ -1,4 +1,4 @@
-export type ThemePalette = 'cyber-cyan' | 'royal-violet' | 'sunset-coral' | 'emerald-mint';
+export type ThemePalette = 'warm-sage' | 'lavender-blush' | 'peach-terracotta' | 'matcha-cream';
 
 export interface Member {
   id: string;
@@ -6,6 +6,7 @@ export interface Member {
   tagline: string;
   avatar: string;
   theme: ThemePalette;
+  statusNote?: string;
 }
 
 export interface ScheduleItem {
@@ -57,6 +58,7 @@ export interface TimeLog {
   minutes: number;
   date: string;
   timestamp: string;
+  cheers?: number;
 }
 
 export interface AppState {
@@ -80,16 +82,18 @@ export const INITIAL_STATE: AppState = {
     {
       id: 'mehrsan',
       name: 'Mehrsan',
-      tagline: 'Computer Eng • AI & Web',
+      tagline: 'Computer Eng • Deep Learning & Web',
       avatar: 'M',
-      theme: 'cyber-cyan'
+      theme: 'warm-sage',
+      statusNote: 'Building steady habits, one focused hour at a time ☕'
     },
     {
       id: 'ronak',
       name: 'Ronak',
-      tagline: 'French B2 • English & Uni',
+      tagline: 'French B2 Journey • English & Uni',
       avatar: 'R',
-      theme: 'royal-violet' // Her favorite purple/lavender aesthetic!
+      theme: 'lavender-blush',
+      statusNote: 'Dreaming in French & leveling up every single day 💜✨'
     }
   ],
   schedules: [
@@ -136,11 +140,11 @@ export const INITIAL_STATE: AppState = {
     { id: 'ex-5', userId: 'mehrsan', title: 'Special Topics (Deep Learning)', date: '1405/11/14', time: '09:00', professor: 'Saleh Yousefi', type: 'Core' },
   ],
   logs: [
-    { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastDateStr(2), timestamp: '2 days ago' },
-    { id: 'l-2', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 120, date: getPastDateStr(2), timestamp: '2 days ago' },
-    { id: 'l-3', userId: 'mehrsan', targetTitle: 'Full-Stack Web Dev Projects', minutes: 110, date: getPastDateStr(1), timestamp: 'Yesterday' },
-    { id: 'l-4', userId: 'ronak', targetTitle: 'English Immersion (Movies, YouTube & Media)', minutes: 95, date: getPastDateStr(1), timestamp: 'Yesterday' },
-    { id: 'l-5', userId: 'mehrsan', targetTitle: 'B.Sc. Final Project (3 Credits)', minutes: 60, date: getTodayStr(), timestamp: 'Today, 10:15' },
-    { id: 'l-6', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 75, date: getTodayStr(), timestamp: 'Today, 11:30' },
+    { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastDateStr(2), timestamp: '2 days ago', cheers: 2 },
+    { id: 'l-2', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 120, date: getPastDateStr(2), timestamp: '2 days ago', cheers: 4 },
+    { id: 'l-3', userId: 'mehrsan', targetTitle: 'Full-Stack Web Dev Projects', minutes: 110, date: getPastDateStr(1), timestamp: 'Yesterday', cheers: 3 },
+    { id: 'l-4', userId: 'ronak', targetTitle: 'English Immersion (Movies, YouTube & Media)', minutes: 95, date: getPastDateStr(1), timestamp: 'Yesterday', cheers: 5 },
+    { id: 'l-5', userId: 'mehrsan', targetTitle: 'B.Sc. Final Project (3 Credits)', minutes: 60, date: getTodayStr(), timestamp: 'Today, 10:15', cheers: 2 },
+    { id: 'l-6', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 75, date: getTodayStr(), timestamp: 'Today, 11:30', cheers: 6 },
   ]
 };

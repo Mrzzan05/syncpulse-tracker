@@ -9,20 +9,26 @@
   }
 }
 
-.theme-transition {
-  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.5s ease;
+.cozy-transition {
+  transition: background-color 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+              color 0.6s ease,
+              box-shadow 0.9s ease;
 }
 
-@keyframes floatSlow {
-  0%, 100% { transform: translate(0px, 0px) scale(1); }
-  50% { transform: translate(25px, -20px) scale(1.08); }
+/* Subtle organic paper grain overlay */
+.paper-grain {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
 }
 
-.ambient-orb {
-  animation: floatSlow 9s ease-in-out infinite;
+@keyframes breathe {
+  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.75; }
+  50% { transform: translate(18px, -18px) scale(1.07); opacity: 1; }
+}
+
+.cozy-orb {
+  animation: breathe 11s ease-in-out infinite;
 }
 
 ::-webkit-scrollbar {
@@ -30,9 +36,9 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: rgba(148, 163, 184, 0.25);
   border-radius: 9999px;
 }
