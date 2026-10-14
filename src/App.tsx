@@ -5,7 +5,7 @@ import {
   Play, Pause, RotateCcw, TrendingUp, Bell, Sparkles,
   Users, Cloud, Check, X, GraduationCap, HelpCircle,
   Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
-  Sun, Moon, Coffee, CloudRain, VolumeX, Flame, Award
+  Sun, Moon, Coffee, CloudRain, VolumeX, LayoutDashboard, Menu
 } from 'lucide-react';
 import {
   INITIAL_STATE, AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette
@@ -13,18 +13,20 @@ import {
 
 const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-// Warm, Calm & Cozy Theme System (Supports both Cozy Night & Warm Latte Day modes)
 interface CozyStyle {
   name: string;
   pageBg: string;
+  sidebarBg: string;
   cardBg: string;
   innerCardBg: string;
+  dockBg: string;
   textMain: string;
   textMuted: string;
   orb1: string;
   orb2: string;
   primaryBtn: string;
   softBadge: string;
+  activeNav: string;
   activeBorder: string;
   progressBar: string;
   accentText: string;
@@ -33,19 +35,21 @@ interface CozyStyle {
 
 const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
   if (palette === 'lavender-blush') {
-    // Ronak's Warm Lavender, Soft Plum & Dusty Rose Palette 💜
     return isLatte
       ? {
           name: 'Lavender Oat Latte 💜',
           pageBg: 'bg-[#FAF5FF]',
+          sidebarBg: 'bg-[#F3E8FF]/90 border-purple-200/80',
           cardBg: 'bg-white/85 border-purple-200/80 shadow-sm shadow-purple-950/5',
-          innerCardBg: 'bg-[#F5EEFC]/80 border-purple-200/60',
+          innerCardBg: 'bg-[#F6EEFC]/85 border-purple-200/60',
+          dockBg: 'bg-white/90 border-purple-300/80 shadow-2xl shadow-purple-950/10',
           textMain: 'text-[#2E1B3B]',
           textMuted: 'text-[#735A85]',
           orb1: 'bg-purple-300/45',
           orb2: 'bg-pink-300/40',
           primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B47AEA] to-[#D685B8] hover:opacity-95 text-white shadow-md shadow-purple-500/20',
           softBadge: 'bg-purple-100 text-purple-800 border-purple-300/70',
+          activeNav: 'bg-purple-200/75 text-[#2E1B3B] font-bold border-purple-300',
           activeBorder: 'border-purple-400/80 shadow-lg shadow-purple-300/30',
           progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
           accentText: 'text-[#8B47C2]',
@@ -53,15 +57,18 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         }
       : {
           name: 'Cozy Velvet Lavender 💜',
-          pageBg: 'bg-[#191124]',
-          cardBg: 'bg-[#251A34]/75 border-purple-300/15 shadow-xl shadow-black/30',
-          innerCardBg: 'bg-[#150E1E]/75 border-purple-300/10',
+          pageBg: 'bg-[#170F21]',
+          sidebarBg: 'bg-[#120B1B]/90 border-purple-300/15',
+          cardBg: 'bg-[#231832]/80 border-purple-300/15 shadow-xl shadow-black/30',
+          innerCardBg: 'bg-[#160F20]/80 border-purple-300/10',
+          dockBg: 'bg-[#1E142B]/95 border-purple-400/30 shadow-2xl shadow-black/70',
           textMain: 'text-[#F7F1FF]',
           textMuted: 'text-[#B9A5CC]',
           orb1: 'bg-[#9D65C9]/25',
           orb2: 'bg-[#E879F9]/20',
           primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B779E2] to-[#D977B4] hover:opacity-95 text-white shadow-lg shadow-purple-950/50',
           softBadge: 'bg-purple-400/15 text-purple-200 border-purple-300/30',
+          activeNav: 'bg-purple-500/20 text-white border-purple-400/40',
           activeBorder: 'border-purple-400/50 shadow-xl shadow-purple-950/60',
           progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
           accentText: 'text-[#DFB6FF]',
@@ -74,30 +81,36 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
       ? {
           name: 'Warm Terracotta Latte',
           pageBg: 'bg-[#FDF8F5]',
+          sidebarBg: 'bg-[#F9EFEA]/90 border-orange-200/80',
           cardBg: 'bg-white/85 border-orange-200/80 shadow-sm',
           innerCardBg: 'bg-[#FAF0EA]/80 border-orange-200/60',
+          dockBg: 'bg-white/90 border-orange-300/80 shadow-2xl',
           textMain: 'text-[#362019]',
           textMuted: 'text-[#856256]',
           orb1: 'bg-amber-300/40',
           orb2: 'bg-rose-300/35',
-          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-md shadow-orange-500/20',
+          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-md',
           softBadge: 'bg-orange-100 text-orange-900 border-orange-300/70',
-          activeBorder: 'border-orange-400/80 shadow-lg shadow-orange-200/40',
+          activeNav: 'bg-orange-200/70 text-[#362019] border-orange-300',
+          activeBorder: 'border-orange-400/80 shadow-lg',
           progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
           accentText: 'text-[#C85A32]',
           barColor: 'from-[#D97757] to-[#F59E0B]'
         }
       : {
           name: 'Fireside Terracotta',
-          pageBg: 'bg-[#1D1513]',
-          cardBg: 'bg-[#2B1F1D]/75 border-orange-300/15',
-          innerCardBg: 'bg-[#16100E]/75 border-orange-300/10',
+          pageBg: 'bg-[#1B1311]',
+          sidebarBg: 'bg-[#140E0C]/90 border-orange-300/15',
+          cardBg: 'bg-[#291D1B]/80 border-orange-300/15',
+          innerCardBg: 'bg-[#16100E]/80 border-orange-300/10',
+          dockBg: 'bg-[#241917]/95 border-orange-400/30 shadow-2xl',
           textMain: 'text-[#FDF4F0]',
           textMuted: 'text-[#C4A89E]',
           orb1: 'bg-orange-500/20',
           orb2: 'bg-amber-500/15',
           primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-lg',
           softBadge: 'bg-orange-400/15 text-orange-200 border-orange-300/30',
+          activeNav: 'bg-orange-500/20 text-white border-orange-400/40',
           activeBorder: 'border-orange-400/50 shadow-xl',
           progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
           accentText: 'text-[#FDBA8C]',
@@ -110,14 +123,17 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
       ? {
           name: 'Matcha Oat Milk',
           pageBg: 'bg-[#F6F9F4]',
+          sidebarBg: 'bg-[#EBF2E6]/90 border-emerald-200/80',
           cardBg: 'bg-white/85 border-emerald-200/80 shadow-sm',
           innerCardBg: 'bg-[#ECF3E8]/80 border-emerald-200/60',
+          dockBg: 'bg-white/90 border-emerald-300/80 shadow-2xl',
           textMain: 'text-[#1B2E22]',
           textMuted: 'text-[#5A7864]',
           orb1: 'bg-emerald-300/35',
           orb2: 'bg-lime-300/30',
           primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-md',
           softBadge: 'bg-emerald-100 text-emerald-900 border-emerald-300/70',
+          activeNav: 'bg-emerald-200/70 text-[#1B2E22] border-emerald-300',
           activeBorder: 'border-emerald-400/80 shadow-lg',
           progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
           accentText: 'text-[#387558]',
@@ -125,15 +141,18 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         }
       : {
           name: 'Forest Matcha Night',
-          pageBg: 'bg-[#111B16]',
-          cardBg: 'bg-[#1A2821]/75 border-emerald-300/15',
-          innerCardBg: 'bg-[#0D1411]/75 border-emerald-300/10',
+          pageBg: 'bg-[#101914]',
+          sidebarBg: 'bg-[#0B120E]/90 border-emerald-300/15',
+          cardBg: 'bg-[#18261F]/80 border-emerald-300/15',
+          innerCardBg: 'bg-[#0D1411]/80 border-emerald-300/10',
+          dockBg: 'bg-[#15221B]/95 border-emerald-400/30 shadow-2xl',
           textMain: 'text-[#F0FAF4]',
           textMuted: 'text-[#9CBAA8]',
           orb1: 'bg-emerald-500/20',
           orb2: 'bg-teal-500/15',
           primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-lg',
           softBadge: 'bg-emerald-400/15 text-emerald-200 border-emerald-300/30',
+          activeNav: 'bg-emerald-500/20 text-white border-emerald-400/40',
           activeBorder: 'border-emerald-400/50 shadow-xl',
           progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
           accentText: 'text-[#86EFAC]',
@@ -146,31 +165,37 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
     ? {
         name: 'Warm Oat & Sage ☕',
         pageBg: 'bg-[#FBF9F5]',
+        sidebarBg: 'bg-[#F3EFE6]/90 border-[#E2D9C8]',
         cardBg: 'bg-white/85 border-[#E6DFD3] shadow-sm shadow-stone-900/5',
         innerCardBg: 'bg-[#F4EFE6]/85 border-[#E2D9C8]',
+        dockBg: 'bg-white/95 border-[#D6CFC2] shadow-2xl shadow-stone-900/10',
         textMain: 'text-[#292524]',
         textMuted: 'text-[#78716C]',
         orb1: 'bg-amber-200/50',
         orb2: 'bg-teal-200/45',
-        primaryBtn: 'bg-gradient-to-r from-[#4A6B65] via-[#5B7F78] to-[#B87D4B] hover:opacity-95 text-white shadow-md shadow-stone-500/15',
+        primaryBtn: 'bg-gradient-to-r from-[#4A6B65] via-[#5B7F78] to-[#B87D4B] hover:opacity-95 text-white shadow-md',
         softBadge: 'bg-[#EFECE6] text-[#4A6B65] border-[#D6CFC2]',
-        activeBorder: 'border-[#5B7F78]/70 shadow-lg shadow-stone-300/40',
+        activeNav: 'bg-[#E5DEC9]/80 text-[#292524] border-[#C8BFA8]',
+        activeBorder: 'border-[#5B7F78]/70 shadow-lg',
         progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
         accentText: 'text-[#4A6B65]',
         barColor: 'from-[#4A6B65] to-[#D99B52]'
       }
     : {
         name: 'Cozy Espresso & Amber ☕',
-        pageBg: 'bg-[#161514]',
-        cardBg: 'bg-[#22201E]/80 border-[#383430] shadow-xl shadow-black/30',
-        innerCardBg: 'bg-[#181615]/85 border-[#2E2A27]',
+        pageBg: 'bg-[#151413]',
+        sidebarBg: 'bg-[#100F0E]/90 border-[#2E2A27]',
+        cardBg: 'bg-[#211F1D]/80 border-[#36322E] shadow-xl shadow-black/30',
+        innerCardBg: 'bg-[#171514]/85 border-[#2C2825]',
+        dockBg: 'bg-[#1E1C1A]/95 border-[#443E38] shadow-2xl shadow-black/80',
         textMain: 'text-[#F5F2EB]',
         textMuted: 'text-[#A8A29E]',
         orb1: 'bg-[#D99B52]/18',
         orb2: 'bg-[#5B7F78]/22',
-        primaryBtn: 'bg-gradient-to-r from-[#5B7F78] to-[#C88A4B] hover:opacity-95 text-white shadow-lg shadow-black/40',
+        primaryBtn: 'bg-gradient-to-r from-[#5B7F78] to-[#C88A4B] hover:opacity-95 text-white shadow-lg',
         softBadge: 'bg-[#2D2A26] text-[#E6CBA8] border-[#443F3A]',
-        activeBorder: 'border-[#C88A4B]/50 shadow-xl shadow-black/50',
+        activeNav: 'bg-[#2D2A26] text-white border-[#5B7F78]/50',
+        activeBorder: 'border-[#C88A4B]/50 shadow-xl',
         progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
         accentText: 'text-[#E6B88A]',
         barColor: 'from-[#5B7F78] to-[#E09F5A]'
@@ -179,22 +204,22 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
 
 const TUTORIAL_STEPS = [
   {
-    title: 'Welcome to Your Cozy Sanctuary ☕✨',
-    subtitle: 'Designed with Warm Minimalism for calm, stress-free productivity.',
-    description: 'We replaced harsh neon colors with soothing, organic tones. Switch between Cozy Night 🌙 and Warm Latte ☀️ anytime at the top!',
-    highlight: 'Click Ronak’s card to see the entire room softly glow in warm Lavender & Dusty Rose 💜, or Mehrsan’s for Cozy Espresso & Sage.'
+    title: 'Welcome to Your New Sidebar Workspace ✨',
+    subtitle: 'Inspired by Notion & Linear for calm, clutter-free focus.',
+    description: 'We moved companion profiles, navigation tabs, and ambient controls into a sleek left sidebar so your main canvas feels spacious and peaceful.',
+    highlight: 'Switch between Mehrsan ☕ and Ronak 💜 in the left sidebar to watch the entire sanctuary change its color palette!'
   },
   {
-    title: 'Focus with Built-in Ambient Sounds 🌧️',
-    subtitle: 'Cozy Pomodoro + Soft Rain & Zen Audio.',
-    description: 'Use the top sound bar to play soothing Soft Rain or Warm Zen frequencies while your timer runs—no external app needed!',
-    highlight: 'When you finish studying, click "Log Time" or use the quick [+15m] [+30m] [+1h] buttons on any goal.'
+    title: 'Meet the Floating Timer Dock ⏱️',
+    subtitle: 'Inspired by Toggl Track & Spotify.',
+    description: 'Look at the bottom of your screen! Your Focus Timer now floats with you across every tab—whether you are checking your schedule or reviewing goals.',
+    highlight: 'Switch between Open Stopwatch and 25m Cozy Pomodoro anytime, and click "Log" to save your minutes.'
   },
   {
-    title: 'Cheer Each Other On & Share Joy 💜👏',
-    subtitle: 'Up to 4 Squad Members + Heart Reactions.',
-    description: 'In the Shared Squad Activity Feed, tap the heart button next to any logged session to send warm encouragement to your partner!',
-    highlight: 'Everything—goals, classes, tasks, and personal status notes—can be added, edited, or deleted anytime.'
+    title: 'Cheer & Grow Together 💜',
+    subtitle: 'Up to 4 Companions + Ambient Soundscapes.',
+    description: 'Play soothing Rain or 432Hz Zen audio from the sidebar, check off daily tasks, and tap the 💜 button on your partner’s activity logs!',
+    highlight: 'All your changes save automatically in your browser, and you can connect Cloud Sync anytime.'
   }
 ];
 
@@ -215,12 +240,13 @@ export default function App() {
     return localStorage.getItem('syncpulse_latte') === 'true';
   });
   const [activeTab, setActiveTab] = useState<'dashboard' | 'goals' | 'schedule' | 'analytics'>('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [selectedDay, setSelectedDay] = useState<string>(() => {
     const jsDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
     return DAYS.includes(jsDay) ? jsDay : 'Saturday';
   });
 
-  // Web Audio API Cozy Ambient Sound Generator (No external MP3 needed!)
+  // Web Audio API Cozy Ambient Sound Generator
   const [ambientMode, setAmbientMode] = useState<'off' | 'rain' | 'zen'>('off');
   const audioCtxRef = useRef<AudioContext | null>(null);
 
@@ -238,7 +264,6 @@ export default function App() {
     audioCtxRef.current = ctx;
 
     if (ambientMode === 'rain') {
-      // Warm Pink/Brown Noise for soothing rain sound
       const bufferSize = 2 * ctx.sampleRate;
       const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const output = noiseBuffer.getChannelData(0);
@@ -247,7 +272,7 @@ export default function App() {
         const white = Math.random() * 2 - 1;
         output[i] = (lastOut + 0.02 * white) / 1.02;
         lastOut = output[i];
-        output[i] *= 0.12; // Gentle volume
+        output[i] *= 0.12;
       }
       const whiteNoise = ctx.createBufferSource();
       whiteNoise.buffer = noiseBuffer;
@@ -261,7 +286,6 @@ export default function App() {
       filter.connect(ctx.destination);
       whiteNoise.start(0);
     } else if (ambientMode === 'zen') {
-      // Warm 432Hz + 216Hz harmonic drone
       const osc1 = ctx.createOscillator();
       const osc2 = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -282,17 +306,13 @@ export default function App() {
     };
   }, [ambientMode]);
 
-  // Tutorial Modal State
+  // Modals
   const [showTutorial, setShowTutorial] = useState<boolean>(() => {
-    return !localStorage.getItem('syncpulse_v3_tutorial_seen');
+    return !localStorage.getItem('syncpulse_phase1_seen');
   });
   const [tutorialStep, setTutorialStep] = useState<number>(0);
-
-  // Share Modal
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
   const [copiedShare, setCopiedShare] = useState<boolean>(false);
-
-  // Add Member Modal
   const [showMemberModal, setShowMemberModal] = useState<boolean>(false);
   const [memberForm, setMemberForm] = useState({
     name: '',
@@ -300,7 +320,7 @@ export default function App() {
     theme: 'peach-terracotta' as ThemePalette
   });
 
-  // Timer (Supports Stopwatch & 25m Cozy Pomodoro)
+  // Floating Timer Dock State
   const [timerMode, setTimerMode] = useState<'stopwatch' | 'pomodoro'>('stopwatch');
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
@@ -345,7 +365,6 @@ export default function App() {
     localStorage.setItem('syncpulse_latte', String(isLatteMode));
   }, [isLatteMode]);
 
-  // Cloud Sync Polling
   useEffect(() => {
     if (!syncUrl) return;
     const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v3.json`;
@@ -417,7 +436,7 @@ export default function App() {
     confetti({
       particleCount: 50,
       spread: 65,
-      origin: { y: 0.75 },
+      origin: { y: 0.8 },
       colors: currentMember.theme === 'lavender-blush' ? ['#C084FC', '#F472B6', '#FDE68A'] : ['#84A98C', '#E09F5A', '#FDE68A']
     });
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -474,7 +493,6 @@ export default function App() {
     pushToCloud({ ...state, members: updated });
   };
 
-  // Add Member
   const handleAddMember = (e: React.FormEvent) => {
     e.preventDefault();
     if (!memberForm.name.trim() || state.members.length >= 4) return;
@@ -482,7 +500,7 @@ export default function App() {
     const newMember: Member = {
       id,
       name: memberForm.name.trim(),
-      tagline: memberForm.tagline.trim() || 'Squad Member',
+      tagline: memberForm.tagline.trim() || 'Squad Companion',
       avatar: memberForm.name.trim()[0].toUpperCase(),
       theme: memberForm.theme,
       statusNote: 'Excited to grow together ✨'
@@ -675,7 +693,7 @@ export default function App() {
   };
 
   const closeTutorial = () => {
-    localStorage.setItem('syncpulse_v3_tutorial_seen', 'true');
+    localStorage.setItem('syncpulse_phase1_seen', 'true');
     setShowTutorial(false);
     setTutorialStep(0);
   };
@@ -721,8 +739,15 @@ export default function App() {
   const userTasks = state.tasks.filter((t) => t.userId === activeUser);
   const levelInfo = getLevelInfo(activeUser);
 
+  const navItems = [
+    { id: 'dashboard', label: 'Today’s Sanctuary', icon: LayoutDashboard, badge: `${userTasks.filter(t => !t.completed).length}` },
+    { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: `${userGoals.length}` },
+    { id: 'schedule', label: 'Weekly Classes', icon: Calendar },
+    { id: 'analytics', label: 'Squad Analytics', icon: TrendingUp },
+  ];
+
   return (
-    <div className={`min-h-screen pb-20 relative cozy-transition paper-grain ${theme.pageBg} ${theme.textMain}`}>
+    <div className={`min-h-screen flex flex-col lg:flex-row relative cozy-transition paper-grain ${theme.pageBg} ${theme.textMain}`}>
       {/* Soft Breathing Ambient Glow Orbs */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div
@@ -734,444 +759,299 @@ export default function App() {
         />
       </div>
 
-      {/* Cozy Top Header */}
-      <header className="sticky top-0 z-30 border-b border-current/10 backdrop-blur-xl bg-opacity-70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
-              {currentMember.theme === 'lavender-blush' ? (
-                <Heart className="w-5 h-5 text-white fill-white/25" />
-              ) : (
-                <Coffee className="w-5 h-5 text-white" />
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-serif italic text-2xl tracking-wide">
-                  SyncPulse
-                </h1>
-                <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border cozy-transition ${theme.softBadge}`}>
-                  {theme.name}
+      {/* MOBILE HEADER BAR */}
+      <div className={`lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 border-b backdrop-blur-xl ${theme.sidebarBg}`}>
+        <div className="flex items-center gap-2.5">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${theme.primaryBtn}`}>
+            {currentMember.theme === 'lavender-blush' ? <Heart className="w-4 h-4 text-white" /> : <Coffee className="w-4 h-4 text-white" />}
+          </div>
+          <span className="font-serif italic text-xl">SyncPulse</span>
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
+            {currentMember.name}
+          </span>
+        </div>
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className={`p-2 rounded-xl border ${theme.cardBg}`}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* NOTION / LINEAR INSPIRED LEFT SIDEBAR */}
+      <aside
+        className={`${
+          mobileMenuOpen ? 'fixed inset-0 z-40 block' : 'hidden'
+        } lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:flex lg:flex-col border-r backdrop-blur-2xl z-30 p-5 justify-between overflow-y-auto cozy-transition ${theme.sidebarBg}`}
+      >
+        <div className="space-y-6">
+          {/* Brand Logo */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
+                {currentMember.theme === 'lavender-blush' ? (
+                  <Heart className="w-5 h-5 text-white fill-white/25" />
+                ) : (
+                  <Coffee className="w-5 h-5 text-white" />
+                )}
+              </div>
+              <div>
+                <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
+                <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                  Cozy Workspace
                 </span>
               </div>
-              <p className={`text-xs ${theme.textMuted}`}>
-                Cozy Shared Space • Lv.{levelInfo.level} {levelInfo.title}
-              </p>
             </div>
+            {mobileMenuOpen && (
+              <button onClick={() => setMobileMenuOpen(false)} className="lg:hidden p-1.5">
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
-          {/* Right Controls: Ambient Sound, Latte/Night Mode, Tutorial, Share */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Built-in Cozy Soundscape Pill */}
-            <div className={`flex items-center rounded-2xl p-1 border cozy-transition ${theme.cardBg}`}>
-              <button
-                onClick={() => setAmbientMode(ambientMode === 'rain' ? 'off' : 'rain')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition ${
-                  ambientMode === 'rain' ? theme.primaryBtn : theme.textMuted
-                }`}
-                title="Play Soothing Rain Sound"
-              >
-                <CloudRain className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Rain</span>
-              </button>
-              <button
-                onClick={() => setAmbientMode(ambientMode === 'zen' ? 'off' : 'zen')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-medium flex items-center gap-1 transition ${
-                  ambientMode === 'zen' ? theme.primaryBtn : theme.textMuted
-                }`}
-                title="Play Warm 432Hz Zen Sound"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Zen</span>
-              </button>
-              {ambientMode !== 'off' && (
+          {/* Squad Companions Switcher */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+              <span className={`text-[11px] font-mono uppercase tracking-wider ${theme.textMuted}`}>
+                Companions ({state.members.length}/4)
+              </span>
+              {state.members.length < 4 && (
                 <button
-                  onClick={() => setAmbientMode('off')}
-                  className="px-1.5 text-rose-400 hover:text-rose-500"
-                  title="Mute Sound"
+                  onClick={() => setShowMemberModal(true)}
+                  className={`text-[11px] font-semibold flex items-center gap-1 hover:underline ${theme.accentText}`}
                 >
-                  <VolumeX className="w-3.5 h-3.5" />
+                  <UserPlus className="w-3 h-3" /> Add
                 </button>
               )}
             </div>
 
-            {/* Warm Latte (Day) / Cozy Night Toggle */}
+            <div className="space-y-1.5">
+              {state.members.map((member) => {
+                const isSelected = member.id === activeUser;
+                const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
+                const todayMins = getTodayMinutes(member.id);
+                return (
+                  <div
+                    key={member.id}
+                    onClick={() => {
+                      setActiveUser(member.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`cursor-pointer rounded-2xl p-2.5 border transition-all flex items-center justify-between group ${
+                      isSelected
+                        ? `${mStyle.activeNav} shadow-sm`
+                        : 'border-transparent hover:bg-current/5 opacity-75 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className={`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border shrink-0 ${mStyle.softBadge}`}>
+                        {member.avatar}
+                      </div>
+                      <div className="truncate">
+                        <p className="text-xs font-bold flex items-center gap-1 truncate">
+                          {member.name}
+                          {member.id === 'ronak' && <span>💜</span>}
+                        </p>
+                        <p className={`text-[10px] font-mono ${theme.textMuted}`}>
+                          Today: {Math.floor(todayMins / 60)}h {todayMins % 60}m
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md border ${mStyle.softBadge}`}>
+                        {getTotalHours(member.id)}h
+                      </span>
+                      {member.id !== 'mehrsan' && member.id !== 'ronak' && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeMember(member.id);
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-400"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main Navigation Views */}
+          <div className="space-y-1">
+            <span className={`px-1 text-[11px] font-mono uppercase tracking-wider block mb-1.5 ${theme.textMuted}`}>
+              Workspace Views
+            </span>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id as any);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={`w-full px-3.5 py-2.5 rounded-2xl text-xs font-semibold flex items-center justify-between border transition-all ${
+                    active
+                      ? theme.activeNav
+                      : `border-transparent ${theme.textMuted} hover:bg-current/5`
+                  }`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </span>
+                  {item.badge && (
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Cozy Soundscape Widget */}
+          <div className={`p-3.5 rounded-2xl border space-y-2.5 ${theme.innerCardBg}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <CloudRain className="w-3.5 h-3.5" /> Cozy Ambience
+              </span>
+              {ambientMode !== 'off' && (
+                <button
+                  onClick={() => setAmbientMode('off')}
+                  className="text-[10px] font-mono text-rose-400 flex items-center gap-0.5"
+                >
+                  <VolumeX className="w-3 h-3" /> Mute
+                </button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'rain' ? 'off' : 'rain')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 border transition ${
+                  ambientMode === 'rain' ? theme.primaryBtn : `${theme.cardBg} ${theme.textMuted}`
+                }`}
+              >
+                🌧️ Rain
+              </button>
+              <button
+                onClick={() => setAmbientMode(ambientMode === 'zen' ? 'off' : 'zen')}
+                className={`py-1.5 px-2 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 border transition ${
+                  ambientMode === 'zen' ? theme.primaryBtn : `${theme.cardBg} ${theme.textMuted}`
+                }`}
+              >
+                ✨ 432Hz
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Sidebar Controls (Latte/Night, Share, Cloud, Guide) */}
+        <div className="pt-4 border-t border-current/10 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setIsLatteMode(!isLatteMode)}
-              className={`px-3 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 cozy-transition ${theme.cardBg}`}
-              title="Switch between Warm Latte Day Mode and Cozy Night Mode"
+              className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 ${theme.cardBg}`}
             >
-              {isLatteMode ? (
-                <>
-                  <Moon className="w-3.5 h-3.5 text-purple-600" />
-                  <span>Night</span>
-                </>
-              ) : (
-                <>
-                  <Sun className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Latte</span>
-                </>
-              )}
+              {isLatteMode ? <Moon className="w-3.5 h-3.5 text-purple-600" /> : <Sun className="w-3.5 h-3.5 text-amber-300" />}
+              {isLatteMode ? 'Night' : 'Latte'}
             </button>
+            <button
+              onClick={() => setShowShareModal(true)}
+              className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 ${theme.primaryBtn}`}
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              Share
+            </button>
+          </div>
 
+          <div className="flex items-center justify-between text-xs pt-1 px-1">
+            <button
+              onClick={() => setShowSyncModal(true)}
+              className={`flex items-center gap-1.5 ${theme.textMuted} hover:underline`}
+            >
+              <Cloud className={`w-3.5 h-3.5 ${syncUrl ? 'text-emerald-400' : ''}`} />
+              {syncUrl ? 'Cloud Connected' : 'Cloud Sync'}
+            </button>
             <button
               onClick={() => {
                 setTutorialStep(0);
                 setShowTutorial(true);
               }}
-              className={`px-3 py-2 rounded-2xl border text-xs font-semibold flex items-center gap-1.5 cozy-transition ${theme.cardBg}`}
+              className={`flex items-center gap-1 ${theme.textMuted} hover:underline`}
             >
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span className="hidden md:inline">Guide</span>
-            </button>
-
-            <button
-              onClick={() => setShowShareModal(true)}
-              className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition ${theme.primaryBtn}`}
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>Share</span>
-            </button>
-
-            <button
-              onClick={() => setShowSyncModal(true)}
-              className={`p-2 rounded-2xl border text-xs cozy-transition ${theme.cardBg}`}
-              title="Cloud Sync Settings"
-            >
-              <Cloud className={`w-4 h-4 ${syncUrl ? 'text-emerald-500' : theme.textMuted}`} />
+              <HelpCircle className="w-3.5 h-3.5" /> Guide
             </button>
           </div>
         </div>
-      </header>
+      </aside>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 pt-7 space-y-7">
-        {/* EDITORIAL WARM GREETING BANNER */}
-        <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <p className={`text-xs font-mono uppercase tracking-widest ${theme.accentText}`}>
-              ✨ {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-            </p>
-            <h2 className="font-serif italic text-3xl sm:text-4xl mt-1 tracking-tight">
-              Take a deep breath and enjoy your pace, {currentMember.name}.
-            </h2>
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={currentMember.statusNote || ''}
-              onChange={(e) => updateMemberStatus(e.target.value)}
-              placeholder="Write your cozy status note..."
-              className={`text-xs px-3.5 py-2 rounded-2xl border w-full md:w-72 focus:outline-none cozy-transition ${theme.cardBg}`}
-            />
-          </div>
-        </section>
-
-        {/* SQUAD CARDS (UP TO 4 MEMBERS) */}
-        <section className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <span className={`text-xs font-medium flex items-center gap-1.5 ${theme.textMuted}`}>
-              <Users className="w-3.5 h-3.5" />
-              Our Cozy Circle (Click a companion to enter their space & theme)
-            </span>
-            {state.members.length < 4 && (
-              <button
-                onClick={() => setShowMemberModal(true)}
-                className={`text-xs font-semibold flex items-center gap-1 px-3 py-1.5 rounded-2xl border cozy-transition ${theme.cardBg}`}
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                + Invite Companion ({state.members.length}/4)
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {state.members.map((member) => {
-              const isSelected = member.id === activeUser;
-              const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
-              const todayMins = getTodayMinutes(member.id);
-              const mLv = getLevelInfo(member.id);
-              return (
-                <div
-                  key={member.id}
-                  onClick={() => setActiveUser(member.id)}
-                  className={`cursor-pointer rounded-3xl p-5 border backdrop-blur-md cozy-transition relative group ${
-                    isSelected
-                      ? `${mStyle.cardBg} ${mStyle.activeBorder} scale-[1.01]`
-                      : `${theme.cardBg} opacity-80 hover:opacity-100`
-                  }`}
-                >
-                  {member.id !== 'mehrsan' && member.id !== 'ronak' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeMember(member.id);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 absolute top-3 right-3 p-1 rounded-full hover:text-rose-400"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-serif italic text-xl border ${mStyle.softBadge}`}>
-                        {member.avatar}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm flex items-center gap-1">
-                          {member.name}
-                          {member.id === 'ronak' && <span>💜</span>}
-                        </h3>
-                        <p className={`text-[11px] truncate max-w-[130px] ${theme.textMuted}`}>
-                          {member.tagline}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today</span>
-                      <span className={`font-mono font-bold text-sm ${mStyle.accentText}`}>
-                        {Math.floor(todayMins / 60)}h {todayMins % 60}m
-                      </span>
-                    </div>
-                  </div>
-
-                  {member.statusNote && (
-                    <p className={`text-[11px] italic mb-3 line-clamp-1 ${theme.textMuted}`}>
-                      "{member.statusNote}"
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-[11px] font-mono pt-2.5 border-t border-current/10">
-                    <span>Lv.{mLv.level} • {getTotalHours(member.id)}h banked</span>
-                    <span className={isSelected ? mStyle.accentText : theme.textMuted}>
-                      {isSelected ? '● Here' : 'Visit →'}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* PILL NAVIGATION TABS */}
-        <div className={`flex flex-wrap items-center justify-between gap-2 p-2 rounded-3xl border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
-          <div className="flex items-center gap-1.5 overflow-x-auto">
-            {[
-              { id: 'dashboard', label: '1. Cozy Focus & Daily Flow', icon: Coffee },
-              { id: 'goals', label: '2. Dreams & Time Bank', icon: Target },
-              { id: 'schedule', label: '3. Weekly Classes', icon: Calendar },
-              { id: 'analytics', label: '4. Visual Progress', icon: TrendingUp },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const active = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2 whitespace-nowrap transition-all ${
-                    active ? theme.primaryBtn : `${theme.textMuted} hover:opacity-100`
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* TAB 1: DASHBOARD */}
-        {activeTab === 'dashboard' && (
-          <div className="space-y-6">
-            {/* COZY POMODORO & FOCUS TIMER */}
-            <div className={`rounded-3xl p-6 border backdrop-blur-xl cozy-transition ${theme.cardBg} ${theme.activeBorder}`}>
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-                <div className="lg:col-span-5 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => switchTimerMode('stopwatch')}
-                      className={`text-xs font-mono px-3 py-1 rounded-full border transition ${
-                        timerMode === 'stopwatch' ? theme.softBadge : 'border-transparent opacity-60'
-                      }`}
-                    >
-                      ⏱️ Open Stopwatch
-                    </button>
-                    <button
-                      onClick={() => switchTimerMode('pomodoro')}
-                      className={`text-xs font-mono px-3 py-1 rounded-full border transition ${
-                        timerMode === 'pomodoro' ? theme.softBadge : 'border-transparent opacity-60'
-                      }`}
-                    >
-                      🍅 25m Cozy Pomodoro
-                    </button>
-                  </div>
-                  <h3 className="font-serif italic text-2xl pt-1">
-                    Mindful Time Investment
-                  </h3>
-                  <p className={`text-xs leading-relaxed ${theme.textMuted}`}>
-                    Select what you’re nurturing right now. When you finish, click <b>Log Session</b> to credit the minutes to your goal!
-                  </p>
-                </div>
-
-                <div className="lg:col-span-4 flex flex-col items-center">
-                  <div className="font-mono text-4xl sm:text-5xl font-semibold tracking-wider mb-3">
-                    {formatTimer(timerSeconds)}
-                  </div>
-                  <select
-                    value={selectedGoalId}
-                    onChange={(e) => setSelectedGoalId(e.target.value)}
-                    className={`w-full max-w-xs border rounded-2xl px-3.5 py-2 text-xs focus:outline-none cozy-transition ${theme.innerCardBg}`}
-                  >
-                    <option value="">-- Choose Goal to Nourish --</option>
-                    {userGoals.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.title} ({(g.loggedMinutes / 60).toFixed(1)}h / {g.targetHours}h)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="lg:col-span-3 flex items-center justify-center lg:justify-end gap-2.5">
-                  <button
-                    onClick={() => setIsTimerRunning(!isTimerRunning)}
-                    className={`px-5 py-3 rounded-2xl font-semibold text-xs flex items-center gap-1.5 transition ${theme.primaryBtn}`}
-                  >
-                    {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                    {isTimerRunning ? 'Pause' : 'Start Focus'}
-                  </button>
-                  <button
-                    onClick={handleSaveTimerSession}
-                    className={`px-4 py-3 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition ${theme.softBadge}`}
-                  >
-                    <Check className="w-4 h-4" />
-                    Log Session
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsTimerRunning(false);
-                      setTimerSeconds(timerMode === 'pomodoro' ? 25 * 60 : 0);
-                    }}
-                    className={`p-3 rounded-2xl border ${theme.innerCardBg}`}
-                    title="Reset"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                </div>
+      {/* MAIN WORKSPACE CONTENT AREA */}
+      <div className="flex-1 min-w-0 relative z-10 pb-32">
+        <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-7 space-y-7">
+          {/* Top Personal Greeting & Status Note */}
+          <section className={`p-6 rounded-3xl border backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 cozy-transition ${theme.cardBg}`}>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className={`text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
+                  Lv.{levelInfo.level} • {levelInfo.title}
+                </span>
+                <span className={`text-xs font-mono ${theme.textMuted}`}>
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                </span>
               </div>
+              <h2 className="font-serif italic text-3xl sm:text-4xl tracking-tight pt-1">
+                Welcome to your sanctuary, {currentMember.name}.
+              </h2>
+              <input
+                type="text"
+                value={currentMember.statusNote || ''}
+                onChange={(e) => updateMemberStatus(e.target.value)}
+                placeholder="Write a personal intention or status note..."
+                className={`text-xs bg-transparent border-b border-transparent focus:border-current/30 focus:outline-none w-full max-w-md italic ${theme.textMuted}`}
+              />
             </div>
 
+            <div className="flex items-center gap-4 shrink-0">
+              <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
+                <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today's Focus</span>
+                <span className={`font-mono font-bold text-xl ${theme.accentText}`}>
+                  {Math.floor(getTodayMinutes(activeUser) / 60)}h {getTodayMinutes(activeUser) % 60}m
+                </span>
+              </div>
+              <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
+                <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Total Banked</span>
+                <span className="font-mono font-bold text-xl">
+                  {getTotalHours(activeUser)}h
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* VIEW 1: TODAY'S SANCTUARY (DASHBOARD) */}
+          {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left 7 cols: Active Goals + Gentle Checklist */}
+              {/* Left 7 Cols: Daily Intentions + Active Goals Quick Log */}
               <div className="lg:col-span-7 space-y-6">
-                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                        <Target className={`w-5 h-5 ${theme.accentText}`} />
-                        {currentMember.name}'s Goals & Time Bank
-                      </h3>
-                      <p className={`text-xs ${theme.textMuted}`}>
-                        Tap +15m, +30m, or +1h anytime to gently log your progress
-                      </p>
-                    </div>
-                    <button
-                      onClick={openCreateGoal}
-                      className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 ${theme.primaryBtn}`}
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Goal
-                    </button>
-                  </div>
-
-                  <div className="space-y-3.5">
-                    {userGoals.map((goal) => {
-                      const hoursDone = +(goal.loggedMinutes / 60).toFixed(1);
-                      const pct = Math.min(100, Math.round((hoursDone / goal.targetHours) * 100));
-                      return (
-                        <div
-                          key={goal.id}
-                          className={`p-4 rounded-2xl border cozy-transition ${theme.innerCardBg}`}
-                        >
-                          <div className="flex flex-wrap items-start justify-between gap-2 mb-2.5">
-                            <div>
-                              <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full border mr-2 ${theme.softBadge}`}>
-                                {goal.category}
-                              </span>
-                              <span className={`text-[11px] font-mono ${theme.textMuted}`}>
-                                {goal.deadline}
-                              </span>
-                              <h4 className="font-semibold text-sm mt-1">
-                                {goal.title}
-                              </h4>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <button
-                                onClick={() => logTime(activeUser, goal.id, goal.title, 15)}
-                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
-                              >
-                                +15m
-                              </button>
-                              <button
-                                onClick={() => logTime(activeUser, goal.id, goal.title, 30)}
-                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
-                              >
-                                +30m
-                              </button>
-                              <button
-                                onClick={() => logTime(activeUser, goal.id, goal.title, 60)}
-                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono font-semibold ${theme.softBadge}`}
-                              >
-                                +1h
-                              </button>
-                              <button
-                                onClick={() => openEditGoal(goal)}
-                                className={`p-1.5 rounded-xl opacity-60 hover:opacity-100`}
-                              >
-                                <Edit3 className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                onClick={() => deleteGoal(goal.id)}
-                                className="p-1.5 rounded-xl opacity-60 hover:text-rose-400 hover:opacity-100"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-
-                          <div>
-                            <div className="flex justify-between text-xs font-mono mb-1.5">
-                              <span className={theme.textMuted}>
-                                {hoursDone} hrs invested of {goal.targetHours} hrs
-                              </span>
-                              <span className={`font-bold ${theme.accentText}`}>{pct}%</span>
-                            </div>
-                            <div className="w-full h-2.5 rounded-full bg-current/10 overflow-hidden">
-                              <div
-                                className={`h-full rounded-full transition-all duration-700 ${theme.progressBar}`}
-                                style={{ width: `${pct}%` }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Daily Gentle Checklist */}
+                {/* Daily Tasks & Reminders */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-1">
                     <Bell className={`w-5 h-5 ${theme.accentText}`} />
-                    Today's Gentle Intentions & Reminders
+                    Today's Gentle Intentions
                   </h3>
                   <p className={`text-xs mb-4 ${theme.textMuted}`}>
-                    Small daily wins build big confidence. Check off an item to earn its time credit!
+                    Check off an intention to celebrate and automatically credit its minutes
                   </p>
 
                   <form onSubmit={addTask} className="flex flex-wrap gap-2 mb-4">
                     <input
                       type="text"
-                      placeholder={`Add a gentle task for ${currentMember.name}...`}
+                      placeholder={`What would feel good to finish today, ${currentMember.name}?`}
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       className={`flex-1 min-w-[180px] border rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none ${theme.innerCardBg}`}
@@ -1224,7 +1104,7 @@ export default function App() {
                             <div className={`flex items-center gap-2 text-[11px] font-mono mt-0.5 ${theme.textMuted}`}>
                               <span>⏰ {task.reminderTime}</span>
                               <span>•</span>
-                              <span className={theme.accentText}>+{task.estimatedMinutes}m</span>
+                              <span className={theme.accentText}>+{task.estimatedMinutes}m credit</span>
                             </div>
                           </div>
                         </div>
@@ -1238,18 +1118,106 @@ export default function App() {
                     ))}
                   </div>
                 </div>
+
+                {/* Active Goals Quick Log */}
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                        <Target className={`w-5 h-5 ${theme.accentText}`} />
+                        Active Goals & Quick Time Log
+                      </h3>
+                      <p className={`text-xs ${theme.textMuted}`}>
+                        Tap +15m, +30m, or +1h to bank time directly into a goal
+                      </p>
+                    </div>
+                    <button
+                      onClick={openCreateGoal}
+                      className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 ${theme.primaryBtn}`}
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      New Goal
+                    </button>
+                  </div>
+
+                  <div className="space-y-3.5">
+                    {userGoals.map((goal) => {
+                      const hoursDone = +(goal.loggedMinutes / 60).toFixed(1);
+                      const pct = Math.min(100, Math.round((hoursDone / goal.targetHours) * 100));
+                      return (
+                        <div
+                          key={goal.id}
+                          className={`p-4 rounded-2xl border cozy-transition ${theme.innerCardBg}`}
+                        >
+                          <div className="flex flex-wrap items-start justify-between gap-2 mb-2.5">
+                            <div>
+                              <span className={`text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full border mr-2 ${theme.softBadge}`}>
+                                {goal.category}
+                              </span>
+                              <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                                {goal.deadline}
+                              </span>
+                              <h4 className="font-semibold text-sm mt-1">{goal.title}</h4>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => logTime(activeUser, goal.id, goal.title, 15)}
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
+                              >
+                                +15m
+                              </button>
+                              <button
+                                onClick={() => logTime(activeUser, goal.id, goal.title, 30)}
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono hover:opacity-80 ${theme.cardBg}`}
+                              >
+                                +30m
+                              </button>
+                              <button
+                                onClick={() => logTime(activeUser, goal.id, goal.title, 60)}
+                                className={`px-2.5 py-1 rounded-xl border text-[11px] font-mono font-semibold ${theme.softBadge}`}
+                              >
+                                +1h
+                              </button>
+                              <button onClick={() => openEditGoal(goal)} className="p-1.5 opacity-60 hover:opacity-100">
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button onClick={() => deleteGoal(goal.id)} className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100">
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="flex justify-between text-xs font-mono mb-1.5">
+                              <span className={theme.textMuted}>
+                                {hoursDone} hrs invested of {goal.targetHours} hrs
+                              </span>
+                              <span className={`font-bold ${theme.accentText}`}>{pct}%</span>
+                            </div>
+                            <div className="w-full h-2.5 rounded-full bg-current/10 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-700 ${theme.progressBar}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
-              {/* Right 5 cols: Shared Squad Feed with Heart Cheers + Exams */}
+              {/* Right 5 Cols: Shared Squad Feed + Exams */}
               <div className="lg:col-span-5 space-y-6">
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
                       <Heart className={`w-5 h-5 ${theme.accentText}`} />
-                      Shared Warmth & Activity
+                      Shared Squad Moments
                     </h3>
                     <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
-                      Live Moments
+                      Live Feed
                     </span>
                   </div>
 
@@ -1264,7 +1232,7 @@ export default function App() {
                         >
                           <div className="flex items-center gap-3">
                             <span
-                              className={`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border ${mStyle.softBadge}`}
+                              className={`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border shrink-0 ${mStyle.softBadge}`}
                             >
                               {logMember ? logMember.avatar : 'S'}
                             </span>
@@ -1280,8 +1248,7 @@ export default function App() {
 
                           <button
                             onClick={() => cheerLog(log.id)}
-                            className={`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 hover:scale-105 transition ${mStyle.softBadge}`}
-                            title="Send a warm cheer!"
+                            className={`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 hover:scale-105 transition shrink-0 ${mStyle.softBadge}`}
                           >
                             <span>💜</span>
                             <span>{log.cheers || 1}</span>
@@ -1292,11 +1259,10 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* University Exam Dates */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
                     <GraduationCap className={`w-5 h-5 ${theme.accentText}`} />
-                    Upcoming University Exams (1405)
+                    University Exams (1405)
                   </h3>
                   <div className="space-y-2.5">
                     {state.exams.map((ex) => (
@@ -1318,255 +1284,309 @@ export default function App() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TAB 2: GOALS & TIME BANK */}
-        {activeTab === 'goals' && (
-          <div className="space-y-6">
-            <div className={`flex flex-wrap items-center justify-between gap-4 p-6 rounded-3xl border ${theme.cardBg}`}>
-              <div>
-                <h3 className="font-serif italic text-2xl">
-                  Shared Dreams & Time Bank
-                </h3>
-                <p className={`text-xs ${theme.textMuted}`}>
-                  Add, edit, or refine short-term and long-term milestones for anyone in the circle.
-                </p>
+          {/* VIEW 2: GOALS & TIME BANK */}
+          {activeTab === 'goals' && (
+            <div className="space-y-6">
+              <div className={`flex flex-wrap items-center justify-between gap-4 p-6 rounded-3xl border ${theme.cardBg}`}>
+                <div>
+                  <h3 className="font-serif italic text-2xl">Shared Dreams & Time Bank</h3>
+                  <p className={`text-xs ${theme.textMuted}`}>
+                    Add, edit, or refine short-term and long-term milestones for anyone in the circle.
+                  </p>
+                </div>
+                <button
+                  onClick={openCreateGoal}
+                  className={`px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${theme.primaryBtn}`}
+                >
+                  <Plus className="w-4 h-4" />
+                  New Goal for {currentMember.name}
+                </button>
               </div>
-              <button
-                onClick={openCreateGoal}
-                className={`px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${theme.primaryBtn}`}
-              >
-                <Plus className="w-4 h-4" />
-                New Goal for {currentMember.name}
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {state.members.map((member) => {
-                const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
-                return (
-                  <div
-                    key={member.id}
-                    className={`rounded-3xl p-6 border space-y-4 ${theme.cardBg}`}
-                  >
-                    <div className="flex items-center justify-between border-b border-current/10 pb-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {state.members.map((member) => {
+                  const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
+                  return (
+                    <div key={member.id} className={`rounded-3xl p-6 border space-y-4 ${theme.cardBg}`}>
+                      <div className="flex items-center justify-between border-b border-current/10 pb-3">
+                        <h4 className="font-serif italic text-2xl flex items-center gap-2">
+                          <span className={`w-7 h-7 rounded-xl text-sm flex items-center justify-center border ${mStyle.softBadge}`}>
+                            {member.avatar}
+                          </span>
+                          {member.name}'s Goals
+                        </h4>
+                        <span className={`text-xs font-mono ${theme.textMuted}`}>
+                          {getTotalHours(member.id)} hrs banked
+                        </span>
+                      </div>
+
+                      {state.goals
+                        .filter((g) => g.userId === member.id)
+                        .map((g) => {
+                          const hrs = +(g.loggedMinutes / 60).toFixed(1);
+                          const pct = Math.min(100, Math.round((hrs / g.targetHours) * 100));
+                          return (
+                            <div key={g.id} className={`p-4 rounded-2xl border space-y-2 ${theme.innerCardBg}`}>
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
+                                    {g.category}
+                                  </span>
+                                  <h5 className="font-semibold text-sm mt-1">{g.title}</h5>
+                                  <p className={`text-[11px] font-mono ${theme.textMuted}`}>
+                                    Horizon: {g.deadline}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <button onClick={() => openEditGoal(g)} className="p-1.5 opacity-60 hover:opacity-100">
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button onClick={() => deleteGoal(g.id)} className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100">
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs font-mono pt-1">
+                                <span>{hrs}h / {g.targetHours}h ({pct}%)</span>
+                                <div className="flex gap-1.5">
+                                  <button
+                                    onClick={() => logTime(member.id, g.id, g.title, 30)}
+                                    className={`px-2 py-0.5 rounded-lg border ${theme.cardBg}`}
+                                  >
+                                    +30m
+                                  </button>
+                                  <button
+                                    onClick={() => logTime(member.id, g.id, g.title, 60)}
+                                    className={`px-2 py-0.5 rounded-lg border ${mStyle.softBadge}`}
+                                  >
+                                    +1h
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="w-full h-2 rounded-full bg-current/10 overflow-hidden">
+                                <div className={`h-full rounded-full ${mStyle.progressBar}`} style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* VIEW 3: WEEKLY SCHEDULE */}
+          {activeTab === 'schedule' && (
+            <div className="space-y-5">
+              <div className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-3xl border ${theme.cardBg}`}>
+                <div className="flex items-center gap-1.5 overflow-x-auto">
+                  {DAYS.map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => setSelectedDay(day)}
+                      className={`px-3.5 py-2 rounded-2xl text-xs font-semibold transition ${
+                        selectedDay === day ? theme.primaryBtn : `${theme.innerCardBg} ${theme.textMuted}`
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setScheduleForm({ ...scheduleForm, day: selectedDay });
+                    setShowScheduleModal(true);
+                  }}
+                  className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 ${theme.primaryBtn}`}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Class for {currentMember.name}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {state.members.map((member) => {
+                  const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
+                  const dayItems = state.schedules
+                    .filter((s) => s.userId === member.id && s.day === selectedDay)
+                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+                  return (
+                    <div key={member.id} className={`rounded-3xl p-6 border space-y-3 ${theme.cardBg}`}>
                       <h4 className="font-serif italic text-2xl flex items-center gap-2">
                         <span className={`w-7 h-7 rounded-xl text-sm flex items-center justify-center border ${mStyle.softBadge}`}>
                           {member.avatar}
                         </span>
-                        {member.name}'s Goals
+                        {member.name}'s {selectedDay}
                       </h4>
-                      <span className={`text-xs font-mono ${theme.textMuted}`}>
-                        {getTotalHours(member.id)} hrs banked
-                      </span>
+                      {dayItems.length === 0 ? (
+                        <p className={`text-xs py-6 text-center italic ${theme.textMuted}`}>
+                          A free, unhurried {selectedDay} — wonderful for self-paced goals ☕
+                        </p>
+                      ) : (
+                        dayItems.map((item) => {
+                          const attendedToday = item.attendedDates.includes(todayStr);
+                          return (
+                            <div
+                              key={item.id}
+                              className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${theme.innerCardBg}`}
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`font-mono text-xs font-bold ${mStyle.accentText}`}>
+                                    {item.startTime} - {item.endTime}
+                                  </span>
+                                  <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
+                                    {item.category}
+                                  </span>
+                                </div>
+                                <h5 className="font-semibold text-sm mt-1">{item.title}</h5>
+                                <p className={`text-xs ${theme.textMuted}`}>{item.details}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => toggleClassAttendance(item)}
+                                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition ${
+                                    attendedToday ? mStyle.softBadge : theme.cardBg
+                                  }`}
+                                >
+                                  <CheckCircle2 className="w-3.5 h-3.5" />
+                                  {attendedToday ? 'Attended' : 'Check-in'}
+                                </button>
+                                <button
+                                  onClick={() => deleteScheduleItem(item.id)}
+                                  className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-                    {state.goals
-                      .filter((g) => g.userId === member.id)
-                      .map((g) => {
-                        const hrs = +(g.loggedMinutes / 60).toFixed(1);
-                        const pct = Math.min(100, Math.round((hrs / g.targetHours) * 100));
+          {/* VIEW 4: ANALYTICS */}
+          {activeTab === 'analytics' && (
+            <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+                <div>
+                  <h3 className="font-serif italic text-2xl">7-Day Gentle Consistency Rhythm</h3>
+                  <p className={`text-xs ${theme.textMuted}`}>
+                    Comparing daily focused minutes side-by-side across your circle
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+                  {state.members.map((m) => (
+                    <span key={m.id} className={`flex items-center gap-1.5 ${GET_COZY_THEME(m.theme, isLatteMode).accentText}`}>
+                      ● {m.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-current/10">
+                {last7Days.map((d) => (
+                  <div key={d.dateStr} className="flex flex-col items-center h-full justify-end">
+                    <div className="w-full flex items-end justify-center gap-1.5 h-48">
+                      {d.memberTotals.map((mt) => {
+                        const hPct = Math.round((mt.mins / maxChartMins) * 100);
+                        const barGrad = GET_COZY_THEME(mt.member.theme, isLatteMode).barColor;
                         return (
                           <div
-                            key={g.id}
-                            className={`p-4 rounded-2xl border space-y-2 ${theme.innerCardBg}`}
+                            key={mt.member.id}
+                            className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-xl transition-all duration-500 relative group`}
+                            style={{ height: `${Math.max(8, hPct)}%` }}
                           >
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <span className={`text-[10px] font-mono uppercase px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
-                                  {g.category}
-                                </span>
-                                <h5 className="font-semibold text-sm mt-1">{g.title}</h5>
-                                <p className={`text-[11px] font-mono ${theme.textMuted}`}>
-                                  Horizon: {g.deadline}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <button onClick={() => openEditGoal(g)} className="p-1.5 opacity-60 hover:opacity-100">
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-                                <button onClick={() => deleteGoal(g.id)} className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100">
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between text-xs font-mono pt-1">
-                              <span>{hrs}h / {g.targetHours}h ({pct}%)</span>
-                              <div className="flex gap-1.5">
-                                <button
-                                  onClick={() => logTime(member.id, g.id, g.title, 30)}
-                                  className={`px-2 py-0.5 rounded-lg border ${theme.cardBg}`}
-                                >
-                                  +30m
-                                </button>
-                                <button
-                                  onClick={() => logTime(member.id, g.id, g.title, 60)}
-                                  className={`px-2 py-0.5 rounded-lg border ${mStyle.softBadge}`}
-                                >
-                                  +1h
-                                </button>
-                              </div>
-                            </div>
-
-                            <div className="w-full h-2 rounded-full bg-current/10 overflow-hidden">
-                              <div className={`h-full rounded-full ${mStyle.progressBar}`} style={{ width: `${pct}%` }} />
-                            </div>
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-1.5 py-0.5 rounded whitespace-nowrap z-20">
+                              {mt.member.name[0]}: {mt.mins}m
+                            </span>
                           </div>
                         );
                       })}
+                    </div>
+                    <span className={`text-xs font-mono mt-2 ${theme.textMuted}`}>{d.label}</span>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: WEEKLY SCHEDULE */}
-        {activeTab === 'schedule' && (
-          <div className="space-y-5">
-            <div className={`flex flex-wrap items-center justify-between gap-3 p-4 rounded-3xl border ${theme.cardBg}`}>
-              <div className="flex items-center gap-1.5 overflow-x-auto">
-                {DAYS.map((day) => (
-                  <button
-                    key={day}
-                    onClick={() => setSelectedDay(day)}
-                    className={`px-3.5 py-2 rounded-2xl text-xs font-semibold transition ${
-                      selectedDay === day ? theme.primaryBtn : `${theme.innerCardBg} ${theme.textMuted}`
-                    }`}
-                  >
-                    {day}
-                  </button>
                 ))}
               </div>
+            </div>
+          )}
+        </main>
+
+        {/* PERSISTENT FLOATING FOCUS TIMER DOCK (TOGGL / SPOTIFY STYLE) */}
+        <div className="fixed bottom-4 left-0 right-0 lg:left-72 z-30 px-4 pointer-events-none">
+          <div
+            className={`max-w-3xl mx-auto rounded-3xl p-3 sm:px-5 border backdrop-blur-2xl pointer-events-auto flex flex-wrap items-center justify-between gap-3 cozy-transition ${theme.dockBg}`}
+          >
+            {/* Left: Mode Switch & Goal Select */}
+            <div className="flex items-center gap-2.5 flex-1 min-w-[200px]">
+              <button
+                onClick={() => switchTimerMode(timerMode === 'stopwatch' ? 'pomodoro' : 'stopwatch')}
+                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono border shrink-0 transition ${theme.softBadge}`}
+                title="Click to switch between Open Stopwatch and 25m Pomodoro"
+              >
+                {timerMode === 'pomodoro' ? '🍅 25m' : '⏱️ Timer'}
+              </button>
+              <select
+                value={selectedGoalId}
+                onChange={(e) => setSelectedGoalId(e.target.value)}
+                className={`w-full border rounded-xl px-3 py-1.5 text-xs focus:outline-none truncate ${theme.innerCardBg}`}
+              >
+                <option value="">-- Focus on Goal ({currentMember.name}) --</option>
+                {userGoals.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.title} ({(g.loggedMinutes / 60).toFixed(1)}h / {g.targetHours}h)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Center: Live Digital Readout */}
+            <div className="font-mono text-2xl sm:text-3xl font-bold tracking-wider px-2">
+              {formatTimer(timerSeconds)}
+            </div>
+
+            {/* Right: Play/Pause, Log & Reset */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsTimerRunning(!isTimerRunning)}
+                className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 transition ${theme.primaryBtn}`}
+              >
+                {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                {isTimerRunning ? 'Pause' : 'Start'}
+              </button>
+              <button
+                onClick={handleSaveTimerSession}
+                className={`px-3.5 py-2 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition ${theme.softBadge}`}
+                title="Save and credit elapsed time"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Log
+              </button>
               <button
                 onClick={() => {
-                  setScheduleForm({ ...scheduleForm, day: selectedDay });
-                  setShowScheduleModal(true);
+                  setIsTimerRunning(false);
+                  setTimerSeconds(timerMode === 'pomodoro' ? 25 * 60 : 0);
                 }}
-                className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 ${theme.primaryBtn}`}
+                className={`p-2 rounded-xl border ${theme.innerCardBg}`}
+                title="Reset Timer"
               >
-                <Plus className="w-3.5 h-3.5" />
-                Add Class for {currentMember.name}
+                <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {state.members.map((member) => {
-                const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
-                const dayItems = state.schedules
-                  .filter((s) => s.userId === member.id && s.day === selectedDay)
-                  .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-                return (
-                  <div key={member.id} className={`rounded-3xl p-6 border space-y-3 ${theme.cardBg}`}>
-                    <h4 className="font-serif italic text-2xl flex items-center gap-2">
-                      <span className={`w-7 h-7 rounded-xl text-sm flex items-center justify-center border ${mStyle.softBadge}`}>
-                        {member.avatar}
-                      </span>
-                      {member.name}'s {selectedDay}
-                    </h4>
-                    {dayItems.length === 0 ? (
-                      <p className={`text-xs py-6 text-center italic ${theme.textMuted}`}>
-                        A free, unhurried {selectedDay} — wonderful for self-paced goals ☕
-                      </p>
-                    ) : (
-                      dayItems.map((item) => {
-                        const attendedToday = item.attendedDates.includes(todayStr);
-                        return (
-                          <div
-                            key={item.id}
-                            className={`p-4 rounded-2xl border flex items-center justify-between gap-3 ${theme.innerCardBg}`}
-                          >
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className={`font-mono text-xs font-bold ${mStyle.accentText}`}>
-                                  {item.startTime} - {item.endTime}
-                                </span>
-                                <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${mStyle.softBadge}`}>
-                                  {item.category}
-                                </span>
-                              </div>
-                              <h5 className="font-semibold text-sm mt-1">{item.title}</h5>
-                              <p className={`text-xs ${theme.textMuted}`}>{item.details}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => toggleClassAttendance(item)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition ${
-                                  attendedToday ? mStyle.softBadge : theme.cardBg
-                                }`}
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                {attendedToday ? 'Attended' : 'Check-in'}
-                              </button>
-                              <button
-                                onClick={() => deleteScheduleItem(item.id)}
-                                className="p-1.5 opacity-50 hover:text-rose-400 hover:opacity-100"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </div>
-        )}
-
-        {/* TAB 4: VISUAL PROGRESS */}
-        {activeTab === 'analytics' && (
-          <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-              <div>
-                <h3 className="font-serif italic text-2xl">
-                  7-Day Gentle Consistency Rhythm
-                </h3>
-                <p className={`text-xs ${theme.textMuted}`}>
-                  Comparing daily focused minutes side-by-side across your circle
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-                {state.members.map((m) => (
-                  <span key={m.id} className={`flex items-center gap-1.5 ${GET_COZY_THEME(m.theme, isLatteMode).accentText}`}>
-                    ● {m.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-current/10">
-              {last7Days.map((d) => (
-                <div key={d.dateStr} className="flex flex-col items-center h-full justify-end">
-                  <div className="w-full flex items-end justify-center gap-1.5 h-48">
-                    {d.memberTotals.map((mt) => {
-                      const hPct = Math.round((mt.mins / maxChartMins) * 100);
-                      const barGrad = GET_COZY_THEME(mt.member.theme, isLatteMode).barColor;
-                      return (
-                        <div
-                          key={mt.member.id}
-                          className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-xl transition-all duration-500 relative group`}
-                          style={{ height: `${Math.max(8, hPct)}%` }}
-                        >
-                          <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-1.5 py-0.5 rounded whitespace-nowrap z-20">
-                            {mt.member.name[0]}: {mt.mins}m
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <span className={`text-xs font-mono mt-2 ${theme.textMuted}`}>{d.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
+        </div>
+      </div>
 
       {/* TUTORIAL MODAL */}
       {showTutorial && (
@@ -1574,7 +1594,7 @@ export default function App() {
           <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-5 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
-                Cozy Tour • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
+                Phase 1 Update • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
               </span>
               <button onClick={closeTutorial} className={`text-xs font-mono ${theme.textMuted}`}>
                 Close ✕
@@ -1594,7 +1614,7 @@ export default function App() {
             </div>
 
             <div className={`p-4 rounded-2xl border text-xs leading-relaxed ${theme.innerCardBg}`}>
-              🌿 <b>Note:</b> {TUTORIAL_STEPS[tutorialStep].highlight}
+              🌿 <b>Tip:</b> {TUTORIAL_STEPS[tutorialStep].highlight}
             </div>
 
             <div className="flex items-center justify-between pt-2">
@@ -1618,7 +1638,7 @@ export default function App() {
                   onClick={closeTutorial}
                   className={`px-6 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}
                 >
-                  Enter Cozy Space ✨
+                  Explore Workspace ✨
                 </button>
               )}
             </div>
@@ -1632,7 +1652,7 @@ export default function App() {
           <div className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">
-                Share {currentMember.name}'s Cozy Snapshot
+                Share {currentMember.name}'s Snapshot
               </h3>
               <button onClick={() => setShowShareModal(false)}>
                 <X className="w-4 h-4" />
@@ -1909,9 +1929,7 @@ export default function App() {
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className={`border rounded-3xl max-w-md w-full p-6 space-y-4 ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
-              <h3 className="font-serif italic text-2xl">
-                Real-Time Cloud Sync
-              </h3>
+              <h3 className="font-serif italic text-2xl">Real-Time Cloud Sync</h3>
               <button onClick={() => setShowSyncModal(false)}>
                 <X className="w-4 h-4" />
               </button>
