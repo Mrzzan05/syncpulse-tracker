@@ -5,8 +5,8 @@ import {
   Play, Pause, RotateCcw, TrendingUp, Bell, Sparkles,
   Users, Cloud, Check, X, GraduationCap, HelpCircle,
   Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
-  Sun, Moon, Coffee, CloudRain, VolumeX, LayoutDashboard, Menu,
-  Compass, ArrowRight
+  Sun, Moon, Coffee, CloudRain, VolumeX, Menu,
+  Compass, Flame, Award, Trophy
 } from 'lucide-react';
 import {
   INITIAL_STATE, AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette
@@ -33,6 +33,7 @@ interface CozyStyle {
   accentText: string;
   barColor: string;
   timelineLine: string;
+  heatLevels: [string, string, string, string];
 }
 
 const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
@@ -56,7 +57,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
           accentText: 'text-[#8B47C2]',
           barColor: 'from-[#9D65C9] to-[#E879F9]',
-          timelineLine: 'border-purple-300'
+          timelineLine: 'border-purple-300',
+          heatLevels: ['bg-purple-100/70 border-purple-200/60', 'bg-purple-300 border-purple-400', 'bg-purple-500 border-purple-600', 'bg-fuchsia-600 border-fuchsia-700']
         }
       : {
           name: 'Cozy Velvet Lavender 💜',
@@ -76,7 +78,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
           accentText: 'text-[#DFB6FF]',
           barColor: 'from-[#A855F7] to-[#F472B6]',
-          timelineLine: 'border-purple-400/30'
+          timelineLine: 'border-purple-400/30',
+          heatLevels: ['bg-purple-950/60 border-purple-800/30', 'bg-purple-700/60 border-purple-500/40', 'bg-purple-500 border-purple-400', 'bg-fuchsia-400 border-pink-300 shadow-sm shadow-fuchsia-400/50']
         };
   }
 
@@ -100,7 +103,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
           accentText: 'text-[#C85A32]',
           barColor: 'from-[#D97757] to-[#F59E0B]',
-          timelineLine: 'border-orange-300'
+          timelineLine: 'border-orange-300',
+          heatLevels: ['bg-orange-100/70 border-orange-200', 'bg-orange-300 border-orange-400', 'bg-orange-500 border-orange-600', 'bg-amber-600 border-amber-700']
         }
       : {
           name: 'Fireside Terracotta',
@@ -120,7 +124,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
           accentText: 'text-[#FDBA8C]',
           barColor: 'from-[#EA580C] to-[#FBBF24]',
-          timelineLine: 'border-orange-400/30'
+          timelineLine: 'border-orange-400/30',
+          heatLevels: ['bg-orange-950/50 border-orange-900/30', 'bg-orange-700/60 border-orange-600/40', 'bg-orange-500 border-orange-400', 'bg-amber-400 border-yellow-300']
         };
   }
 
@@ -144,7 +149,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
           accentText: 'text-[#387558]',
           barColor: 'from-[#4E8C6F] to-[#84CC16]',
-          timelineLine: 'border-emerald-300'
+          timelineLine: 'border-emerald-300',
+          heatLevels: ['bg-emerald-100/70 border-emerald-200', 'bg-emerald-300 border-emerald-400', 'bg-emerald-500 border-emerald-600', 'bg-teal-600 border-teal-700']
         }
       : {
           name: 'Forest Matcha Night',
@@ -164,7 +170,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
           progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
           accentText: 'text-[#86EFAC]',
           barColor: 'from-[#10B981] to-[#84CC16]',
-          timelineLine: 'border-emerald-400/30'
+          timelineLine: 'border-emerald-400/30',
+          heatLevels: ['bg-emerald-950/50 border-emerald-900/30', 'bg-emerald-700/60 border-emerald-600/40', 'bg-emerald-500 border-emerald-400', 'bg-lime-400 border-emerald-300']
         };
   }
 
@@ -187,7 +194,8 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
         accentText: 'text-[#4A6B65]',
         barColor: 'from-[#4A6B65] to-[#D99B52]',
-        timelineLine: 'border-[#D6CFC2]'
+        timelineLine: 'border-[#D6CFC2]',
+        heatLevels: ['bg-[#EBE5D9] border-[#DCD3C2]', 'bg-[#94B0A7] border-[#7A9A90]', 'bg-[#5B7F78] border-[#4A6B65]', 'bg-[#C88A4B] border-[#B0753B]']
       }
     : {
         name: 'Cozy Espresso & Amber ☕',
@@ -207,17 +215,16 @@ const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
         progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
         accentText: 'text-[#E6B88A]',
         barColor: 'from-[#5B7F78] to-[#E09F5A]',
-        timelineLine: 'border-[#383430]'
+        timelineLine: 'border-[#383430]',
+        heatLevels: ['bg-[#262320] border-[#332F2B]', 'bg-[#3F5E57] border-[#527870]', 'bg-[#66968C] border-[#84A98C]', 'bg-[#E09F5A] border-[#F3B978] shadow-sm shadow-amber-500/40']
       };
 };
 
-// Helper: Convert "HH:MM" to minutes from midnight
 const toMins = (timeStr: string): number => {
   const [h, m] = (timeStr || '09:00').split(':').map(Number);
   return (h || 0) * 60 + (m || 0);
 };
 
-// Helper: Convert minutes from midnight back to "HH:MM"
 const fromMins = (total: number): string => {
   const h = Math.floor(total / 60) % 24;
   const m = total % 60;
@@ -226,22 +233,22 @@ const fromMins = (total: number): string => {
 
 const TUTORIAL_STEPS = [
   {
-    title: 'Phase 2: Visual Daily Timeline ⏳✨',
+    title: 'Phase 3: Habit Heatmaps & Streaks 🔥🏆',
+    subtitle: 'Inspired by GitHub Contributions & Duolingo Streaks.',
+    description: 'Consistency is now visually rewarding! Check the top banner and the Squad Analytics tab to see your 28-Day Habit Heatmap, your active Daily Streak flame, and your RPG XP bar.',
+    highlight: 'Every focused minute gives you +10 XP. Open the Analytics tab to view your unlocked Achievement Badges!'
+  },
+  {
+    title: 'Visual Daily Timeline ⏳✨',
     subtitle: 'Inspired by Structured & Amie Calendar.',
-    description: 'Your classes and daily tasks are now woven together into a single chronological river! You can see what’s happening right now, what’s coming up next, and how much time is left.',
-    highlight: 'Look for the pulsing "HAPPENING NOW" or "UP NEXT" badges on your timeline—and switch days anytime to preview tomorrow!'
+    description: 'Your classes and daily tasks merge into one chronological river with a live "HAPPENING NOW" indicator and automatic Free Focus Windows.',
+    highlight: 'Check-in to any class or task right inside the timeline to earn instant XP and keep your daily streak alive!'
   },
   {
-    title: 'Smart "Free Focus Windows" 🌿',
-    subtitle: 'Turn gaps between classes into progress.',
-    description: 'Whenever you have a gap of 45+ minutes between two scheduled items, SyncPulse automatically detects a "Free Focus Window" and lets you launch your focus timer with 1 click!',
-    highlight: 'Check-in to classes or complete tasks right inside the timeline to trigger confetti and log minutes automatically.'
-  },
-  {
-    title: 'Sidebar + Persistent Timer Dock 🎧',
-    subtitle: 'Everything in its right place.',
-    description: 'Switch between Mehrsan ☕ and Ronak 💜 on the left sidebar, turn on soothing Rain audio, and use the bottom floating timer dock across any tab.',
-    highlight: 'Next up in Phase 3: 30-Day GitHub/Duolingo Habit Heatmap & Streak Badges!'
+    title: 'Cozy Themes & Persistent Timer Dock 🎧',
+    subtitle: 'Warm Minimalism for Mehrsan & Ronak.',
+    description: 'Switch profiles in the left sidebar to transform the sanctuary between Cozy Espresso ☕ and Velvet Lavender 💜, play soothing Rain audio, and track time from the bottom dock.',
+    highlight: 'Next up in Phase 4: One-Click Cloud Room Sync, JSON Backups & Installable App (.exe / .apk / PWA)!'
   }
 ];
 
@@ -272,7 +279,6 @@ export default function App() {
   const [selectedDay, setSelectedDay] = useState<string>(realTodayName);
   const [timelineDay, setTimelineDay] = useState<string>(realTodayName);
 
-  // Live Current Clock for Timeline "NOW" Indicator
   const [nowMinutes, setNowMinutes] = useState<number>(() => {
     const d = new Date();
     return d.getHours() * 60 + d.getMinutes();
@@ -348,7 +354,7 @@ export default function App() {
 
   // Modals
   const [showTutorial, setShowTutorial] = useState<boolean>(() => {
-    return !localStorage.getItem('syncpulse_phase2_seen');
+    return !localStorage.getItem('syncpulse_phase3_seen');
   });
   const [tutorialStep, setTutorialStep] = useState<number>(0);
   const [showShareModal, setShowShareModal] = useState<boolean>(false);
@@ -474,8 +480,8 @@ export default function App() {
   const logTime = (userId: string, goalId: string | null, title: string, minutes: number) => {
     if (minutes <= 0) return;
     confetti({
-      particleCount: 50,
-      spread: 65,
+      particleCount: 55,
+      spread: 68,
       origin: { y: 0.8 },
       colors: currentMember.theme === 'lavender-blush' ? ['#C084FC', '#F472B6', '#FDE68A'] : ['#84A98C', '#E09F5A', '#FDE68A']
     });
@@ -720,35 +726,141 @@ export default function App() {
       .filter((l) => l.userId === uid && l.date === todayStr)
       .reduce((acc, cur) => acc + cur.minutes, 0);
 
-  const getTotalHours = (uid: string) => {
-    const goalMins = state.goals
+  const getTotalMinutes = (uid: string) =>
+    state.goals
       .filter((g) => g.userId === uid)
       .reduce((acc, g) => acc + g.loggedMinutes, 0);
-    return (goalMins / 60).toFixed(1);
+
+  const getTotalHours = (uid: string) => (getTotalMinutes(uid) / 60).toFixed(1);
+
+  // ============================================================================
+  // PHASE 3: STREAK CALCULATOR, 28-DAY GITHUB HEATMAP & RPG XP / BADGES
+  // ============================================================================
+  const getStreakDays = (uid: string): number => {
+    const userDates = new Set(
+      state.logs.filter((l) => l.userId === uid && l.minutes > 0).map((l) => l.date)
+    );
+    let streak = 0;
+    for (let i = 0; i < 60; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dStr = d.toISOString().split('T')[0];
+      if (userDates.has(dStr)) {
+        streak++;
+      } else if (i === 0) {
+        // If today has no log yet, check if yesterday had a streak alive
+        continue;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const get28DayGrid = (uid: string) => {
+    return Array.from({ length: 28 }, (_, idx) => {
+      const daysAgo = 27 - idx;
+      const d = new Date();
+      d.setDate(d.getDate() - daysAgo);
+      const dateStr = d.toISOString().split('T')[0];
+      const prettyDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const mins = state.logs
+        .filter((l) => l.userId === uid && l.date === dateStr)
+        .reduce((a, b) => a + b.minutes, 0);
+      // Intensity 0..3
+      const level = mins === 0 ? 0 : mins < 45 ? 1 : mins < 120 ? 2 : 3;
+      return { dateStr, prettyDate, mins, level };
+    });
   };
 
   const getLevelInfo = (uid: string) => {
+    const totalMins = getTotalMinutes(uid);
+    const totalXP = totalMins * 10; // 10 XP per focused minute
+    const xpPerLevel = 6000; // 600 mins (10 hours) per level
+    const level = Math.max(1, Math.floor(totalXP / xpPerLevel) + 1);
+    const currentLevelXP = totalXP % xpPerLevel;
+    const progressPct = Math.min(100, Math.round((currentLevelXP / xpPerLevel) * 100));
+    const title =
+      level >= 8
+        ? 'Grandmaster Luminary 👑'
+        : level >= 5
+        ? 'Master Scholar ✨'
+        : level >= 3
+        ? 'Steady Seeker 🌿'
+        : 'Rising Star 🌱';
+    return { level, title, totalXP, currentLevelXP, xpPerLevel, progressPct };
+  };
+
+  const getBadges = (uid: string) => {
+    const userLogs = state.logs.filter((l) => l.userId === uid);
     const totalHrs = Number(getTotalHours(uid));
-    const level = Math.max(1, Math.floor(totalHrs / 15) + 1);
-    return { level, title: level >= 5 ? 'Master Scholar ✨' : level >= 3 ? 'Steady Seeker 🌿' : 'Rising Star 🌱' };
+    const streak = getStreakDays(uid);
+    const hasDeepSession = userLogs.some((l) => l.minutes >= 90);
+    const totalCheersReceived = userLogs.reduce((a, b) => a + (b.cheers || 0), 0);
+
+    return [
+      {
+        id: 'spark',
+        icon: '🌱',
+        name: 'First Spark',
+        desc: 'Logged your first focus session',
+        unlocked: userLogs.length > 0
+      },
+      {
+        id: 'flame',
+        icon: '🔥',
+        name: '3-Day Flame',
+        desc: 'Maintained a 3+ day focus streak',
+        unlocked: streak >= 3
+      },
+      {
+        id: 'deep',
+        icon: '⚡',
+        name: 'Deep Diver',
+        desc: 'Completed a 90+ min focus block',
+        unlocked: hasDeepSession
+      },
+      {
+        id: 'beloved',
+        icon: '💜',
+        name: 'Warm Spirit',
+        desc: 'Received 5+ heart cheers from squad',
+        unlocked: totalCheersReceived >= 5
+      },
+      {
+        id: 'club10',
+        icon: '🏛️',
+        name: '10-Hour Club',
+        desc: 'Banked over 10 total hours in goals',
+        unlocked: totalHrs >= 10
+      },
+      {
+        id: 'legend50',
+        icon: '👑',
+        name: '50-Hour Legend',
+        desc: 'Banked over 50 total hours in goals',
+        unlocked: totalHrs >= 50
+      }
+    ];
   };
 
   const closeTutorial = () => {
-    localStorage.setItem('syncpulse_phase2_seen', 'true');
+    localStorage.setItem('syncpulse_phase3_seen', 'true');
     setShowTutorial(false);
     setTutorialStep(0);
   };
 
   const generateShareText = () => {
     const todayMins = getTodayMinutes(activeUser);
-    const completedTasks = state.tasks.filter((t) => t.userId === activeUser && t.completed).length;
+    const streak = getStreakDays(activeUser);
+    const lv = getLevelInfo(activeUser);
     const topGoals = state.goals
       .filter((g) => g.userId === activeUser)
       .slice(0, 3)
       .map((g) => `• ${g.title}: ${(g.loggedMinutes / 60).toFixed(1)}h / ${g.targetHours}h`)
       .join('\n');
 
-    return `🌿 SyncPulse Cozy Log — ${currentMember.name}\n⏱️ Today's Focus: ${Math.floor(todayMins / 60)}h ${todayMins % 60}m\n✅ Tasks Done: ${completedTasks}\n🏆 Total Banked: ${getTotalHours(activeUser)} hrs\n\n🎯 Current Goals:\n${topGoals}`;
+    return `🌿 SyncPulse Cozy Log — ${currentMember.name}\n🔥 Streak: ${streak} Days | ⭐ Lv.${lv.level} (${lv.totalXP} XP)\n⏱️ Today's Focus: ${Math.floor(todayMins / 60)}h ${todayMins % 60}m\n🏆 Total Banked: ${getTotalHours(activeUser)} hrs\n\n🎯 Current Goals:\n${topGoals}`;
   };
 
   const copyShareStatus = () => {
@@ -760,10 +872,10 @@ export default function App() {
   const userGoals = state.goals.filter((g) => g.userId === activeUser);
   const userTasks = state.tasks.filter((t) => t.userId === activeUser);
   const levelInfo = getLevelInfo(activeUser);
+  const activeStreak = getStreakDays(activeUser);
+  const activeBadges = getBadges(activeUser);
 
-  // ============================================================================
-  // PHASE 2: BUILD UNIFIED VISUAL DAILY TIMELINE (STRUCTURED / AMIE STYLE)
-  // ============================================================================
+  // Unified Visual Daily Timeline
   interface TimelineEntry {
     id: string;
     kind: 'class' | 'task' | 'gap';
@@ -813,7 +925,7 @@ export default function App() {
         id: t.id,
         kind: 'task',
         title: t.title,
-        subtitle: `Scheduled Task • +${t.estimatedMinutes}m credit`,
+        subtitle: `Scheduled Task • +${t.estimatedMinutes * 10} XP`,
         badge: 'Intention',
         startMins: sM,
         endMins: eM,
@@ -827,7 +939,6 @@ export default function App() {
 
     baseEntries.sort((a, b) => a.startMins - b.startMins);
 
-    // Insert Smart "Free Focus Windows" when gap between events >= 45 mins
     const streamWithGaps: TimelineEntry[] = [];
     for (let i = 0; i < baseEntries.length; i++) {
       const current = baseEntries[i];
@@ -885,7 +996,7 @@ export default function App() {
     { id: 'dashboard', label: 'Today’s Timeline', icon: Compass, badge: `${dailyStream.filter(i => i.kind !== 'gap' && !i.completed).length}` },
     { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: `${userGoals.length}` },
     { id: 'schedule', label: 'Weekly Classes', icon: Calendar },
-    { id: 'analytics', label: 'Squad Analytics', icon: TrendingUp },
+    { id: 'analytics', label: 'Heatmaps & Badges', icon: Trophy, badge: `${activeBadges.filter(b => b.unlocked).length}/6` },
   ];
 
   return (
@@ -909,7 +1020,7 @@ export default function App() {
           </div>
           <span className="font-serif italic text-xl">SyncPulse</span>
           <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
-            {currentMember.name}
+            🔥 {activeStreak}d
           </span>
         </div>
         <button
@@ -951,7 +1062,7 @@ export default function App() {
             )}
           </div>
 
-          {/* Squad Companions Switcher */}
+          {/* Squad Companions Switcher with Live Streak Badges */}
           <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
               <span className={`text-[11px] font-mono uppercase tracking-wider ${theme.textMuted}`}>
@@ -972,6 +1083,7 @@ export default function App() {
                 const isSelected = member.id === activeUser;
                 const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
                 const todayMins = getTodayMinutes(member.id);
+                const mStreak = getStreakDays(member.id);
                 return (
                   <div
                     key={member.id}
@@ -1000,9 +1112,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1">
-                      <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md border ${mStyle.softBadge}`}>
-                        {getTotalHours(member.id)}h
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-0.5" title="Active Streak">
+                        🔥{mStreak}
                       </span>
                       {member.id !== 'mehrsan' && member.id !== 'ronak' && (
                         <button
@@ -1136,47 +1248,68 @@ export default function App() {
       {/* MAIN WORKSPACE CONTENT AREA */}
       <div className="flex-1 min-w-0 relative z-10 pb-32">
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-7 space-y-7">
-          {/* Top Personal Greeting + Live Next Up Banner */}
-          <section className={`p-6 rounded-3xl border backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4 cozy-transition ${theme.cardBg}`}>
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className={`text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
-                  Lv.{levelInfo.level} • {levelInfo.title}
-                </span>
-                <span className={`text-xs font-mono ${theme.textMuted}`}>
-                  🕐 {fromMins(nowMinutes)} • {realTodayName}
-                </span>
-                {nextUpcomingItem && (
-                  <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${theme.innerCardBg}`}>
-                    <Sparkles className="w-3 h-3" />
-                    Next: <b>{nextUpcomingItem.title}</b> ({nextUpcomingItem.startTime})
+          {/* Top Personal Greeting + Duolingo Streak & RPG XP Bar */}
+          <section className={`p-6 rounded-3xl border backdrop-blur-md space-y-4 cozy-transition ${theme.cardBg}`}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold flex items-center gap-1">
+                    🔥 {activeStreak} Day Streak
                   </span>
-                )}
+                  <span className={`text-[11px] font-mono uppercase px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
+                    Lv.{levelInfo.level} • {levelInfo.title}
+                  </span>
+                  {nextUpcomingItem && (
+                    <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${theme.innerCardBg}`}>
+                      <Sparkles className="w-3 h-3" />
+                      Next: <b>{nextUpcomingItem.title}</b> ({nextUpcomingItem.startTime})
+                    </span>
+                  )}
+                </div>
+                <h2 className="font-serif italic text-3xl sm:text-4xl tracking-tight pt-1">
+                  Flow through your day, {currentMember.name}.
+                </h2>
+                <input
+                  type="text"
+                  value={currentMember.statusNote || ''}
+                  onChange={(e) => updateMemberStatus(e.target.value)}
+                  placeholder="Write a personal intention or status note..."
+                  className={`text-xs bg-transparent border-b border-transparent focus:border-current/30 focus:outline-none w-full max-w-md italic ${theme.textMuted}`}
+                />
               </div>
-              <h2 className="font-serif italic text-3xl sm:text-4xl tracking-tight pt-1">
-                Flow through your day, {currentMember.name}.
-              </h2>
-              <input
-                type="text"
-                value={currentMember.statusNote || ''}
-                onChange={(e) => updateMemberStatus(e.target.value)}
-                placeholder="Write a personal intention or status note..."
-                className={`text-xs bg-transparent border-b border-transparent focus:border-current/30 focus:outline-none w-full max-w-md italic ${theme.textMuted}`}
-              />
+
+              <div className="flex items-center gap-3 shrink-0">
+                <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
+                  <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today's Focus</span>
+                  <span className={`font-mono font-bold text-xl ${theme.accentText}`}>
+                    {Math.floor(getTodayMinutes(activeUser) / 60)}h {getTodayMinutes(activeUser) % 60}m
+                  </span>
+                </div>
+                <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
+                  <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Total Banked</span>
+                  <span className="font-mono font-bold text-xl">
+                    {getTotalHours(activeUser)}h
+                  </span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
-              <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
-                <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Today's Focus</span>
-                <span className={`font-mono font-bold text-xl ${theme.accentText}`}>
-                  {Math.floor(getTodayMinutes(activeUser) / 60)}h {getTodayMinutes(activeUser) % 60}m
+            {/* RPG XP Progress Bar */}
+            <div className="pt-2 border-t border-current/10">
+              <div className="flex items-center justify-between text-[11px] font-mono mb-1.5">
+                <span className="flex items-center gap-1.5">
+                  <Trophy className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                  <span>Experience Points: <b>{levelInfo.totalXP.toLocaleString()} XP</b></span>
+                </span>
+                <span className={theme.textMuted}>
+                  {levelInfo.currentLevelXP} / {levelInfo.xpPerLevel} XP to Level {levelInfo.level + 1} ({levelInfo.progressPct}%)
                 </span>
               </div>
-              <div className={`px-4 py-3 rounded-2xl border text-right ${theme.innerCardBg}`}>
-                <span className={`text-[10px] font-mono uppercase block ${theme.textMuted}`}>Total Banked</span>
-                <span className="font-mono font-bold text-xl">
-                  {getTotalHours(activeUser)}h
-                </span>
+              <div className="w-full h-2 rounded-full bg-current/10 overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${theme.progressBar}`}
+                  style={{ width: `${levelInfo.progressPct}%` }}
+                />
               </div>
             </div>
           </section>
@@ -1187,7 +1320,6 @@ export default function App() {
               {/* Left 7 Cols: Visual Daily Timeline Stream */}
               <div className="lg:col-span-7 space-y-6">
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
-                  {/* Timeline Header & Day Switcher */}
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
                       <h3 className="font-serif italic text-2xl flex items-center gap-2">
@@ -1231,11 +1363,11 @@ export default function App() {
                     })}
                   </div>
 
-                  {/* Quick Add Scheduled Task to Timeline */}
+                  {/* Quick Add Scheduled Task */}
                   <form onSubmit={addTask} className="flex flex-wrap gap-2 mb-6">
                     <input
                       type="text"
-                      placeholder={`Add task to timeline (e.g., Practice French / Code)...`}
+                      placeholder="Add task to timeline (e.g., Practice French / Code)..."
                       value={newTaskTitle}
                       onChange={(e) => setNewTaskTitle(e.target.value)}
                       className={`flex-1 min-w-[160px] border rounded-2xl px-3.5 py-2 text-xs focus:outline-none ${theme.innerCardBg}`}
@@ -1245,7 +1377,6 @@ export default function App() {
                       value={newTaskTime}
                       onChange={(e) => setNewTaskTime(e.target.value)}
                       className={`border rounded-2xl px-2.5 py-2 text-xs font-mono ${theme.innerCardBg}`}
-                      title="Start Time"
                     />
                     <select
                       value={newTaskMins}
@@ -1266,17 +1397,16 @@ export default function App() {
                     </button>
                   </form>
 
-                  {/* CHRONOLOGICAL VERTICAL STREAM (STRUCTURED STYLE) */}
+                  {/* CHRONOLOGICAL STREAM */}
                   {dailyStream.length === 0 ? (
                     <div className={`p-8 rounded-2xl border text-center space-y-2 ${theme.innerCardBg}`}>
                       <p className="font-serif italic text-xl">An open, unhurried canvas ✨</p>
                       <p className={`text-xs ${theme.textMuted}`}>
-                        No fixed classes or tasks plotted for {timelineDay} yet. Add an intention above or start a focus session below!
+                        No fixed classes or tasks plotted for {timelineDay} yet.
                       </p>
                     </div>
                   ) : (
                     <div className="relative pl-3 sm:pl-5 space-y-4">
-                      {/* Vertical Timeline Spine */}
                       <div
                         className={`absolute top-3 bottom-3 left-[74px] sm:left-[86px] border-l-2 border-dashed ${theme.timelineLine}`}
                       />
@@ -1286,8 +1416,6 @@ export default function App() {
                           timelineDay === realTodayName &&
                           nowMinutes >= entry.startMins &&
                           nowMinutes <= entry.endMins;
-                        const isPast =
-                          timelineDay === realTodayName && nowMinutes > entry.endMins;
                         const isNextUp = nextUpcomingItem?.id === entry.id && !isHappeningNow;
 
                         const minsUntilStart = entry.startMins - nowMinutes;
@@ -1330,13 +1458,11 @@ export default function App() {
 
                         return (
                           <div key={entry.id} className="relative flex items-start gap-3 sm:gap-4">
-                            {/* Left Time Column */}
                             <div className="w-14 sm:w-16 text-right font-mono shrink-0 pt-2">
                               <span className="text-xs font-bold block">{entry.startTime}</span>
                               <span className={`text-[10px] block ${theme.textMuted}`}>{entry.endTime}</span>
                             </div>
 
-                            {/* Center Timeline Node */}
                             <button
                               onClick={() => {
                                 if (entry.kind === 'class' && entry.rawClass) {
@@ -1352,12 +1478,10 @@ export default function App() {
                                   ? 'bg-amber-400 border-amber-300 animate-ping'
                                   : `${theme.pageBg} border-current`
                               }`}
-                              title="Click to check-off"
                             >
                               {entry.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                             </button>
 
-                            {/* Right Event Card */}
                             <div
                               className={`flex-1 p-4 rounded-2xl border transition-all ${
                                 isHappeningNow
@@ -1385,7 +1509,7 @@ export default function App() {
                                 </div>
 
                                 <span className={`text-[11px] font-mono ${theme.textMuted}`}>
-                                  {entry.durationMins}m
+                                  +{entry.durationMins * 10} XP
                                 </span>
                               </div>
 
@@ -1442,7 +1566,7 @@ export default function App() {
                         Active Goals & Quick Time Log
                       </h3>
                       <p className={`text-xs ${theme.textMuted}`}>
-                        Tap +15m, +30m, or +1h to bank extra study time directly into a goal
+                        Tap +15m, +30m, or +1h to bank extra study time and earn XP
                       </p>
                     </div>
                     <button
@@ -1522,8 +1646,43 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Right 5 Cols: Shared Squad Feed + Exams */}
+              {/* Right 5 Cols: Mini 28-Day Heatmap Preview + Shared Squad Feed + Exams */}
               <div className="lg:col-span-5 space-y-6">
+                {/* Mini 28-Day Habit Consistency Grid */}
+                <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                        <Flame className="w-5 h-5 text-amber-400" />
+                        28-Day Habit Heatmap
+                      </h3>
+                      <p className={`text-xs ${theme.textMuted}`}>
+                        {currentMember.name}'s daily focus intensity
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setActiveTab('analytics')}
+                      className={`text-[11px] font-mono underline ${theme.accentText}`}
+                    >
+                      All Badges →
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-2 pt-2">
+                    {get28DayGrid(activeUser).map((cell) => (
+                      <div
+                        key={cell.dateStr}
+                        className={`h-7 rounded-lg border transition-all relative group ${theme.heatLevels[cell.level]}`}
+                      >
+                        <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-2 py-0.5 rounded whitespace-nowrap z-20 pointer-events-none shadow">
+                          {cell.prettyDate}: {cell.mins}m
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Shared Squad Feed */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
@@ -1535,7 +1694,7 @@ export default function App() {
                     </span>
                   </div>
 
-                  <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
                     {state.logs.slice(0, 14).map((log) => {
                       const logMember = state.members.find((m) => m.id === log.userId);
                       const mStyle = GET_COZY_THEME(logMember?.theme || 'warm-sage', isLatteMode);
@@ -1555,7 +1714,7 @@ export default function App() {
                                 <span className="font-bold">{logMember?.name}</span> • {log.targetTitle}
                               </p>
                               <span className={`text-[11px] font-mono ${theme.textMuted}`}>
-                                {log.timestamp} (+{log.minutes}m)
+                                {log.timestamp} (+{log.minutes}m • +{log.minutes * 10} XP)
                               </span>
                             </div>
                           </div>
@@ -1573,6 +1732,7 @@ export default function App() {
                   </div>
                 </div>
 
+                {/* University Exam Dates */}
                 <div className={`rounded-3xl p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
                     <GraduationCap className={`w-5 h-5 ${theme.accentText}`} />
@@ -1790,48 +1950,151 @@ export default function App() {
             </div>
           )}
 
-          {/* VIEW 4: ANALYTICS */}
+          {/* VIEW 4: PHASE 3 HABIT HEATMAPS, 7-DAY CHART & RPG BADGES */}
           {activeTab === 'analytics' && (
-            <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-                <div>
-                  <h3 className="font-serif italic text-2xl">7-Day Gentle Consistency Rhythm</h3>
-                  <p className={`text-xs ${theme.textMuted}`}>
-                    Comparing daily focused minutes side-by-side across your circle
-                  </p>
+            <div className="space-y-6">
+              {/* Side-by-Side 28-Day GitHub-Style Habit Heatmaps */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {state.members.map((member) => {
+                  const mStyle = GET_COZY_THEME(member.theme, isLatteMode);
+                  const grid = get28DayGrid(member.id);
+                  const mStreak = getStreakDays(member.id);
+                  const mLv = getLevelInfo(member.id);
+                  return (
+                    <div key={member.id} className={`rounded-3xl p-6 border space-y-4 ${theme.cardBg}`}>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <span className={`w-8 h-8 rounded-xl font-serif italic text-base flex items-center justify-center border ${mStyle.softBadge}`}>
+                            {member.avatar}
+                          </span>
+                          <div>
+                            <h4 className="font-serif italic text-2xl leading-none">
+                              {member.name}'s 28-Day Heatmap
+                            </h4>
+                            <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                              Lv.{mLv.level} ({mLv.totalXP} XP)
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 font-bold">
+                          🔥 {mStreak}d Streak
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-7 gap-2 pt-1">
+                        {grid.map((cell) => (
+                          <div
+                            key={cell.dateStr}
+                            className={`h-8 rounded-xl border transition-all relative group ${mStyle.heatLevels[cell.level]}`}
+                          >
+                            <span className="opacity-0 group-hover:opacity-100 absolute -top-7 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-2 py-0.5 rounded whitespace-nowrap z-20 pointer-events-none">
+                              {cell.prettyDate}: {cell.mins}m
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className={`flex items-center justify-between text-[11px] font-mono pt-1 ${theme.textMuted}`}>
+                        <span>4 Weeks Ago</span>
+                        <div className="flex items-center gap-1">
+                          <span>Less</span>
+                          {[0, 1, 2, 3].map((lv) => (
+                            <span key={lv} className={`w-3 h-3 rounded border inline-block ${mStyle.heatLevels[lv]}`} />
+                          ))}
+                          <span>More</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* RPG Achievement Badges Showcase */}
+              <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-serif italic text-2xl flex items-center gap-2">
+                      <Award className={`w-5 h-5 ${theme.accentText}`} />
+                      {currentMember.name}'s Sanctuary Badges & Milestones
+                    </h3>
+                    <p className={`text-xs ${theme.textMuted}`}>
+                      Unlock badges automatically by logging focus sessions, streaks, and cheering companions
+                    </p>
+                  </div>
+                  <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
+                    {activeBadges.filter((b) => b.unlocked).length} / {activeBadges.length} Unlocked
+                  </span>
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
-                  {state.members.map((m) => (
-                    <span key={m.id} className={`flex items-center gap-1.5 ${GET_COZY_THEME(m.theme, isLatteMode).accentText}`}>
-                      ● {m.name}
-                    </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {activeBadges.map((b) => (
+                    <div
+                      key={b.id}
+                      className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all ${
+                        b.unlocked
+                          ? `${theme.innerCardBg} ${theme.activeBorder}`
+                          : `${theme.innerCardBg} opacity-40 grayscale`
+                      }`}
+                    >
+                      <div className="text-2xl w-11 h-11 rounded-2xl flex items-center justify-center bg-current/5 shrink-0">
+                        {b.icon}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <h5 className="font-bold text-xs sm:text-sm">{b.name}</h5>
+                          {b.unlocked && (
+                            <span className="text-[10px] font-mono text-emerald-400">✓</span>
+                          )}
+                        </div>
+                        <p className={`text-[11px] ${theme.textMuted}`}>{b.desc}</p>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-current/10">
-                {last7Days.map((d) => (
-                  <div key={d.dateStr} className="flex flex-col items-center h-full justify-end">
-                    <div className="w-full flex items-end justify-center gap-1.5 h-48">
-                      {d.memberTotals.map((mt) => {
-                        const hPct = Math.round((mt.mins / maxChartMins) * 100);
-                        const barGrad = GET_COZY_THEME(mt.member.theme, isLatteMode).barColor;
-                        return (
-                          <div
-                            key={mt.member.id}
-                            className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-xl transition-all duration-500 relative group`}
-                            style={{ height: `${Math.max(8, hPct)}%` }}
-                          >
-                            <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-1.5 py-0.5 rounded whitespace-nowrap z-20">
-                              {mt.member.name[0]}: {mt.mins}m
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <span className={`text-xs font-mono mt-2 ${theme.textMuted}`}>{d.label}</span>
+              {/* 7-Day Bar Comparison */}
+              <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
+                  <div>
+                    <h3 className="font-serif italic text-2xl">7-Day Gentle Consistency Rhythm</h3>
+                    <p className={`text-xs ${theme.textMuted}`}>
+                      Comparing daily focused minutes side-by-side across your circle
+                    </p>
                   </div>
-                ))}
+                  <div className="flex flex-wrap items-center gap-4 text-xs font-mono">
+                    {state.members.map((m) => (
+                      <span key={m.id} className={`flex items-center gap-1.5 ${GET_COZY_THEME(m.theme, isLatteMode).accentText}`}>
+                        ● {m.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-3 items-end h-60 pt-8 px-2 border-b border-current/10">
+                  {last7Days.map((d) => (
+                    <div key={d.dateStr} className="flex flex-col items-center h-full justify-end">
+                      <div className="w-full flex items-end justify-center gap-1.5 h-48">
+                        {d.memberTotals.map((mt) => {
+                          const hPct = Math.round((mt.mins / maxChartMins) * 100);
+                          const barGrad = GET_COZY_THEME(mt.member.theme, isLatteMode).barColor;
+                          return (
+                            <div
+                              key={mt.member.id}
+                              className={`w-4 sm:w-6 bg-gradient-to-t ${barGrad} rounded-t-xl transition-all duration-500 relative group`}
+                              style={{ height: `${Math.max(8, hPct)}%` }}
+                            >
+                              <span className="opacity-0 group-hover:opacity-100 absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono bg-stone-900 text-white px-1.5 py-0.5 rounded whitespace-nowrap z-20">
+                                {mt.member.name[0]}: {mt.mins}m
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <span className={`text-xs font-mono mt-2 ${theme.textMuted}`}>{d.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -1846,7 +2109,6 @@ export default function App() {
               <button
                 onClick={() => switchTimerMode(timerMode === 'stopwatch' ? 'pomodoro' : 'stopwatch')}
                 className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono border shrink-0 transition ${theme.softBadge}`}
-                title="Click to switch between Open Stopwatch and 25m Pomodoro"
               >
                 {timerMode === 'pomodoro' ? '🍅 25m' : '⏱️ Timer'}
               </button>
@@ -1879,7 +2141,6 @@ export default function App() {
               <button
                 onClick={handleSaveTimerSession}
                 className={`px-3.5 py-2 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition ${theme.softBadge}`}
-                title="Save and credit elapsed time"
               >
                 <Check className="w-3.5 h-3.5" />
                 Log
@@ -1890,7 +2151,6 @@ export default function App() {
                   setTimerSeconds(timerMode === 'pomodoro' ? 25 * 60 : 0);
                 }}
                 className={`p-2 rounded-xl border ${theme.innerCardBg}`}
-                title="Reset Timer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
@@ -1905,7 +2165,7 @@ export default function App() {
           <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-5 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
-                Phase 2 Update • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
+                Phase 3 Update • {tutorialStep + 1} / {TUTORIAL_STEPS.length}
               </span>
               <button onClick={closeTutorial} className={`text-xs font-mono ${theme.textMuted}`}>
                 Close ✕
@@ -1949,7 +2209,7 @@ export default function App() {
                   onClick={closeTutorial}
                   className={`px-6 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}
                 >
-                  Explore Timeline ✨
+                  See Heatmaps & Badges ✨
                 </button>
               )}
             </div>
@@ -1977,8 +2237,12 @@ export default function App() {
                     {currentMember.avatar}
                   </div>
                   <div>
-                    <h4 className="font-bold text-sm">{currentMember.name}</h4>
-                    <span className={`text-[11px] ${theme.textMuted}`}>{currentMember.tagline}</span>
+                    <h4 className="font-bold text-sm">
+                      {currentMember.name} • 🔥 {activeStreak}d
+                    </h4>
+                    <span className={`text-[11px] font-mono ${theme.textMuted}`}>
+                      Lv.{levelInfo.level} ({levelInfo.totalXP} XP)
+                    </span>
                   </div>
                 </div>
                 <span className={`text-xs font-mono px-2.5 py-1 rounded-xl border ${theme.softBadge}`}>

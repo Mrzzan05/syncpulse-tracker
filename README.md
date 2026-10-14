@@ -17,7 +17,7 @@
 
 ## ✨ Overview
 
-**SyncPulse** is a collaborative productivity web application inspired by world-class tools like **Notion**, **Linear**, **Toggl Track**, and **Structured**. Instead of cold, stressful neon dashboards, SyncPulse embraces **Warm Minimalism**—offering a calm, cozy environment where companions can track their study hours, check into university/language classes, and cheer each other on in real time.
+**SyncPulse** is a collaborative productivity web application inspired by world-class tools like **Notion**, **Linear**, **Toggl Track**, **Structured**, and **Duolingo**. Instead of cold, stressful neon dashboards, SyncPulse embraces **Warm Minimalism**—offering a calm, cozy environment where companions can track their study hours, check into university/language classes, maintain daily streaks, and cheer each other on in real time.
 
 🔗 **Try it Live:** [**https://mrzzan05.github.io/syncpulse-tracker/**](https://mrzzan05.github.io/syncpulse-tracker/)
 
@@ -36,12 +36,13 @@
 * **Unified Day Stream:** Automatically merges your fixed university/language classes for the day with your scheduled daily tasks into a chronological vertical timeline.
 * **Live "NOW" Indicator & Countdowns:** Highlights what is happening right now, calculates time until your next session, and detects **Free Focus Windows** between classes.
 
-### 🧭 3. Notion/Linear-Inspired Sidebar & Floating Timer Dock
+### 🔥 3. Habit Heatmaps, Streaks & RPG Progression (*GitHub* & *Duolingo* Inspired)
+* **28-Day Contribution Heatmaps:** Side-by-side color-graded activity grids showing daily focus intensity for each companion.
+* **Live Streak Counter & XP Levels:** Earn **10 XP** for every focused minute, maintain multi-day streaks (🔥), and unlock 6 milestone **Achievement Badges**.
+
+### 🧭 4. Notion/Linear-Inspired Sidebar & Floating Timer Dock
 * **Distraction-Free Sidebar Navigation:** Clean separation between daily flow, goal time-banks, weekly schedules, and visual analytics.
 * **Persistent Floating Focus Dock:** Inspired by *Toggl* and *Spotify*, the bottom floating timer (supporting both **Open Stopwatch** and **25m Cozy Pomodoro**) stays with you across all tabs.
-
-### 🌧️ 4. Built-In Web Audio Soundscape
-* Zero external audio files required—synthesizes soothing **Soft Rain** and **432Hz Warm Zen** frequencies directly in the browser using the native Web Audio API.
 
 ---
 
@@ -49,7 +50,7 @@
 
 - [x] **Phase 1:** Notion/Linear Sidebar Architecture + Persistent Floating Timer Dock + Pro Documentation
 - [x] **Phase 2:** Visual Daily Timeline (*Structured* style) with live "Now" indicator, Free Focus Windows & class countdowns
-- [ ] **Phase 3:** 30-Day Habit Heatmap (*GitHub / Duolingo* style) + Streak Counter & RPG Badges
+- [x] **Phase 3:** 28-Day Habit Heatmap (*GitHub / Duolingo* style) + Streak Counter, XP Bar & Achievement Badges
 - [ ] **Phase 4:** One-Click Cloud Room Sync + JSON Data Backup/Restore + Installable PWA / Desktop & Mobile builds
 
 ---
