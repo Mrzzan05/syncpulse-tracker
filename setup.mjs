@@ -1,739 +1,49 @@
-// setup.mjs - SyncPulse v4.0 (Full Claude Audit Fix + Modular Architecture + PWA + JSON Backup)
+// setup.mjs - SyncPulse v4.1 (Phosphor Icons Duotone & Fill Edition)
 // Run with: node setup.mjs
 import fs from 'fs';
 import path from 'path';
 
 const files = {
-  'public/manifest.json': JSON.stringify({
-    name: 'SyncPulse — Cozy Co-Op Sanctuary',
-    short_name: 'SyncPulse',
-    description: 'Warm-minimalist shared productivity, timeline, and habit tracker.',
-    start_url: './',
-    display: 'standalone',
-    background_color: '#151413',
-    theme_color: '#5B7F78',
-    icons: [
-      {
-        src: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/2615.png',
-        sizes: '72x72',
-        type: 'image/png'
-      },
-      {
-        src: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2615.svg',
-        sizes: '192x192 512x512',
-        type: 'image/svg+xml',
-        purpose: 'any maskable'
-      }
-    ]
+  'package.json': JSON.stringify({
+    name: 'syncpulse-squad-tracker',
+    private: true,
+    version: '4.1.0',
+    type: 'module',
+    scripts: {
+      dev: 'vite',
+      build: 'vite build',
+      preview: 'vite preview'
+    },
+    dependencies: {
+      '@phosphor-icons/react': '^2.1.7',
+      'lucide-react': '^0.344.0',
+      'react': '^18.2.0',
+      'react-dom': '^18.2.0',
+      'canvas-confetti': '^1.9.2'
+    },
+    devDependencies: {
+      '@types/react': '^18.2.66',
+      '@types/react-dom': '^18.2.22',
+      '@vitejs/plugin-react': '^4.2.1',
+      'autoprefixer': '^10.4.19',
+      'postcss': '^8.4.38',
+      'tailwindcss': '^3.4.3',
+      'typescript': '^5.2.2',
+      'vite': '^5.2.0'
+    }
   }, null, 2),
-
-  'public/sw.js': `const CACHE_NAME = 'syncpulse-v4-cache';
-self.addEventListener('install', (e) => {
-  self.skipWaiting();
-});
-self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim());
-});
-self.addEventListener('fetch', (e) => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
-  );
-});
-`,
-
-  'index.html': `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#151413" />
-    <meta name="description" content="SyncPulse — Cozy Co-Op Productivity, Visual Timeline & Habit Tracker for Mehrsan & Ronak" />
-    <link rel="manifest" href="./manifest.json" />
-    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2615.svg" />
-    <title>SyncPulse — Cozy Shared Sanctuary</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="antialiased">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js').catch(() => {});
-        });
-      }
-    </script>
-  </body>
-</html>
-`,
-
-  'tailwind.config.js': `/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  theme: {
-    extend: {
-      fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-        serif: ['"Instrument Serif"', 'serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
-      },
-    },
-  },
-  plugins: [],
-};
-`,
-
-  'src/index.css': `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    overflow-x: hidden;
-  }
-}
-
-.cozy-transition {
-  transition: background-color 0.35s ease,
-              border-color 0.35s ease,
-              color 0.25s ease,
-              box-shadow 0.35s ease;
-}
-
-.paper-grain {
-  background-image: radial-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-
-@keyframes breathe {
-  0%, 100% { transform: translate(0px, 0px) scale(1); opacity: 0.7; }
-  50% { transform: translate(14px, -14px) scale(1.05); opacity: 0.95; }
-}
-
-.cozy-orb {
-  animation: breathe 12s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cozy-orb, .animate-ping, .animate-pulse {
-    animation: none !important;
-  }
-  .cozy-transition {
-    transition: none !important;
-  }
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 9999px;
-}
-`,
-
-  'src/types.ts': `export type ThemePalette = 'warm-sage' | 'lavender-blush' | 'peach-terracotta' | 'matcha-cream';
-
-export interface ActivePresence {
-  isFocusing: boolean;
-  targetTitle: string;
-  startedAtMs: number;
-  mode: 'stopwatch' | 'pomodoro' | 'break';
-}
-
-export interface Member {
-  id: string;
-  name: string;
-  tagline: string;
-  avatar: string;
-  theme: ThemePalette;
-  statusNote?: string;
-  presence?: ActivePresence | null;
-}
-
-export interface ScheduleItem {
-  id: string;
-  userId: string;
-  day: string;
-  title: string;
-  startTime: string;
-  endTime: string;
-  details: string;
-  category: 'Core' | 'Lab' | 'General' | 'Language' | 'University';
-  attendedDates: string[];
-}
-
-export interface GoalItem {
-  id: string;
-  userId: string;
-  title: string;
-  category: 'Short-Term' | 'Long-Term' | 'Habit' | 'Career';
-  targetHours: number;
-  loggedMinutes: number;
-  deadline: string;
-}
-
-export interface TaskItem {
-  id: string;
-  userId: string;
-  day: string; // Bound to specific day of week so tasks don't repeat on all days
-  title: string;
-  reminderTime: string;
-  completed: boolean;
-  estimatedMinutes: number;
-  createdAt: string;
-}
-
-export interface ExamItem {
-  id: string;
-  userId: string;
-  title: string;
-  date: string;
-  time: string;
-  professor: string;
-  type: 'Core' | 'General';
-}
-
-export interface TimeLog {
-  id: string;
-  sourceKey?: string; // Prevents duplicate XP farming when toggling tasks/classes
-  userId: string;
-  targetTitle: string;
-  minutes: number;
-  date: string; // Local YYYY-MM-DD
-  createdAtMs: number;
-  cheeredBy: string[]; // Array of member IDs who cheered (no self-cheer farming)
-}
-
-export interface AppState {
-  version: number;
-  lastUpdatedMs: number;
-  members: Member[];
-  schedules: ScheduleItem[];
-  goals: GoalItem[];
-  tasks: TaskItem[];
-  exams: ExamItem[];
-  logs: TimeLog[];
-}
-`,
-
-  'src/utils.ts': `export const DAYS = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-
-// Fixes UTC bug in Iran/Türkiye: Always returns local YYYY-MM-DD
-export const getLocalDateStr = (d: Date = new Date()): string => {
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return \`\${year}-\${month}-\${day}\`;
-};
-
-export const getPastLocalDateStr = (daysAgo: number): string => {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return getLocalDateStr(d);
-};
-
-export const getTodayWeekday = (): string => {
-  const jsDay = new Date().toLocaleDateString('en-US', { weekday: 'long' });
-  return DAYS.includes(jsDay) ? jsDay : 'Saturday';
-};
-
-export const uid = (prefix = 'id'): string => {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return \`\${prefix}-\${crypto.randomUUID().slice(0, 8)}\`;
-  }
-  return \`\${prefix}-\${Date.now()}-\${Math.random().toString(36).slice(2, 7)}\`;
-};
-
-export const toMins = (timeStr: string): number => {
-  const [h, m] = (timeStr || '09:00').split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
-};
-
-export const fromMins = (total: number): string => {
-  const normalized = ((total % 1440) + 1440) % 1440;
-  const h = Math.floor(normalized / 60);
-  const m = normalized % 60;
-  return \`\${String(h).padStart(2, '0')}:\${String(m).padStart(2, '0')}\`;
-};
-
-export const formatRelativeTime = (createdAtMs: number, dateStr: string): string => {
-  const today = getLocalDateStr();
-  const yesterday = getPastLocalDateStr(1);
-  const diffSec = Math.max(0, Math.floor((Date.now() - createdAtMs) / 1000));
-
-  if (diffSec < 60) return 'Just now';
-  if (diffSec < 3600) return \`\${Math.floor(diffSec / 60)}m ago\`;
-  const timeFormatted = new Date(createdAtMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  if (dateStr === today) return \`Today, \${timeFormatted}\`;
-  if (dateStr === yesterday) return \`Yesterday, \${timeFormatted}\`;
-  return dateStr;
-};
-
-// Gentle Web Audio Chime when Pomodoro or Reminder triggers
-export const playGentleChime = () => {
-  try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioCtx();
-    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 warm chord
-    notes.forEach((freq, idx) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.001, ctx.currentTime + idx * 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + idx * 0.15 + 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.15 + 1.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + idx * 0.15);
-      osc.stop(ctx.currentTime + idx * 0.15 + 1.25);
-    });
-  } catch {}
-};
-`,
-
-  'src/themes.ts': `import { ThemePalette } from './types';
-
-export interface CozyStyle {
-  name: string;
-  pageBg: string;
-  sidebarBg: string;
-  cardBg: string;
-  innerCardBg: string;
-  dockBg: string;
-  textMain: string;
-  textMuted: string;
-  divider: string;
-  trackBg: string;
-  orb1: string;
-  orb2: string;
-  primaryBtn: string;
-  softBadge: string;
-  streakBadge: string;
-  doneBadge: string;
-  activeNav: string;
-  activeBorder: string;
-  progressBar: string;
-  accentText: string;
-  barColor: string;
-  timelineLine: string;
-  selectionCls: string;
-  heatLevels: [string, string, string, string];
-}
-
-export const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
-  const streakBadge = isLatte
-    ? 'bg-amber-100 text-amber-900 border-amber-300'
-    : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-
-  const doneBadge = isLatte
-    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
-    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-
-  if (palette === 'lavender-blush') {
-    return isLatte
-      ? {
-          name: 'Lavender Oat Latte 💜',
-          pageBg: 'bg-[#FAF5FF]',
-          sidebarBg: 'bg-[#F3E8FF]/95 border-purple-200',
-          cardBg: 'bg-white/90 border-purple-200/90 shadow-sm shadow-purple-950/5',
-          innerCardBg: 'bg-[#F6EEFC]/90 border-purple-200/75',
-          dockBg: 'bg-white/95 border-purple-300 shadow-2xl shadow-purple-950/10',
-          textMain: 'text-[#2E1B3B]',
-          textMuted: 'text-[#6A517D]',
-          divider: 'border-purple-200/80',
-          trackBg: 'bg-purple-200/70',
-          orb1: 'bg-purple-300/40',
-          orb2: 'bg-pink-300/35',
-          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B47AEA] to-[#D685B8] hover:opacity-95 text-white shadow-md shadow-purple-500/20',
-          softBadge: 'bg-purple-100 text-purple-900 border-purple-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-purple-200/80 text-[#2E1B3B] font-bold border-purple-300',
-          activeBorder: 'border-purple-400 shadow-lg shadow-purple-300/30',
-          progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
-          accentText: 'text-[#7E3AF2]',
-          barColor: 'from-[#9D65C9] to-[#E879F9]',
-          timelineLine: 'border-purple-300',
-          selectionCls: 'selection:bg-purple-300/50',
-          heatLevels: ['bg-purple-100 border-purple-200', 'bg-purple-300 border-purple-400', 'bg-purple-500 border-purple-600', 'bg-fuchsia-600 border-fuchsia-700']
-        }
-      : {
-          name: 'Cozy Velvet Lavender 💜',
-          pageBg: 'bg-[#170F21]',
-          sidebarBg: 'bg-[#120B1B]/95 border-purple-300/15',
-          cardBg: 'bg-[#231832]/85 border-purple-300/15 shadow-xl shadow-black/30',
-          innerCardBg: 'bg-[#160F20]/85 border-purple-300/15',
-          dockBg: 'bg-[#1E142B]/95 border-purple-400/30 shadow-2xl shadow-black/70',
-          textMain: 'text-[#F7F1FF]',
-          textMuted: 'text-[#C4B2D6]',
-          divider: 'border-purple-300/15',
-          trackBg: 'bg-purple-950/80',
-          orb1: 'bg-[#9D65C9]/20',
-          orb2: 'bg-[#E879F9]/15',
-          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B779E2] to-[#D977B4] hover:opacity-95 text-white shadow-lg shadow-purple-950/50',
-          softBadge: 'bg-purple-400/15 text-purple-200 border-purple-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-purple-500/25 text-white border-purple-400/40',
-          activeBorder: 'border-purple-400/50 shadow-xl shadow-purple-950/60',
-          progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
-          accentText: 'text-[#DFB6FF]',
-          barColor: 'from-[#A855F7] to-[#F472B6]',
-          timelineLine: 'border-purple-400/30',
-          selectionCls: 'selection:bg-purple-500/40',
-          heatLevels: ['bg-purple-950/70 border-purple-800/40', 'bg-purple-700/70 border-purple-500/50', 'bg-purple-500 border-purple-400', 'bg-fuchsia-400 border-pink-300']
-        };
-  }
-
-  if (palette === 'peach-terracotta') {
-    return isLatte
-      ? {
-          name: 'Warm Terracotta Latte',
-          pageBg: 'bg-[#FDF8F5]',
-          sidebarBg: 'bg-[#F9EFEA]/95 border-orange-200',
-          cardBg: 'bg-white/90 border-orange-200/90 shadow-sm',
-          innerCardBg: 'bg-[#FAF0EA]/90 border-orange-200/75',
-          dockBg: 'bg-white/95 border-orange-300 shadow-2xl',
-          textMain: 'text-[#362019]',
-          textMuted: 'text-[#7C584C]',
-          divider: 'border-orange-200/80',
-          trackBg: 'bg-orange-200/70',
-          orb1: 'bg-amber-300/35',
-          orb2: 'bg-rose-300/30',
-          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-md',
-          softBadge: 'bg-orange-100 text-orange-900 border-orange-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-orange-200/75 text-[#362019] border-orange-300',
-          activeBorder: 'border-orange-400 shadow-lg',
-          progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
-          accentText: 'text-[#B84A24]',
-          barColor: 'from-[#D97757] to-[#F59E0B]',
-          timelineLine: 'border-orange-300',
-          selectionCls: 'selection:bg-orange-300/50',
-          heatLevels: ['bg-orange-100 border-orange-200', 'bg-orange-300 border-orange-400', 'bg-orange-500 border-orange-600', 'bg-amber-600 border-amber-700']
-        }
-      : {
-          name: 'Fireside Terracotta',
-          pageBg: 'bg-[#1B1311]',
-          sidebarBg: 'bg-[#140E0C]/95 border-orange-300/15',
-          cardBg: 'bg-[#291D1B]/85 border-orange-300/15',
-          innerCardBg: 'bg-[#16100E]/85 border-orange-300/15',
-          dockBg: 'bg-[#241917]/95 border-orange-400/30 shadow-2xl',
-          textMain: 'text-[#FDF4F0]',
-          textMuted: 'text-[#CBB2A8]',
-          divider: 'border-orange-300/15',
-          trackBg: 'bg-orange-950/80',
-          orb1: 'bg-orange-500/15',
-          orb2: 'bg-amber-500/15',
-          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-lg',
-          softBadge: 'bg-orange-400/15 text-orange-200 border-orange-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-orange-500/20 text-white border-orange-400/40',
-          activeBorder: 'border-orange-400/50 shadow-xl',
-          progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
-          accentText: 'text-[#FDBA8C]',
-          barColor: 'from-[#EA580C] to-[#FBBF24]',
-          timelineLine: 'border-orange-400/30',
-          selectionCls: 'selection:bg-orange-500/40',
-          heatLevels: ['bg-orange-950/60 border-orange-900/40', 'bg-orange-700/60 border-orange-600/40', 'bg-orange-500 border-orange-400', 'bg-amber-400 border-yellow-300']
-        };
-  }
-
-  if (palette === 'matcha-cream') {
-    return isLatte
-      ? {
-          name: 'Matcha Oat Milk',
-          pageBg: 'bg-[#F6F9F4]',
-          sidebarBg: 'bg-[#EBF2E6]/95 border-emerald-200',
-          cardBg: 'bg-white/90 border-emerald-200/90 shadow-sm',
-          innerCardBg: 'bg-[#ECF3E8]/90 border-emerald-200/75',
-          dockBg: 'bg-white/95 border-emerald-300 shadow-2xl',
-          textMain: 'text-[#1B2E22]',
-          textMuted: 'text-[#4F6D59]',
-          divider: 'border-emerald-200/80',
-          trackBg: 'bg-emerald-200/70',
-          orb1: 'bg-emerald-300/30',
-          orb2: 'bg-lime-300/25',
-          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-md',
-          softBadge: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-emerald-200/75 text-[#1B2E22] border-emerald-300',
-          activeBorder: 'border-emerald-400 shadow-lg',
-          progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
-          accentText: 'text-[#2D6A4F]',
-          barColor: 'from-[#4E8C6F] to-[#84CC16]',
-          timelineLine: 'border-emerald-300',
-          selectionCls: 'selection:bg-emerald-300/50',
-          heatLevels: ['bg-emerald-100 border-emerald-200', 'bg-emerald-300 border-emerald-400', 'bg-emerald-500 border-emerald-600', 'bg-teal-600 border-teal-700']
-        }
-      : {
-          name: 'Forest Matcha Night',
-          pageBg: 'bg-[#101914]',
-          sidebarBg: 'bg-[#0B120E]/95 border-emerald-300/15',
-          cardBg: 'bg-[#18261F]/85 border-emerald-300/15',
-          innerCardBg: 'bg-[#0D1411]/85 border-emerald-300/15',
-          dockBg: 'bg-[#15221B]/95 border-emerald-400/30 shadow-2xl',
-          textMain: 'text-[#F0FAF4]',
-          textMuted: 'text-[#A7C4B3]',
-          divider: 'border-emerald-300/15',
-          trackBg: 'bg-emerald-950/80',
-          orb1: 'bg-emerald-500/15',
-          orb2: 'bg-teal-500/15',
-          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-lg',
-          softBadge: 'bg-emerald-400/15 text-emerald-200 border-emerald-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-emerald-500/20 text-white border-emerald-400/40',
-          activeBorder: 'border-emerald-400/50 shadow-xl',
-          progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
-          accentText: 'text-[#86EFAC]',
-          barColor: 'from-[#10B981] to-[#84CC16]',
-          timelineLine: 'border-emerald-400/30',
-          selectionCls: 'selection:bg-emerald-500/40',
-          heatLevels: ['bg-emerald-950/60 border-emerald-900/40', 'bg-emerald-700/60 border-emerald-600/40', 'bg-emerald-500 border-emerald-400', 'bg-lime-400 border-emerald-300']
-        };
-  }
-
-  // Default: 'warm-sage' (Mehrsan)
-  return isLatte
-    ? {
-        name: 'Warm Oat & Sage ☕',
-        pageBg: 'bg-[#FBF9F5]',
-        sidebarBg: 'bg-[#F3EFE6]/95 border-[#DDD3C0]',
-        cardBg: 'bg-white/90 border-[#E2D9C8] shadow-sm shadow-stone-900/5',
-        innerCardBg: 'bg-[#F4EFE6]/90 border-[#DDD3C0]',
-        dockBg: 'bg-white/95 border-[#C8BFA8] shadow-2xl shadow-stone-900/10',
-        textMain: 'text-[#292524]',
-        textMuted: 'text-[#68625D]',
-        divider: 'border-[#E2D9C8]',
-        trackBg: 'bg-[#E5DEC9]',
-        orb1: 'bg-amber-200/45',
-        orb2: 'bg-teal-200/40',
-        primaryBtn: 'bg-gradient-to-r from-[#4A6B65] via-[#5B7F78] to-[#B87D4B] hover:opacity-95 text-white shadow-md',
-        softBadge: 'bg-[#EFECE6] text-[#3B5752] border-[#CFC6B4]',
-        streakBadge,
-        doneBadge,
-        activeNav: 'bg-[#E5DEC9] text-[#292524] font-bold border-[#C8BFA8]',
-        activeBorder: 'border-[#5B7F78] shadow-lg',
-        progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
-        accentText: 'text-[#3F5E58]',
-        barColor: 'from-[#4A6B65] to-[#D99B52]',
-        timelineLine: 'border-[#CFC6B4]',
-        selectionCls: 'selection:bg-[#D99B52]/30',
-        heatLevels: ['bg-[#EBE5D9] border-[#DCD3C2]', 'bg-[#94B0A7] border-[#7A9A90]', 'bg-[#5B7F78] border-[#4A6B65]', 'bg-[#C88A4B] border-[#B0753B]']
-      }
-    : {
-        name: 'Cozy Espresso & Amber ☕',
-        pageBg: 'bg-[#151413]',
-        sidebarBg: 'bg-[#100F0E]/95 border-[#2E2A27]',
-        cardBg: 'bg-[#211F1D]/85 border-[#36322E] shadow-xl shadow-black/30',
-        innerCardBg: 'bg-[#171514]/90 border-[#2C2825]',
-        dockBg: 'bg-[#1E1C1A]/95 border-[#443E38] shadow-2xl shadow-black/80',
-        textMain: 'text-[#F5F2EB]',
-        textMuted: 'text-[#B5AFA9]',
-        divider: 'border-[#332F2B]',
-        trackBg: 'bg-[#2C2825]',
-        orb1: 'bg-[#D99B52]/15',
-        orb2: 'bg-[#5B7F78]/20',
-        primaryBtn: 'bg-gradient-to-r from-[#5B7F78] to-[#C88A4B] hover:opacity-95 text-white shadow-lg',
-        softBadge: 'bg-[#2D2A26] text-[#E6CBA8] border-[#443F3A]',
-        streakBadge,
-        doneBadge,
-        activeNav: 'bg-[#2D2A26] text-white border-[#5B7F78]/60',
-        activeBorder: 'border-[#C88A4B]/50 shadow-xl',
-        progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
-        accentText: 'text-[#E6B88A]',
-        barColor: 'from-[#5B7F78] to-[#E09F5A]',
-        timelineLine: 'border-[#383430]',
-        selectionCls: 'selection:bg-amber-500/30',
-        heatLevels: ['bg-[#262320] border-[#332F2B]', 'bg-[#3F5E57] border-[#527870]', 'bg-[#66968C] border-[#84A98C]', 'bg-[#E09F5A] border-[#F3B978]']
-      };
-};
-`,
-
-  'src/initialData.ts': `import { AppState } from './types';
-import { getLocalDateStr, getPastLocalDateStr, getTodayWeekday } from './utils';
-
-const now = Date.now();
-const today = getLocalDateStr();
-const todayDay = getTodayWeekday();
-
-export const INITIAL_STATE: AppState = {
-  version: 4,
-  lastUpdatedMs: now,
-  members: [
-    {
-      id: 'mehrsan',
-      name: 'Mehrsan',
-      tagline: 'Computer Eng • Deep Learning & Web',
-      avatar: 'M',
-      theme: 'warm-sage',
-      statusNote: 'Building steady habits, one focused hour at a time ☕',
-      presence: null
-    },
-    {
-      id: 'ronak',
-      name: 'Ronak',
-      tagline: 'French B2 Journey • English & Uni',
-      avatar: 'R',
-      theme: 'lavender-blush',
-      statusNote: 'Dreaming in French & leveling up every single day 💜✨',
-      presence: null
-    }
-  ],
-  schedules: [
-    { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Yousefi • Room 1205', category: 'Core', attendedDates: [] },
-    { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Karimi • Room 102', category: 'General', attendedDates: [] },
-    { id: 'm-s4', userId: 'mehrsan', day: 'Sunday', title: 'Special Topics (Deep Learning)', startTime: '08:30', endTime: '10:30', details: 'Prof. Yousefi • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s5', userId: 'mehrsan', day: 'Sunday', title: 'Principles of Compiler Design', startTime: '14:00', endTime: '16:00', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s6', userId: 'mehrsan', day: 'Monday', title: 'Fundamentals of Info Security', startTime: '12:30', endTime: '14:00', details: 'Prof. Tajbakhsh • Room 101', category: 'Core', attendedDates: [] },
-    { id: 'm-s7', userId: 'mehrsan', day: 'Tuesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s8', userId: 'mehrsan', day: 'Tuesday', title: 'Electrical & Electronic Circuits Lab', startTime: '12:30', endTime: '14:00', details: 'Room 210', category: 'Lab', attendedDates: [] },
-    { id: 'm-s9', userId: 'mehrsan', day: 'Wednesday', title: 'Fundamentals of Info Security', startTime: '08:30', endTime: '10:30', details: 'Prof. Tajbakhsh • Room 102', category: 'Core', attendedDates: [] },
-    { id: 'm-s10', userId: 'mehrsan', day: 'Wednesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
-
-    { id: 'r-s1', userId: 'ronak', day: 'Saturday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-    { id: 'r-s2', userId: 'ronak', day: 'Sunday', title: 'University Classes Block', startTime: '08:30', endTime: '12:30', details: 'Morning Campus Sessions', category: 'University', attendedDates: [] },
-    { id: 'r-s3', userId: 'ronak', day: 'Monday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
-    { id: 'r-s4', userId: 'ronak', day: 'Monday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-    { id: 'r-s5', userId: 'ronak', day: 'Tuesday', title: 'University Classes Block', startTime: '08:30', endTime: '14:30', details: 'Full Campus Day', category: 'University', attendedDates: [] },
-    { id: 'r-s6', userId: 'ronak', day: 'Wednesday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Live Session', category: 'Language', attendedDates: [] },
-  ],
-  goals: [
-    { id: 'm-g1', userId: 'mehrsan', title: 'B.Sc. Final Project (3 Credits)', category: 'Long-Term', targetHours: 120, loggedMinutes: 1440, deadline: 'End of Semester' },
-    { id: 'm-g2', userId: 'mehrsan', title: 'Master Deep Learning & Neural Nets', category: 'Long-Term', targetHours: 80, loggedMinutes: 960, deadline: '1405/11/14' },
-    { id: 'm-g3', userId: 'mehrsan', title: 'Full-Stack Web Dev Projects', category: 'Short-Term', targetHours: 50, loggedMinutes: 720, deadline: 'Ongoing' },
-
-    { id: 'r-g1', userId: 'ronak', title: 'Master French up to B2 Level', category: 'Long-Term', targetHours: 400, loggedMinutes: 3600, deadline: 'Until B.Sc. Graduation (~3 Years)' },
-    { id: 'r-g2', userId: 'ronak', title: 'English Immersion (Movies, YouTube & Media)', category: 'Habit', targetHours: 150, loggedMinutes: 2100, deadline: 'Daily Routine' },
-    { id: 'r-g3', userId: 'ronak', title: 'Launch English Teaching Career', category: 'Career', targetHours: 60, loggedMinutes: 600, deadline: 'This Year' },
-  ],
-  tasks: [
-    { id: 'm-t1', userId: 'mehrsan', day: todayDay, title: 'Review Compiler Design Lexical Analysis notes', reminderTime: '18:00', completed: false, estimatedMinutes: 45, createdAt: today },
-    { id: 'r-t1', userId: 'ronak', day: todayDay, title: 'Watch 1hr English YouTube / Movie', reminderTime: '20:00', completed: false, estimatedMinutes: 60, createdAt: today },
-  ],
-  exams: [
-    { id: 'ex-1', userId: 'mehrsan', title: 'Principles of Compiler Design', date: '1405/10/26', time: '11:00', professor: 'Damanafshan', type: 'Core' },
-    { id: 'ex-2', userId: 'mehrsan', title: 'Fundamentals of Info Security', date: '1405/10/30', time: '11:00', professor: 'Tajbakhsh', type: 'Core' },
-    { id: 'ex-3', userId: 'mehrsan', title: 'Analytical History of Early Islam', date: '1405/11/05', time: '14:00', professor: 'Karimi', type: 'General' },
-    { id: 'ex-4', userId: 'mehrsan', title: 'Web Programming', date: '1405/11/10', time: '09:00', professor: 'Azimi', type: 'Core' },
-    { id: 'ex-5', userId: 'mehrsan', title: 'Special Topics (Deep Learning)', date: '1405/11/14', time: '09:00', professor: 'Yousefi', type: 'Core' },
-  ],
-  logs: [
-    { id: 'l-1', userId: 'mehrsan', targetTitle: 'Special Topics (Deep Learning)', minutes: 90, date: getPastLocalDateStr(2), createdAtMs: now - 172800000, cheeredBy: ['ronak'] },
-    { id: 'l-2', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 120, date: getPastLocalDateStr(2), createdAtMs: now - 170000000, cheeredBy: ['mehrsan'] },
-    { id: 'l-3', userId: 'mehrsan', targetTitle: 'Full-Stack Web Dev Projects', minutes: 110, date: getPastLocalDateStr(1), createdAtMs: now - 86400000, cheeredBy: ['ronak'] },
-    { id: 'l-4', userId: 'ronak', targetTitle: 'English Immersion (Movies, YouTube & Media)', minutes: 95, date: getPastLocalDateStr(1), createdAtMs: now - 82000000, cheeredBy: ['mehrsan'] },
-    { id: 'l-5', userId: 'mehrsan', targetTitle: 'B.Sc. Final Project (3 Credits)', minutes: 60, date: today, createdAtMs: now - 7200000, cheeredBy: ['ronak'] },
-    { id: 'l-6', userId: 'ronak', targetTitle: 'Master French up to B2 Level', minutes: 75, date: today, createdAtMs: now - 3600000, cheeredBy: ['mehrsan'] },
-  ]
-};
-`,
-
-  'src/components/ErrorBoundary.tsx': `import React from 'react';
-import { INITIAL_STATE } from '../initialData';
-
-interface State {
-  hasError: boolean;
-  errorMsg: string;
-}
-
-export class ErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false, errorMsg: '' };
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, errorMsg: error.message };
-  }
-
-  handleExportRaw = () => {
-    const raw = localStorage.getItem('syncpulse_v4') || localStorage.getItem('syncpulse_v3') || '{}';
-    const blob = new Blob([raw], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'syncpulse-emergency-backup.json';
-    a.click();
-  };
-
-  handleSafeReset = () => {
-    localStorage.setItem('syncpulse_v4', JSON.stringify(INITIAL_STATE));
-    window.location.reload();
-  };
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-[#151413] text-[#F5F2EB] flex items-center justify-center p-6">
-          <div className="max-w-md w-full bg-[#211F1D] border border-[#36322E] rounded-3xl p-7 space-y-4">
-            <h1 className="font-serif italic text-3xl">Sanctuary Recovery Mode 🌿</h1>
-            <p className="text-xs text-[#B5AFA9] leading-relaxed">
-              We detected corrupted or incompatible state data ({this.state.errorMsg}). Your data is still in local storage—you can download a backup before resetting.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button
-                onClick={this.handleExportRaw}
-                className="px-4 py-2.5 rounded-2xl bg-[#2D2A26] border border-[#443F3A] text-xs font-semibold"
-              >
-                Download Raw Backup (.json)
-              </button>
-              <button
-                onClick={this.handleSafeReset}
-                className="px-4 py-2.5 rounded-2xl bg-[#5B7F78] text-white text-xs font-semibold"
-              >
-                Restore Clean Sanctuary
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-`,
-
-  'src/main.tsx': `import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import { ErrorBoundary } from './components/ErrorBoundary';
-import './index.css';
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
-  </React.StrictMode>,
-);
-`,
 
   'src/App.tsx': `import React, { useState, useEffect, useRef, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import {
-  Target, Calendar, CheckCircle2, Plus, Trash2, Edit3,
-  Play, Pause, RotateCcw, Bell, Sparkles,
-  Cloud, Check, X, GraduationCap, HelpCircle,
-  Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
-  Sun, Moon, Coffee, CloudRain, VolumeX,
-  Compass, Flame, Award, Trophy, Download, Upload
-} from 'lucide-react';
+  Target, CalendarBlank, CheckCircle, Plus, Trash, PencilSimple,
+  Play, Pause, ArrowCounterClockwise, Sparkle,
+  CloudArrowUp, Check, X, GraduationCap, Question,
+  ShareNetwork, UserPlus, Copy, Heart,
+  SunDim, MoonStars, Coffee, CloudRain, SpeakerSlash,
+  Compass, Fire, Medal, Trophy, DownloadSimple, UploadSimple,
+  Timer, Waveform, Plant, Lightning, Crown, Buildings
+} from '@phosphor-icons/react';
 import {
   AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette, TimeLog
 } from './types';
@@ -802,7 +112,6 @@ export default function App() {
     return d.getHours() * 60 + d.getMinutes();
   });
 
-  // Check clock & trigger task reminders
   const notifiedTasksRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const timer = setInterval(() => {
@@ -816,7 +125,7 @@ export default function App() {
           notifiedTasksRef.current.add(t.id);
           playGentleChime();
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(\`🌿 SyncPulse Reminder (\${t.title})\`, {
+            new Notification(\`SyncPulse Reminder: \${t.title}\`, {
               body: \`Scheduled for \${t.reminderTime} (+\${t.estimatedMinutes}m)\`
             });
           }
@@ -911,7 +220,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Persistent Wall-Clock Timer (Never loses time on refresh or phone lock!)
+  // Persistent Wall-Clock Timer
   const [timerMode, setTimerMode] = useState<'stopwatch' | 'pomodoro' | 'break'>(() => {
     return (localStorage.getItem('sp_timer_mode') as any) || 'stopwatch';
   });
@@ -957,7 +266,7 @@ export default function App() {
           playGentleChime();
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(
-              timerMode === 'pomodoro' ? '🍅 25m Focus Complete!' : '☕ Break Complete!',
+              timerMode === 'pomodoro' ? '25m Focus Complete!' : 'Break Complete!',
               { body: timerMode === 'pomodoro' ? 'Click Log to bank your 25 minutes or take a 5m break.' : 'Ready for another focus session?' }
             );
           }
@@ -1045,7 +354,6 @@ export default function App() {
     localStorage.setItem('syncpulse_latte', String(isLatteMode));
   }, [isLatteMode]);
 
-  // Safe Cloud Polling (Only applies remote if newer & user isn't actively typing)
   useEffect(() => {
     if (!syncUrl) return;
     const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : \`\${syncUrl.replace(/\\/$/, '')}/syncpulse_v4.json\`;
@@ -1152,7 +460,6 @@ export default function App() {
     }));
   };
 
-  // Prevent self-cheering & multiple cheers per person
   const toggleCheerLog = (logId: string) => {
     commitState((prev) => ({
       ...prev,
@@ -1172,7 +479,7 @@ export default function App() {
   const handleSaveTimerSession = () => {
     const elapsedSec = getElapsedTimerSeconds();
     const elapsedMins = Math.floor(elapsedSec / 60);
-    if (elapsedMins < 1) return; // Prevents 0s -> 1m XP exploit
+    if (elapsedMins < 1) return;
 
     const userGoals = state.goals.filter((g) => g.userId === activeUser);
     const targetGoal = userGoals.find((g) => g.id === selectedGoalId) || userGoals[0];
@@ -1192,7 +499,7 @@ export default function App() {
         ...prev,
         members: prev.members.map((m) => (m.id === activeUser ? { ...m, statusNote: note } : m))
       }),
-      1200 // 1.2s debounce while typing
+      1200
     );
     setTimeout(() => {
       isTypingRef.current = false;
@@ -1231,7 +538,6 @@ export default function App() {
     setShowMemberModal(false);
   };
 
-  // Clean cascade delete when removing a companion
   const removeMember = (id: string, name: string) => {
     if (id === 'mehrsan' || id === 'ronak') return;
     if (!window.confirm(\`Remove \${name} and all their goals/logs from the sanctuary?\`)) return;
@@ -1246,7 +552,6 @@ export default function App() {
     setActiveUser('mehrsan');
   };
 
-  // Goal CRUD
   const openCreateGoal = () => {
     setEditingGoal(null);
     setGoalForm({ title: '', category: 'Short-Term', targetHours: 40, deadline: 'Ongoing' });
@@ -1295,7 +600,6 @@ export default function App() {
     commitState((prev) => ({ ...prev, goals: prev.goals.filter((g) => g.id !== goal.id) }));
   };
 
-  // Idempotent Class Check-in (Unchecking removes the log so XP cannot be farmed!)
   const toggleClassAttendance = (sched: ScheduleItem) => {
     const attended = sched.attendedDates.includes(todayStr);
     const sourceKey = \`class-\${sched.id}-\${todayStr}\`;
@@ -1361,7 +665,6 @@ export default function App() {
     commitState((prev) => ({ ...prev, schedules: prev.schedules.filter((s) => s.id !== item.id) }));
   };
 
-  // Idempotent Task Toggle (Bound to timelineDay + removes log on uncheck)
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
@@ -1414,7 +717,6 @@ export default function App() {
     }));
   };
 
-  // JSON Export & Import Backup
   const handleExportJSON = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -1441,7 +743,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  // Unified Metrics (Memoized for fast performance)
   const memberMetrics = useMemo(() => {
     const map: Record<string, {
       todayMins: number;
@@ -1461,13 +762,11 @@ export default function App() {
       const mLogs = state.logs.filter((l) => l.userId === m.id);
       const todayMins = mLogs.filter((l) => l.date === todayStr).reduce((a, b) => a + b.minutes, 0);
 
-      // Unified total minutes: Goal banked minutes + class/task logs
       const goalMins = state.goals.filter((g) => g.userId === m.id).reduce((a, b) => a + b.loggedMinutes, 0);
       const nonGoalLogMins = mLogs.filter((l) => l.sourceKey).reduce((a, b) => a + b.minutes, 0);
       const totalMins = goalMins + nonGoalLogMins;
       const totalHours = (totalMins / 60).toFixed(1);
 
-      // Local Date Streak
       const activeDates = new Set(mLogs.filter((l) => l.minutes > 0).map((l) => l.date));
       let streak = 0;
       for (let i = 0; i < 60; i++) {
@@ -1485,7 +784,7 @@ export default function App() {
       const currentLevelXP = totalXP % xpPerLevel;
       const progressPct = Math.min(100, Math.round((currentLevelXP / xpPerLevel) * 100));
       const title =
-        level >= 8 ? 'Grandmaster Luminary 👑' : level >= 5 ? 'Master Scholar ✨' : level >= 3 ? 'Steady Seeker 🌿' : 'Rising Star 🌱';
+        level >= 8 ? 'Grandmaster Luminary' : level >= 5 ? 'Master Scholar' : level >= 3 ? 'Steady Seeker' : 'Rising Star';
 
       const grid28 = Array.from({ length: 28 }, (_, idx) => {
         const daysAgo = 27 - idx;
@@ -1531,16 +830,15 @@ export default function App() {
     );
 
     return [
-      { id: 'spark', icon: '🌱', name: 'First Spark', desc: 'Logged your first focus session', unlocked: userLogs.length > 0 },
-      { id: 'flame', icon: '🔥', name: '3-Day Flame', desc: 'Maintained a 3+ day focus streak', unlocked: activeStats.streak >= 3 },
-      { id: 'deep', icon: '⚡', name: 'Deep Diver', desc: 'Completed a 90+ min focus block', unlocked: hasDeepSession },
-      { id: 'beloved', icon: '💜', name: 'Warm Spirit', desc: 'Received cheers from companions', unlocked: othersCheeredCount >= 2 },
-      { id: 'club10', icon: '🏛️', name: '10-Hour Club', desc: 'Banked over 10 total hours', unlocked: totalHrs >= 10 },
-      { id: 'legend50', icon: '👑', name: '50-Hour Legend', desc: 'Banked over 50 total hours', unlocked: totalHrs >= 50 }
+      { id: 'spark', Icon: Plant, name: 'First Spark', desc: 'Logged your first focus session', unlocked: userLogs.length > 0 },
+      { id: 'flame', Icon: Fire, name: '3-Day Flame', desc: 'Maintained a 3+ day focus streak', unlocked: activeStats.streak >= 3 },
+      { id: 'deep', Icon: Lightning, name: 'Deep Diver', desc: 'Completed a 90+ min focus block', unlocked: hasDeepSession },
+      { id: 'beloved', Icon: Heart, name: 'Warm Spirit', desc: 'Received cheers from companions', unlocked: othersCheeredCount >= 2 },
+      { id: 'club10', Icon: Buildings, name: '10-Hour Club', desc: 'Banked over 10 total hours', unlocked: totalHrs >= 10 },
+      { id: 'legend50', Icon: Crown, name: '50-Hour Legend', desc: 'Banked over 50 total hours', unlocked: totalHrs >= 50 }
     ];
   }, [state.logs, activeUser, activeStats]);
 
-  // Share Handler with Web Share API + Try/Catch Clipboard Fallback
   const generateShareText = () => {
     const topGoals = userGoals
       .slice(0, 3)
@@ -1567,7 +865,6 @@ export default function App() {
     }
   };
 
-  // Chronological Visual Daily Timeline with Overlap Detection
   const dailyStream = useMemo(() => {
     const dayClasses = state.schedules.filter(
       (s) => s.userId === activeUser && s.day === timelineDay
@@ -1628,7 +925,7 @@ export default function App() {
           out.push({
             id: \`gap-\${cur.id}-\${next.id}\`,
             kind: 'gap',
-            title: 'Free Focus Window ✨',
+            title: 'Free Focus Window',
             subtitle: \`Open breathing room before \${next.title}\`,
             startMins: cur.endMins,
             endMins: next.startMins,
@@ -1671,7 +968,7 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Today’s Flow', icon: Compass, badge: \`\${dailyStream.filter(i => i.kind !== 'gap' && !i.completed).length}\` },
     { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: \`\${userGoals.length}\` },
-    { id: 'schedule', label: 'Weekly Classes', icon: Calendar },
+    { id: 'schedule', label: 'Weekly Classes', icon: CalendarBlank },
     { id: 'analytics', label: 'Heatmaps & Badges', icon: Trophy, badge: \`\${activeBadges.filter(b => b.unlocked).length}/6\` },
   ];
 
@@ -1690,12 +987,11 @@ export default function App() {
       <div className={\`lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-2.5 border-b backdrop-blur-xl \${theme.sidebarBg}\`}>
         <div className="flex items-center gap-2">
           <div className={\`w-7 h-7 rounded-xl flex items-center justify-center \${theme.primaryBtn}\`}>
-            {currentMember.theme === 'lavender-blush' ? <Heart className="w-3.5 h-3.5 text-white" /> : <Coffee className="w-3.5 h-3.5 text-white" />}
+            {currentMember.theme === 'lavender-blush' ? <Heart weight="fill" className="w-4 h-4 text-white" /> : <Coffee weight="fill" className="w-4 h-4 text-white" />}
           </div>
           <span className="font-serif italic text-xl">SyncPulse</span>
         </div>
 
-        {/* Mobile Companion Quick Pills */}
         <div className="flex items-center gap-1.5">
           {state.members.map((m) => (
             <button
@@ -1714,7 +1010,7 @@ export default function App() {
             aria-label="Toggle Day/Night Mode"
             className={\`p-1.5 rounded-xl border \${theme.cardBg}\`}
           >
-            {isLatteMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-300" />}
+            {isLatteMode ? <MoonStars weight="duotone" className="w-4 h-4 text-purple-600" /> : <SunDim weight="duotone" className="w-4 h-4 text-amber-300" />}
           </button>
         </div>
       </div>
@@ -1725,14 +1021,14 @@ export default function App() {
           <div className="flex items-center gap-3">
             <div className={\`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition \${theme.primaryBtn}\`}>
               {currentMember.theme === 'lavender-blush' ? (
-                <Heart className="w-5 h-5 text-white fill-white/25" />
+                <Heart weight="duotone" className="w-5 h-5 text-white" />
               ) : (
-                <Coffee className="w-5 h-5 text-white" />
+                <Coffee weight="duotone" className="w-5 h-5 text-white" />
               )}
             </div>
             <div>
               <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
-              <span className={\`text-xs font-mono \${theme.textMuted}\`}>Cozy Sanctuary v4</span>
+              <span className={\`text-xs font-mono \${theme.textMuted}\`}>Cozy Sanctuary</span>
             </div>
           </div>
 
@@ -1747,7 +1043,7 @@ export default function App() {
                   onClick={() => setShowMemberModal(true)}
                   className={\`text-xs font-semibold flex items-center gap-1 hover:underline \${theme.accentText}\`}
                 >
-                  <UserPlus className="w-3.5 h-3.5" /> Add
+                  <UserPlus weight="duotone" className="w-3.5 h-3.5" /> Add
                 </button>
               )}
             </div>
@@ -1780,7 +1076,7 @@ export default function App() {
                       <div className="truncate">
                         <p className="text-xs font-bold flex items-center gap-1 truncate">
                           {member.name}
-                          {member.id === 'ronak' && <span>💜</span>}
+                          {member.id === 'ronak' && <Heart weight="fill" className="w-3 h-3 text-purple-400 inline" />}
                         </p>
                         <p className={\`text-xs font-mono \${theme.textMuted}\`}>
                           {Math.floor(mStat.todayMins / 60)}h {mStat.todayMins % 60}m today
@@ -1790,7 +1086,8 @@ export default function App() {
 
                     <div className="flex items-center gap-1 shrink-0">
                       <span className={\`text-xs font-mono px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 \${theme.streakBadge}\`} title="Active Streak">
-                        🔥{mStat.streak}
+                        <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                        {mStat.streak}
                       </span>
                       {member.id !== 'mehrsan' && member.id !== 'ronak' && (
                         <button
@@ -1802,7 +1099,7 @@ export default function App() {
                           }}
                           className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-400"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X weight="bold" className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -1812,7 +1109,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation Views */}
+          {/* Navigation Views (Phosphor Duotone when idle, Fill when active!) */}
           <nav className="space-y-1" aria-label="Main Navigation">
             <span className={\`px-1 text-xs font-mono uppercase tracking-wider block mb-1.5 \${theme.textMuted}\`}>
               Workspace Views
@@ -1829,7 +1126,7 @@ export default function App() {
                   }\`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
+                    <Icon weight={active ? 'fill' : 'duotone'} className="w-4 h-4" />
                     {item.label}
                   </span>
                   {item.badge && (
@@ -1846,7 +1143,7 @@ export default function App() {
           <div className={\`p-3.5 rounded-2xl border space-y-2.5 \${theme.innerCardBg}\`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase tracking-wider flex items-center gap-1.5">
-                <CloudRain className="w-3.5 h-3.5" /> Cozy Ambience
+                <CloudRain weight="duotone" className="w-4 h-4" /> Cozy Ambience
               </span>
               {ambientMode !== 'off' && (
                 <button
@@ -1854,7 +1151,7 @@ export default function App() {
                   aria-label="Mute Ambient Audio"
                   className="text-xs font-mono text-rose-400 flex items-center gap-0.5"
                 >
-                  <VolumeX className="w-3.5 h-3.5" /> Mute
+                  <SpeakerSlash weight="duotone" className="w-3.5 h-3.5" /> Mute
                 </button>
               )}
             </div>
@@ -1865,7 +1162,8 @@ export default function App() {
                   ambientMode === 'rain' ? theme.primaryBtn : \`\${theme.cardBg} \${theme.textMuted}\`
                 }\`}
               >
-                🌧️ Soft Rain
+                <CloudRain weight={ambientMode === 'rain' ? 'fill' : 'duotone'} className="w-4 h-4" />
+                Soft Rain
               </button>
               <button
                 onClick={() => setAmbientMode(ambientMode === 'tone' ? 'off' : 'tone')}
@@ -1873,7 +1171,8 @@ export default function App() {
                   ambientMode === 'tone' ? theme.primaryBtn : \`\${theme.cardBg} \${theme.textMuted}\`
                 }\`}
               >
-                ✨ Warm Tone
+                <Waveform weight={ambientMode === 'tone' ? 'bold' : 'duotone'} className="w-4 h-4" />
+                Warm Tone
               </button>
             </div>
           </div>
@@ -1886,14 +1185,18 @@ export default function App() {
               onClick={() => setIsLatteMode(!isLatteMode)}
               className={\`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 \${theme.cardBg}\`}
             >
-              {isLatteMode ? <Moon className="w-3.5 h-3.5 text-purple-600" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
+              {isLatteMode ? (
+                <MoonStars weight="duotone" className="w-4 h-4 text-purple-600" />
+              ) : (
+                <SunDim weight="duotone" className="w-4 h-4 text-amber-400" />
+              )}
               {isLatteMode ? 'Night' : 'Latte'}
             </button>
             <button
               onClick={() => setShowShareModal(true)}
               className={\`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 \${theme.primaryBtn}\`}
             >
-              <Share2 className="w-3.5 h-3.5" />
+              <ShareNetwork weight="duotone" className="w-4 h-4" />
               Share
             </button>
           </div>
@@ -1903,14 +1206,14 @@ export default function App() {
               onClick={() => setShowSyncModal(true)}
               className={\`flex items-center gap-1.5 \${theme.textMuted} hover:underline\`}
             >
-              <Cloud className={\`w-3.5 h-3.5 \${syncUrl ? 'text-emerald-500' : ''}\`} />
+              <CloudArrowUp weight="duotone" className={\`w-4 h-4 \${syncUrl ? 'text-emerald-500' : ''}\`} />
               {syncUrl ? 'Sync & Backup' : 'Backup / Sync'}
             </button>
             <button
               onClick={() => setShowTutorial(true)}
               className={\`flex items-center gap-1 \${theme.textMuted} hover:underline\`}
             >
-              <HelpCircle className="w-3.5 h-3.5" /> Guide
+              <Question weight="duotone" className="w-4 h-4" /> Guide
             </button>
           </div>
         </div>
@@ -1919,7 +1222,7 @@ export default function App() {
       {/* MAIN WORKSPACE CONTENT AREA */}
       <div className="flex-1 min-w-0 relative z-10 pb-36">
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-          {/* Live Companion Presence Alert if someone is focusing */}
+          {/* Live Companion Presence Alert */}
           {state.members.some((m) => m.presence?.isFocusing) && (
             <div className={\`px-4 py-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2 text-xs \${theme.doneBadge}\`}>
               <div className="flex items-center gap-2">
@@ -1931,25 +1234,29 @@ export default function App() {
                     .join(' • ')}
                 </span>
               </div>
-              <span className="font-mono text-xs">Co-Op Live ✨</span>
+              <span className="font-mono text-xs flex items-center gap-1">
+                <Sparkle weight="fill" className="w-3.5 h-3.5" /> Co-Op Live
+              </span>
             </div>
           )}
 
-          {/* Header Banner: Full on Dashboard, Compact on other tabs */}
+          {/* Header Banner */}
           {activeTab === 'dashboard' ? (
             <section className={\`p-5 sm:p-6 rounded-3xl border backdrop-blur-md space-y-4 cozy-transition \${theme.cardBg}\`}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={\`text-xs font-mono px-2.5 py-0.5 rounded-full border font-bold flex items-center gap-1 \${theme.streakBadge}\`}>
-                      🔥 {activeStats.streak} Day Streak
+                      <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                      {activeStats.streak} Day Streak
                     </span>
-                    <span className={\`text-xs font-mono uppercase px-2.5 py-0.5 rounded-full border \${theme.softBadge}\`}>
+                    <span className={\`text-xs font-mono uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 \${theme.softBadge}\`}>
+                      <Sparkle weight="duotone" className="w-3.5 h-3.5" />
                       Lv.{activeStats.level} • {activeStats.title}
                     </span>
                     {nextUpcomingItem && (
                       <span className={\`text-xs font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 \${theme.innerCardBg}\`}>
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Timer weight="duotone" className="w-3.5 h-3.5" />
                         Next: <b>{nextUpcomingItem.title}</b> ({nextUpcomingItem.startTime})
                       </span>
                     )}
@@ -1988,7 +1295,7 @@ export default function App() {
               <div className={\`pt-3 border-t \${theme.divider}\`}>
                 <div className="flex items-center justify-between text-xs font-mono mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <Trophy className={\`w-3.5 h-3.5 \${theme.accentText}\`} />
+                    <Trophy weight="duotone" className={\`w-4 h-4 \${theme.accentText}\`} />
                     <span>Experience: <b>{activeStats.totalXP.toLocaleString()} XP</b></span>
                   </span>
                   <span className={theme.textMuted}>
@@ -2010,8 +1317,8 @@ export default function App() {
                   {currentMember.avatar}
                 </span>
                 <span className="font-bold text-sm">{currentMember.name}</span>
-                <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border \${theme.streakBadge}\`}>
-                  🔥 {activeStats.streak}d
+                <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border flex items-center gap-1 \${theme.streakBadge}\`}>
+                  <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" /> {activeStats.streak}d
                 </span>
                 <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border \${theme.softBadge}\`}>
                   Lv.{activeStats.level} ({activeStats.totalHours}h)
@@ -2021,21 +1328,21 @@ export default function App() {
                 onClick={() => setShowSyncModal(true)}
                 className={\`text-xs font-mono flex items-center gap-1.5 \${theme.textMuted} hover:underline\`}
               >
-                <Download className="w-3.5 h-3.5" /> Backup / Sync
+                <DownloadSimple weight="duotone" className="w-4 h-4" /> Backup / Sync
               </button>
             </div>
           )}
 
-          {/* VIEW 1: TODAY'S FLOW (VISUAL DAILY TIMELINE + LIVE SQUAD FEED) */}
+          {/* VIEW 1: TODAY'S FLOW */}
           {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left 7 Cols: Structured-Style Visual Daily Timeline */}
+              {/* Left 7 Cols: Visual Daily Timeline */}
               <div className="lg:col-span-7 space-y-6">
                 <div className={\`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition \${theme.cardBg}\`}>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
                       <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                        <Compass className={\`w-5 h-5 \${theme.accentText}\`} />
+                        <Compass weight="duotone" className={\`w-5 h-5 \${theme.accentText}\`} />
                         Visual Daily Timeline ({timelineDay})
                       </h3>
                       <p className={\`text-xs \${theme.textMuted}\`}>
@@ -2050,7 +1357,7 @@ export default function App() {
                       }}
                       className={\`px-3 py-1.5 rounded-2xl text-xs font-semibold flex items-center gap-1 border \${theme.softBadge}\`}
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Class
+                      <Plus weight="bold" className="w-3.5 h-3.5" /> Add Class
                     </button>
                   </div>
 
@@ -2108,16 +1415,16 @@ export default function App() {
                     </select>
                     <button
                       type="submit"
-                      className={\`px-4 py-2 rounded-2xl font-semibold text-xs \${theme.primaryBtn}\`}
+                      className={\`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1 \${theme.primaryBtn}\`}
                     >
-                      + Plot
+                      <Plus weight="bold" className="w-3.5 h-3.5" /> Plot
                     </button>
                   </form>
 
                   {/* Timeline Stream */}
                   {dailyStream.length === 0 ? (
                     <div className={\`p-8 rounded-2xl border text-center space-y-2 \${theme.innerCardBg}\`}>
-                      <p className="font-serif italic text-xl">An open, unhurried {timelineDay} ✨</p>
+                      <p className="font-serif italic text-xl">An open, unhurried {timelineDay}</p>
                       <p className={\`text-xs \${theme.textMuted}\`}>
                         No fixed classes or tasks plotted for {timelineDay}. Plot a task above or launch the focus timer!
                       </p>
@@ -2149,7 +1456,7 @@ export default function App() {
                               <div className={\`w-3.5 h-3.5 rounded-full border-2 z-10 shrink-0 \${theme.pageBg} \${theme.timelineLine}\`} />
                               <div className={\`flex-1 px-4 py-2.5 rounded-2xl border border-dashed flex flex-wrap items-center justify-between gap-2 text-xs \${theme.innerCardBg}\`}>
                                 <span className="font-medium flex items-center gap-1.5">
-                                  <Sparkles className={\`w-3.5 h-3.5 \${theme.accentText}\`} />
+                                  <Sparkle weight="duotone" className={\`w-4 h-4 \${theme.accentText}\`} />
                                   {entry.title} ({Math.floor(entry.durationMins / 60) > 0 ? \`\${Math.floor(entry.durationMins / 60)}h \` : ''}{entry.durationMins % 60}m)
                                 </span>
                                 <button
@@ -2161,7 +1468,7 @@ export default function App() {
                                   }}
                                   className={\`text-xs font-mono px-2.5 py-1 rounded-xl border flex items-center gap-1 \${theme.softBadge}\`}
                                 >
-                                  <Play className="w-3 h-3" /> Start 25m
+                                  <Play weight="fill" className="w-3 h-3" /> Start 25m
                                 </button>
                               </div>
                             </div>
@@ -2189,7 +1496,7 @@ export default function App() {
                                   : \`\${theme.pageBg} border-current\`
                               }\`}
                             >
-                              {entry.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                              {entry.completed && <Check weight="bold" className="w-2.5 h-2.5" />}
                             </button>
 
                             <div
@@ -2203,12 +1510,17 @@ export default function App() {
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                                 <div className="flex flex-wrap items-center gap-1.5">
-                                  <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border \${theme.softBadge}\`}>
-                                    {entry.kind === 'class' ? \`🎓 \${entry.badge}\` : '✨ Intention'}
+                                  <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border flex items-center gap-1 \${theme.softBadge}\`}>
+                                    {entry.kind === 'class' ? (
+                                      <GraduationCap weight="duotone" className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Sparkle weight="duotone" className="w-3.5 h-3.5" />
+                                    )}
+                                    {entry.kind === 'class' ? entry.badge : 'Intention'}
                                   </span>
                                   {entry.overlaps && (
                                     <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/40">
-                                      ⚠️ Time Overlap
+                                      Time Overlap
                                     </span>
                                   )}
                                   {isHappeningNow && (
@@ -2218,7 +1530,7 @@ export default function App() {
                                   )}
                                   {isNextUp && countdownLabel && (
                                     <span className={\`text-xs font-mono px-2 py-0.5 rounded-full border \${theme.softBadge}\`}>
-                                      ⏳ {countdownLabel}
+                                      {countdownLabel}
                                     </span>
                                   )}
                                 </div>
@@ -2245,7 +1557,7 @@ export default function App() {
                                       entry.completed ? theme.doneBadge : theme.cardBg
                                     }\`}
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <CheckCircle weight={entry.completed ? 'fill' : 'duotone'} className="w-4 h-4" />
                                     {entry.completed ? 'Done' : \`+\${entry.durationMins}m\`}
                                   </button>
                                   {entry.kind === 'task' && entry.rawTask && (
@@ -2254,7 +1566,7 @@ export default function App() {
                                       onClick={() => deleteTask(entry.rawTask!)}
                                       className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash weight="duotone" className="w-4 h-4" />
                                     </button>
                                   )}
                                 </div>
@@ -2273,7 +1585,7 @@ export default function App() {
                 <div className={\`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition \${theme.cardBg}\`}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                      <Heart className={\`w-5 h-5 \${theme.accentText}\`} />
+                      <Heart weight="duotone" className={\`w-5 h-5 \${theme.accentText}\`} />
                       Shared Squad Feed
                     </h3>
                     <span className={\`text-xs font-mono px-2.5 py-0.5 rounded-full border \${theme.softBadge}\`}>
@@ -2311,12 +1623,12 @@ export default function App() {
                             disabled={isOwnLog}
                             onClick={() => toggleCheerLog(log.id)}
                             aria-label={isOwnLog ? 'Your activity log' : 'Cheer companion'}
-                            title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer 💜'}
+                            title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer'}
                             className={\`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 transition shrink-0 \${
                               hasCheered ? theme.primaryBtn : mStyle.softBadge
                             } \${isOwnLog ? 'opacity-70 cursor-default' : 'hover:scale-105'}\`}
                           >
-                            <span>💜</span>
+                            <Heart weight={hasCheered || log.cheeredBy.length > 0 ? 'fill' : 'duotone'} className="w-3.5 h-3.5" />
                             <span>{log.cheeredBy.length}</span>
                           </button>
                         </div>
@@ -2328,7 +1640,7 @@ export default function App() {
                 {/* University Exam Dates */}
                 <div className={\`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition \${theme.cardBg}\`}>
                   <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
-                    <GraduationCap className={\`w-5 h-5 \${theme.accentText}\`} />
+                    <GraduationCap weight="duotone" className={\`w-5 h-5 \${theme.accentText}\`} />
                     University Exams (1405)
                   </h3>
                   <div className="space-y-2.5">
@@ -2343,7 +1655,7 @@ export default function App() {
                         </div>
                         <div className="text-right font-mono">
                           <span className={\`font-bold block \${theme.accentText}\`}>{ex.date}</span>
-                          <span className={\`text-xs \${theme.textMuted}\`}>⏰ {ex.time}</span>
+                          <span className={\`text-xs \${theme.textMuted}\`}>{ex.time}</span>
                         </div>
                       </div>
                     ))}
@@ -2367,7 +1679,7 @@ export default function App() {
                   onClick={openCreateGoal}
                   className={\`px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 \${theme.primaryBtn}\`}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus weight="bold" className="w-4 h-4" />
                   New Goal for {currentMember.name}
                 </button>
               </div>
@@ -2414,14 +1726,14 @@ export default function App() {
                                     onClick={() => openEditGoal(g)}
                                     className="p-1.5 opacity-60 hover:opacity-100"
                                   >
-                                    <Edit3 className="w-3.5 h-3.5" />
+                                    <PencilSimple weight="duotone" className="w-4 h-4" />
                                   </button>
                                   <button
                                     aria-label={\`Delete \${g.title}\`}
                                     onClick={() => deleteGoal(g)}
                                     className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash weight="duotone" className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>
@@ -2488,7 +1800,7 @@ export default function App() {
                   }}
                   className={\`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 \${theme.primaryBtn}\`}
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus weight="bold" className="w-3.5 h-3.5" />
                   Add Class for {currentMember.name}
                 </button>
               </div>
@@ -2510,7 +1822,7 @@ export default function App() {
                       </h4>
                       {dayItems.length === 0 ? (
                         <p className={\`text-xs py-6 text-center italic \${theme.textMuted}\`}>
-                          A free, unhurried {selectedDay} ☕
+                          A free, unhurried {selectedDay}
                         </p>
                       ) : (
                         dayItems.map((item) => {
@@ -2541,7 +1853,7 @@ export default function App() {
                                       attendedToday ? theme.doneBadge : theme.cardBg
                                     }\`}
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <CheckCircle weight={attendedToday ? 'fill' : 'duotone'} className="w-4 h-4" />
                                     {attendedToday ? 'Attended' : 'Check-in'}
                                   </button>
                                 )}
@@ -2550,7 +1862,7 @@ export default function App() {
                                   onClick={() => deleteScheduleItem(item)}
                                   className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash weight="duotone" className="w-4 h-4" />
                                 </button>
                               </div>
                             </div>
@@ -2587,8 +1899,9 @@ export default function App() {
                             </span>
                           </div>
                         </div>
-                        <span className={\`text-xs font-mono px-2.5 py-1 rounded-full border font-bold \${theme.streakBadge}\`}>
-                          🔥 {mStat.streak}d
+                        <span className={\`text-xs font-mono px-2.5 py-1 rounded-full border font-bold flex items-center gap-1 \${theme.streakBadge}\`}>
+                          <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                          {mStat.streak}d
                         </span>
                       </div>
 
@@ -2608,7 +1921,7 @@ export default function App() {
 
                       {selectedHeatCell && selectedHeatCell.member === member.name && (
                         <div className={\`text-xs font-mono px-3 py-1.5 rounded-xl border flex justify-between \${theme.innerCardBg}\`}>
-                          <span>📅 {selectedHeatCell.date}</span>
+                          <span>{selectedHeatCell.date}</span>
                           <span className="font-bold">{selectedHeatCell.mins} minutes logged</span>
                         </div>
                       )}
@@ -2617,12 +1930,12 @@ export default function App() {
                 })}
               </div>
 
-              {/* Badges */}
+              {/* Badges with Phosphor Duotone Vector Icons */}
               <div className={\`rounded-3xl p-6 border \${theme.cardBg}\`}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                      <Award className={\`w-5 h-5 \${theme.accentText}\`} />
+                      <Medal weight="duotone" className={\`w-6 h-6 \${theme.accentText}\`} />
                       {currentMember.name}'s Sanctuary Badges
                     </h3>
                   </div>
@@ -2632,25 +1945,28 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeBadges.map((b) => (
-                    <div
-                      key={b.id}
-                      className={\`p-4 rounded-2xl border flex items-center gap-3.5 transition-all \${
-                        b.unlocked ? \`\${theme.innerCardBg} \${theme.activeBorder}\` : \`\${theme.innerCardBg} opacity-45 grayscale\`
-                      }\`}
-                    >
-                      <div className="text-2xl w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
-                        {b.icon}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h5 className="font-bold text-xs sm:text-sm">{b.name}</h5>
-                          {b.unlocked && <span className="text-xs font-mono text-emerald-500">✓</span>}
+                  {activeBadges.map((b) => {
+                    const BadgeIcon = b.Icon;
+                    return (
+                      <div
+                        key={b.id}
+                        className={\`p-4 rounded-2xl border flex items-center gap-3.5 transition-all \${
+                          b.unlocked ? \`\${theme.innerCardBg} \${theme.activeBorder}\` : \`\${theme.innerCardBg} opacity-45 grayscale\`
+                        }\`}
+                      >
+                        <div className={\`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 \${theme.softBadge}\`}>
+                          <BadgeIcon weight={b.unlocked ? 'duotone' : 'regular'} className="w-6 h-6" />
                         </div>
-                        <p className={\`text-xs \${theme.textMuted}\`}>{b.desc}</p>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h5 className="font-bold text-xs sm:text-sm">{b.name}</h5>
+                            {b.unlocked && <CheckCircle weight="fill" className="w-3.5 h-3.5 text-emerald-500" />}
+                          </div>
+                          <p className={\`text-xs \${theme.textMuted}\`}>{b.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -2697,10 +2013,11 @@ export default function App() {
                     timerMode === 'stopwatch' ? 'pomodoro' : timerMode === 'pomodoro' ? 'break' : 'stopwatch'
                   )
                 }
-                className={\`px-2.5 py-1.5 rounded-xl text-xs font-mono border shrink-0 transition \${theme.softBadge}\`}
+                className={\`px-2.5 py-1.5 rounded-xl text-xs font-mono border shrink-0 flex items-center gap-1 transition \${theme.softBadge}\`}
                 title="Switch Timer Mode (Stopwatch / 25m Focus / 5m Break)"
               >
-                {timerMode === 'pomodoro' ? '🍅 25m' : timerMode === 'break' ? '☕ 5m' : '⏱️ Free'}
+                <Timer weight="duotone" className="w-4 h-4" />
+                {timerMode === 'pomodoro' ? '25m' : timerMode === 'break' ? '5m' : 'Free'}
               </button>
               <label htmlFor="dock-goal-select" className="sr-only">Select Goal</label>
               <select
@@ -2728,7 +2045,7 @@ export default function App() {
                 onClick={toggleTimer}
                 className={\`px-3.5 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1 transition \${theme.primaryBtn}\`}
               >
-                {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                {isTimerRunning ? <Pause weight="fill" className="w-3.5 h-3.5" /> : <Play weight="fill" className="w-3.5 h-3.5" />}
                 <span className="hidden sm:inline">{isTimerRunning ? 'Pause' : 'Start'}</span>
               </button>
               {timerMode !== 'break' && (
@@ -2738,7 +2055,7 @@ export default function App() {
                   title={canLogSession ? 'Log elapsed minutes' : 'Focus at least 1 minute to log'}
                   className={\`px-3 py-2 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition disabled:opacity-40 \${theme.softBadge}\`}
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check weight="bold" className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Log</span>
                 </button>
               )}
@@ -2747,13 +2064,13 @@ export default function App() {
                 aria-label="Reset Timer"
                 className={\`p-2 rounded-xl border \${theme.innerCardBg}\`}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <ArrowCounterClockwise weight="duotone" className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR */}
+        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR (Phosphor Duotone -> Fill) */}
         <nav
           aria-label="Mobile Navigation"
           className={\`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl grid grid-cols-4 px-2 py-1.5 \${theme.sidebarBg}\`}
@@ -2769,7 +2086,7 @@ export default function App() {
                   active ? theme.accentText : theme.textMuted
                 }\`}
               >
-                <Icon className="w-4 h-4 mb-0.5" />
+                <Icon weight={active ? 'fill' : 'duotone'} className="w-5 h-5 mb-0.5" />
                 <span className="text-[11px]">{item.label.split(' ')[0]}</span>
               </button>
             );
@@ -2784,7 +2101,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Data Backup & Cloud Sync</h3>
               <button aria-label="Close modal" onClick={() => setShowSyncModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2795,10 +2112,10 @@ export default function App() {
                   onClick={handleExportJSON}
                   className={\`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 \${theme.primaryBtn}\`}
                 >
-                  <Download className="w-3.5 h-3.5" /> Export Backup
+                  <DownloadSimple weight="duotone" className="w-4 h-4" /> Export Backup
                 </button>
                 <label className={\`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer \${theme.cardBg}\`}>
-                  <Upload className="w-3.5 h-3.5" /> Import JSON
+                  <UploadSimple weight="duotone" className="w-4 h-4" /> Import JSON
                   <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
                 </label>
               </div>
@@ -2806,7 +2123,7 @@ export default function App() {
 
             <div className="space-y-2">
               <label htmlFor="sync-url-input" className={\`block text-xs \${theme.textMuted}\`}>
-                Optional Real-Time REST Database URL (Firebase / Custom JSON Endpoint)
+                Optional Real-Time REST Database URL
               </label>
               <input
                 id="sync-url-input"
@@ -2841,7 +2158,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Share {currentMember.name}'s Snapshot</h3>
               <button aria-label="Close modal" onClick={() => setShowShareModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2853,8 +2170,8 @@ export default function App() {
               onClick={handleShareStatus}
               className={\`w-full py-3 rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 \${theme.primaryBtn}\`}
             >
-              <Copy className="w-4 h-4" />
-              {copiedShare ? 'Copied to Clipboard! ✨' : 'Share / Copy Status Text'}
+              <Copy weight="duotone" className="w-4 h-4" />
+              {copiedShare ? 'Copied to Clipboard!' : 'Share / Copy Status Text'}
             </button>
           </div>
         </div>
@@ -2867,7 +2184,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Invite Companion ({state.members.length}/4)</h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowMemberModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2902,10 +2219,10 @@ export default function App() {
                 onChange={(e) => setMemberForm({ ...memberForm, theme: e.target.value as ThemePalette })}
                 className={\`w-full border rounded-2xl px-3 py-2.5 text-xs \${theme.innerCardBg}\`}
               >
-                <option value="peach-terracotta">Warm Terracotta & Peach 🍑</option>
-                <option value="matcha-cream">Matcha Oat Milk 🍵</option>
-                <option value="lavender-blush">Velvet Lavender & Rose 💜</option>
-                <option value="warm-sage">Espresso & Warm Sage ☕</option>
+                <option value="peach-terracotta">Warm Terracotta & Peach</option>
+                <option value="matcha-cream">Matcha Oat Milk</option>
+                <option value="lavender-blush">Velvet Lavender & Rose</option>
+                <option value="warm-sage">Espresso & Warm Sage</option>
               </select>
             </div>
 
@@ -2930,7 +2247,7 @@ export default function App() {
                 {editingGoal ? 'Edit Goal' : \`New Goal for \${currentMember.name}\`}
               </h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowGoalModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -3005,7 +2322,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Add Class ({currentMember.name})</h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowScheduleModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -3088,13 +2405,13 @@ export default function App() {
           <div className={\`border rounded-3xl max-w-lg w-full p-7 space-y-4 shadow-2xl \${theme.pageBg} \${theme.activeBorder}\`}>
             <div className="flex items-center justify-between">
               <span className={\`text-xs font-mono px-3 py-1 rounded-full border \${theme.softBadge}\`}>
-                SyncPulse v4.0 Guide
+                SyncPulse v4.1 Guide
               </span>
               <button aria-label="Close guide" onClick={() => setShowTutorial(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
-            <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary ✨</h3>
+            <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary</h3>
             <ul className={\`text-xs space-y-2 leading-relaxed \${theme.textMuted}\`}>
               <li>• <b>Visual Timeline:</b> Plots your classes and tasks for the selected day and highlights Free Focus Windows.</li>
               <li>• <b>Persistent Timer:</b> Runs accurately even if you refresh the page or lock your phone. Supports Stopwatch, 25m Pomodoro, and 5m Breaks.</li>
@@ -3103,7 +2420,7 @@ export default function App() {
             </ul>
             <div className="flex justify-end pt-2">
               <button onClick={() => setShowTutorial(false)} className={\`px-5 py-2.5 rounded-2xl text-xs font-semibold \${theme.primaryBtn}\`}>
-                Got It ✨
+                Got It
               </button>
             </div>
           </div>
@@ -3119,7 +2436,7 @@ for (const [filePath, content] of Object.entries(files)) {
   const fullPath = path.join(process.cwd(), filePath);
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   fs.writeFileSync(fullPath, content, 'utf8');
-  console.log('✅ Generated:', filePath);
+  console.log('✨ Updated with Phosphor Icons:', filePath);
 }
 
-console.log('\n🎉 SyncPulse v4.0 (Full Audit Fix + Modular Code + PWA + JSON Backup) is ready!');
+console.log('\n💜 SyncPulse v4.1 (Phosphor Icons Duotone & Fill Edition) is ready!');

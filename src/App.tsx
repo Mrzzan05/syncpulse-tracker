@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import confetti from 'canvas-confetti';
 import {
-  Target, Calendar, CheckCircle2, Plus, Trash2, Edit3,
-  Play, Pause, RotateCcw, Bell, Sparkles,
-  Cloud, Check, X, GraduationCap, HelpCircle,
-  Share2, UserPlus, Copy, ChevronRight, ChevronLeft, Heart,
-  Sun, Moon, Coffee, CloudRain, VolumeX,
-  Compass, Flame, Award, Trophy, Download, Upload
-} from 'lucide-react';
+  Target, CalendarBlank, CheckCircle, Plus, Trash, PencilSimple,
+  Play, Pause, ArrowCounterClockwise, Sparkle,
+  CloudArrowUp, Check, X, GraduationCap, Question,
+  ShareNetwork, UserPlus, Copy, Heart,
+  SunDim, MoonStars, Coffee, CloudRain, SpeakerSlash,
+  Compass, Fire, Medal, Trophy, DownloadSimple, UploadSimple,
+  Timer, Waveform, Plant, Lightning, Crown, Buildings
+} from '@phosphor-icons/react';
 import {
   AppState, GoalItem, ScheduleItem, TaskItem, Member, ThemePalette, TimeLog
 } from './types';
@@ -76,7 +77,6 @@ export default function App() {
     return d.getHours() * 60 + d.getMinutes();
   });
 
-  // Check clock & trigger task reminders
   const notifiedTasksRef = useRef<Set<string>>(new Set());
   useEffect(() => {
     const timer = setInterval(() => {
@@ -90,7 +90,7 @@ export default function App() {
           notifiedTasksRef.current.add(t.id);
           playGentleChime();
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(`🌿 SyncPulse Reminder (${t.title})`, {
+            new Notification(`SyncPulse Reminder: ${t.title}`, {
               body: `Scheduled for ${t.reminderTime} (+${t.estimatedMinutes}m)`
             });
           }
@@ -185,7 +185,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Persistent Wall-Clock Timer (Never loses time on refresh or phone lock!)
+  // Persistent Wall-Clock Timer
   const [timerMode, setTimerMode] = useState<'stopwatch' | 'pomodoro' | 'break'>(() => {
     return (localStorage.getItem('sp_timer_mode') as any) || 'stopwatch';
   });
@@ -231,7 +231,7 @@ export default function App() {
           playGentleChime();
           if ('Notification' in window && Notification.permission === 'granted') {
             new Notification(
-              timerMode === 'pomodoro' ? '🍅 25m Focus Complete!' : '☕ Break Complete!',
+              timerMode === 'pomodoro' ? '25m Focus Complete!' : 'Break Complete!',
               { body: timerMode === 'pomodoro' ? 'Click Log to bank your 25 minutes or take a 5m break.' : 'Ready for another focus session?' }
             );
           }
@@ -319,7 +319,6 @@ export default function App() {
     localStorage.setItem('syncpulse_latte', String(isLatteMode));
   }, [isLatteMode]);
 
-  // Safe Cloud Polling (Only applies remote if newer & user isn't actively typing)
   useEffect(() => {
     if (!syncUrl) return;
     const cleanUrl = syncUrl.endsWith('.json') ? syncUrl : `${syncUrl.replace(/\/$/, '')}/syncpulse_v4.json`;
@@ -426,7 +425,6 @@ export default function App() {
     }));
   };
 
-  // Prevent self-cheering & multiple cheers per person
   const toggleCheerLog = (logId: string) => {
     commitState((prev) => ({
       ...prev,
@@ -446,7 +444,7 @@ export default function App() {
   const handleSaveTimerSession = () => {
     const elapsedSec = getElapsedTimerSeconds();
     const elapsedMins = Math.floor(elapsedSec / 60);
-    if (elapsedMins < 1) return; // Prevents 0s -> 1m XP exploit
+    if (elapsedMins < 1) return;
 
     const userGoals = state.goals.filter((g) => g.userId === activeUser);
     const targetGoal = userGoals.find((g) => g.id === selectedGoalId) || userGoals[0];
@@ -466,7 +464,7 @@ export default function App() {
         ...prev,
         members: prev.members.map((m) => (m.id === activeUser ? { ...m, statusNote: note } : m))
       }),
-      1200 // 1.2s debounce while typing
+      1200
     );
     setTimeout(() => {
       isTypingRef.current = false;
@@ -505,7 +503,6 @@ export default function App() {
     setShowMemberModal(false);
   };
 
-  // Clean cascade delete when removing a companion
   const removeMember = (id: string, name: string) => {
     if (id === 'mehrsan' || id === 'ronak') return;
     if (!window.confirm(`Remove ${name} and all their goals/logs from the sanctuary?`)) return;
@@ -520,7 +517,6 @@ export default function App() {
     setActiveUser('mehrsan');
   };
 
-  // Goal CRUD
   const openCreateGoal = () => {
     setEditingGoal(null);
     setGoalForm({ title: '', category: 'Short-Term', targetHours: 40, deadline: 'Ongoing' });
@@ -569,7 +565,6 @@ export default function App() {
     commitState((prev) => ({ ...prev, goals: prev.goals.filter((g) => g.id !== goal.id) }));
   };
 
-  // Idempotent Class Check-in (Unchecking removes the log so XP cannot be farmed!)
   const toggleClassAttendance = (sched: ScheduleItem) => {
     const attended = sched.attendedDates.includes(todayStr);
     const sourceKey = `class-${sched.id}-${todayStr}`;
@@ -635,7 +630,6 @@ export default function App() {
     commitState((prev) => ({ ...prev, schedules: prev.schedules.filter((s) => s.id !== item.id) }));
   };
 
-  // Idempotent Task Toggle (Bound to timelineDay + removes log on uncheck)
   const addTask = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTaskTitle.trim()) return;
@@ -688,7 +682,6 @@ export default function App() {
     }));
   };
 
-  // JSON Export & Import Backup
   const handleExportJSON = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -715,7 +708,6 @@ export default function App() {
     reader.readAsText(file);
   };
 
-  // Unified Metrics (Memoized for fast performance)
   const memberMetrics = useMemo(() => {
     const map: Record<string, {
       todayMins: number;
@@ -735,13 +727,11 @@ export default function App() {
       const mLogs = state.logs.filter((l) => l.userId === m.id);
       const todayMins = mLogs.filter((l) => l.date === todayStr).reduce((a, b) => a + b.minutes, 0);
 
-      // Unified total minutes: Goal banked minutes + class/task logs
       const goalMins = state.goals.filter((g) => g.userId === m.id).reduce((a, b) => a + b.loggedMinutes, 0);
       const nonGoalLogMins = mLogs.filter((l) => l.sourceKey).reduce((a, b) => a + b.minutes, 0);
       const totalMins = goalMins + nonGoalLogMins;
       const totalHours = (totalMins / 60).toFixed(1);
 
-      // Local Date Streak
       const activeDates = new Set(mLogs.filter((l) => l.minutes > 0).map((l) => l.date));
       let streak = 0;
       for (let i = 0; i < 60; i++) {
@@ -759,7 +749,7 @@ export default function App() {
       const currentLevelXP = totalXP % xpPerLevel;
       const progressPct = Math.min(100, Math.round((currentLevelXP / xpPerLevel) * 100));
       const title =
-        level >= 8 ? 'Grandmaster Luminary 👑' : level >= 5 ? 'Master Scholar ✨' : level >= 3 ? 'Steady Seeker 🌿' : 'Rising Star 🌱';
+        level >= 8 ? 'Grandmaster Luminary' : level >= 5 ? 'Master Scholar' : level >= 3 ? 'Steady Seeker' : 'Rising Star';
 
       const grid28 = Array.from({ length: 28 }, (_, idx) => {
         const daysAgo = 27 - idx;
@@ -805,16 +795,15 @@ export default function App() {
     );
 
     return [
-      { id: 'spark', icon: '🌱', name: 'First Spark', desc: 'Logged your first focus session', unlocked: userLogs.length > 0 },
-      { id: 'flame', icon: '🔥', name: '3-Day Flame', desc: 'Maintained a 3+ day focus streak', unlocked: activeStats.streak >= 3 },
-      { id: 'deep', icon: '⚡', name: 'Deep Diver', desc: 'Completed a 90+ min focus block', unlocked: hasDeepSession },
-      { id: 'beloved', icon: '💜', name: 'Warm Spirit', desc: 'Received cheers from companions', unlocked: othersCheeredCount >= 2 },
-      { id: 'club10', icon: '🏛️', name: '10-Hour Club', desc: 'Banked over 10 total hours', unlocked: totalHrs >= 10 },
-      { id: 'legend50', icon: '👑', name: '50-Hour Legend', desc: 'Banked over 50 total hours', unlocked: totalHrs >= 50 }
+      { id: 'spark', Icon: Plant, name: 'First Spark', desc: 'Logged your first focus session', unlocked: userLogs.length > 0 },
+      { id: 'flame', Icon: Fire, name: '3-Day Flame', desc: 'Maintained a 3+ day focus streak', unlocked: activeStats.streak >= 3 },
+      { id: 'deep', Icon: Lightning, name: 'Deep Diver', desc: 'Completed a 90+ min focus block', unlocked: hasDeepSession },
+      { id: 'beloved', Icon: Heart, name: 'Warm Spirit', desc: 'Received cheers from companions', unlocked: othersCheeredCount >= 2 },
+      { id: 'club10', Icon: Buildings, name: '10-Hour Club', desc: 'Banked over 10 total hours', unlocked: totalHrs >= 10 },
+      { id: 'legend50', Icon: Crown, name: '50-Hour Legend', desc: 'Banked over 50 total hours', unlocked: totalHrs >= 50 }
     ];
   }, [state.logs, activeUser, activeStats]);
 
-  // Share Handler with Web Share API + Try/Catch Clipboard Fallback
   const generateShareText = () => {
     const topGoals = userGoals
       .slice(0, 3)
@@ -841,7 +830,6 @@ export default function App() {
     }
   };
 
-  // Chronological Visual Daily Timeline with Overlap Detection
   const dailyStream = useMemo(() => {
     const dayClasses = state.schedules.filter(
       (s) => s.userId === activeUser && s.day === timelineDay
@@ -902,7 +890,7 @@ export default function App() {
           out.push({
             id: `gap-${cur.id}-${next.id}`,
             kind: 'gap',
-            title: 'Free Focus Window ✨',
+            title: 'Free Focus Window',
             subtitle: `Open breathing room before ${next.title}`,
             startMins: cur.endMins,
             endMins: next.startMins,
@@ -945,7 +933,7 @@ export default function App() {
   const navItems = [
     { id: 'dashboard', label: 'Today’s Flow', icon: Compass, badge: `${dailyStream.filter(i => i.kind !== 'gap' && !i.completed).length}` },
     { id: 'goals', label: 'Goals & Time Bank', icon: Target, badge: `${userGoals.length}` },
-    { id: 'schedule', label: 'Weekly Classes', icon: Calendar },
+    { id: 'schedule', label: 'Weekly Classes', icon: CalendarBlank },
     { id: 'analytics', label: 'Heatmaps & Badges', icon: Trophy, badge: `${activeBadges.filter(b => b.unlocked).length}/6` },
   ];
 
@@ -964,12 +952,11 @@ export default function App() {
       <div className={`lg:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-2.5 border-b backdrop-blur-xl ${theme.sidebarBg}`}>
         <div className="flex items-center gap-2">
           <div className={`w-7 h-7 rounded-xl flex items-center justify-center ${theme.primaryBtn}`}>
-            {currentMember.theme === 'lavender-blush' ? <Heart className="w-3.5 h-3.5 text-white" /> : <Coffee className="w-3.5 h-3.5 text-white" />}
+            {currentMember.theme === 'lavender-blush' ? <Heart weight="fill" className="w-4 h-4 text-white" /> : <Coffee weight="fill" className="w-4 h-4 text-white" />}
           </div>
           <span className="font-serif italic text-xl">SyncPulse</span>
         </div>
 
-        {/* Mobile Companion Quick Pills */}
         <div className="flex items-center gap-1.5">
           {state.members.map((m) => (
             <button
@@ -988,7 +975,7 @@ export default function App() {
             aria-label="Toggle Day/Night Mode"
             className={`p-1.5 rounded-xl border ${theme.cardBg}`}
           >
-            {isLatteMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4 text-amber-300" />}
+            {isLatteMode ? <MoonStars weight="duotone" className="w-4 h-4 text-purple-600" /> : <SunDim weight="duotone" className="w-4 h-4 text-amber-300" />}
           </button>
         </div>
       </div>
@@ -999,14 +986,14 @@ export default function App() {
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center cozy-transition ${theme.primaryBtn}`}>
               {currentMember.theme === 'lavender-blush' ? (
-                <Heart className="w-5 h-5 text-white fill-white/25" />
+                <Heart weight="duotone" className="w-5 h-5 text-white" />
               ) : (
-                <Coffee className="w-5 h-5 text-white" />
+                <Coffee weight="duotone" className="w-5 h-5 text-white" />
               )}
             </div>
             <div>
               <h1 className="font-serif italic text-2xl leading-none">SyncPulse</h1>
-              <span className={`text-xs font-mono ${theme.textMuted}`}>Cozy Sanctuary v4</span>
+              <span className={`text-xs font-mono ${theme.textMuted}`}>Cozy Sanctuary</span>
             </div>
           </div>
 
@@ -1021,7 +1008,7 @@ export default function App() {
                   onClick={() => setShowMemberModal(true)}
                   className={`text-xs font-semibold flex items-center gap-1 hover:underline ${theme.accentText}`}
                 >
-                  <UserPlus className="w-3.5 h-3.5" /> Add
+                  <UserPlus weight="duotone" className="w-3.5 h-3.5" /> Add
                 </button>
               )}
             </div>
@@ -1054,7 +1041,7 @@ export default function App() {
                       <div className="truncate">
                         <p className="text-xs font-bold flex items-center gap-1 truncate">
                           {member.name}
-                          {member.id === 'ronak' && <span>💜</span>}
+                          {member.id === 'ronak' && <Heart weight="fill" className="w-3 h-3 text-purple-400 inline" />}
                         </p>
                         <p className={`text-xs font-mono ${theme.textMuted}`}>
                           {Math.floor(mStat.todayMins / 60)}h {mStat.todayMins % 60}m today
@@ -1064,7 +1051,8 @@ export default function App() {
 
                     <div className="flex items-center gap-1 shrink-0">
                       <span className={`text-xs font-mono px-1.5 py-0.5 rounded-md border flex items-center gap-0.5 ${theme.streakBadge}`} title="Active Streak">
-                        🔥{mStat.streak}
+                        <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                        {mStat.streak}
                       </span>
                       {member.id !== 'mehrsan' && member.id !== 'ronak' && (
                         <button
@@ -1076,7 +1064,7 @@ export default function App() {
                           }}
                           className="opacity-0 group-hover:opacity-100 p-1 hover:text-rose-400"
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X weight="bold" className="w-3.5 h-3.5" />
                         </button>
                       )}
                     </div>
@@ -1086,7 +1074,7 @@ export default function App() {
             </div>
           </div>
 
-          {/* Navigation Views */}
+          {/* Navigation Views (Phosphor Duotone when idle, Fill when active!) */}
           <nav className="space-y-1" aria-label="Main Navigation">
             <span className={`px-1 text-xs font-mono uppercase tracking-wider block mb-1.5 ${theme.textMuted}`}>
               Workspace Views
@@ -1103,7 +1091,7 @@ export default function App() {
                   }`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
+                    <Icon weight={active ? 'fill' : 'duotone'} className="w-4 h-4" />
                     {item.label}
                   </span>
                   {item.badge && (
@@ -1120,7 +1108,7 @@ export default function App() {
           <div className={`p-3.5 rounded-2xl border space-y-2.5 ${theme.innerCardBg}`}>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono uppercase tracking-wider flex items-center gap-1.5">
-                <CloudRain className="w-3.5 h-3.5" /> Cozy Ambience
+                <CloudRain weight="duotone" className="w-4 h-4" /> Cozy Ambience
               </span>
               {ambientMode !== 'off' && (
                 <button
@@ -1128,7 +1116,7 @@ export default function App() {
                   aria-label="Mute Ambient Audio"
                   className="text-xs font-mono text-rose-400 flex items-center gap-0.5"
                 >
-                  <VolumeX className="w-3.5 h-3.5" /> Mute
+                  <SpeakerSlash weight="duotone" className="w-3.5 h-3.5" /> Mute
                 </button>
               )}
             </div>
@@ -1139,7 +1127,8 @@ export default function App() {
                   ambientMode === 'rain' ? theme.primaryBtn : `${theme.cardBg} ${theme.textMuted}`
                 }`}
               >
-                🌧️ Soft Rain
+                <CloudRain weight={ambientMode === 'rain' ? 'fill' : 'duotone'} className="w-4 h-4" />
+                Soft Rain
               </button>
               <button
                 onClick={() => setAmbientMode(ambientMode === 'tone' ? 'off' : 'tone')}
@@ -1147,7 +1136,8 @@ export default function App() {
                   ambientMode === 'tone' ? theme.primaryBtn : `${theme.cardBg} ${theme.textMuted}`
                 }`}
               >
-                ✨ Warm Tone
+                <Waveform weight={ambientMode === 'tone' ? 'bold' : 'duotone'} className="w-4 h-4" />
+                Warm Tone
               </button>
             </div>
           </div>
@@ -1160,14 +1150,18 @@ export default function App() {
               onClick={() => setIsLatteMode(!isLatteMode)}
               className={`py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 ${theme.cardBg}`}
             >
-              {isLatteMode ? <Moon className="w-3.5 h-3.5 text-purple-600" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
+              {isLatteMode ? (
+                <MoonStars weight="duotone" className="w-4 h-4 text-purple-600" />
+              ) : (
+                <SunDim weight="duotone" className="w-4 h-4 text-amber-400" />
+              )}
               {isLatteMode ? 'Night' : 'Latte'}
             </button>
             <button
               onClick={() => setShowShareModal(true)}
               className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 ${theme.primaryBtn}`}
             >
-              <Share2 className="w-3.5 h-3.5" />
+              <ShareNetwork weight="duotone" className="w-4 h-4" />
               Share
             </button>
           </div>
@@ -1177,14 +1171,14 @@ export default function App() {
               onClick={() => setShowSyncModal(true)}
               className={`flex items-center gap-1.5 ${theme.textMuted} hover:underline`}
             >
-              <Cloud className={`w-3.5 h-3.5 ${syncUrl ? 'text-emerald-500' : ''}`} />
+              <CloudArrowUp weight="duotone" className={`w-4 h-4 ${syncUrl ? 'text-emerald-500' : ''}`} />
               {syncUrl ? 'Sync & Backup' : 'Backup / Sync'}
             </button>
             <button
               onClick={() => setShowTutorial(true)}
               className={`flex items-center gap-1 ${theme.textMuted} hover:underline`}
             >
-              <HelpCircle className="w-3.5 h-3.5" /> Guide
+              <Question weight="duotone" className="w-4 h-4" /> Guide
             </button>
           </div>
         </div>
@@ -1193,7 +1187,7 @@ export default function App() {
       {/* MAIN WORKSPACE CONTENT AREA */}
       <div className="flex-1 min-w-0 relative z-10 pb-36">
         <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-6 space-y-6">
-          {/* Live Companion Presence Alert if someone is focusing */}
+          {/* Live Companion Presence Alert */}
           {state.members.some((m) => m.presence?.isFocusing) && (
             <div className={`px-4 py-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2 text-xs ${theme.doneBadge}`}>
               <div className="flex items-center gap-2">
@@ -1205,25 +1199,29 @@ export default function App() {
                     .join(' • ')}
                 </span>
               </div>
-              <span className="font-mono text-xs">Co-Op Live ✨</span>
+              <span className="font-mono text-xs flex items-center gap-1">
+                <Sparkle weight="fill" className="w-3.5 h-3.5" /> Co-Op Live
+              </span>
             </div>
           )}
 
-          {/* Header Banner: Full on Dashboard, Compact on other tabs */}
+          {/* Header Banner */}
           {activeTab === 'dashboard' ? (
             <section className={`p-5 sm:p-6 rounded-3xl border backdrop-blur-md space-y-4 cozy-transition ${theme.cardBg}`}>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border font-bold flex items-center gap-1 ${theme.streakBadge}`}>
-                      🔥 {activeStats.streak} Day Streak
+                      <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                      {activeStats.streak} Day Streak
                     </span>
-                    <span className={`text-xs font-mono uppercase px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
+                    <span className={`text-xs font-mono uppercase px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${theme.softBadge}`}>
+                      <Sparkle weight="duotone" className="w-3.5 h-3.5" />
                       Lv.{activeStats.level} • {activeStats.title}
                     </span>
                     {nextUpcomingItem && (
                       <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${theme.innerCardBg}`}>
-                        <Sparkles className="w-3.5 h-3.5" />
+                        <Timer weight="duotone" className="w-3.5 h-3.5" />
                         Next: <b>{nextUpcomingItem.title}</b> ({nextUpcomingItem.startTime})
                       </span>
                     )}
@@ -1262,7 +1260,7 @@ export default function App() {
               <div className={`pt-3 border-t ${theme.divider}`}>
                 <div className="flex items-center justify-between text-xs font-mono mb-1.5">
                   <span className="flex items-center gap-1.5">
-                    <Trophy className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                    <Trophy weight="duotone" className={`w-4 h-4 ${theme.accentText}`} />
                     <span>Experience: <b>{activeStats.totalXP.toLocaleString()} XP</b></span>
                   </span>
                   <span className={theme.textMuted}>
@@ -1284,8 +1282,8 @@ export default function App() {
                   {currentMember.avatar}
                 </span>
                 <span className="font-bold text-sm">{currentMember.name}</span>
-                <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${theme.streakBadge}`}>
-                  🔥 {activeStats.streak}d
+                <span className={`text-xs font-mono px-2 py-0.5 rounded-full border flex items-center gap-1 ${theme.streakBadge}`}>
+                  <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" /> {activeStats.streak}d
                 </span>
                 <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
                   Lv.{activeStats.level} ({activeStats.totalHours}h)
@@ -1295,21 +1293,21 @@ export default function App() {
                 onClick={() => setShowSyncModal(true)}
                 className={`text-xs font-mono flex items-center gap-1.5 ${theme.textMuted} hover:underline`}
               >
-                <Download className="w-3.5 h-3.5" /> Backup / Sync
+                <DownloadSimple weight="duotone" className="w-4 h-4" /> Backup / Sync
               </button>
             </div>
           )}
 
-          {/* VIEW 1: TODAY'S FLOW (VISUAL DAILY TIMELINE + LIVE SQUAD FEED) */}
+          {/* VIEW 1: TODAY'S FLOW */}
           {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Left 7 Cols: Structured-Style Visual Daily Timeline */}
+              {/* Left 7 Cols: Visual Daily Timeline */}
               <div className="lg:col-span-7 space-y-6">
                 <div className={`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                     <div>
                       <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                        <Compass className={`w-5 h-5 ${theme.accentText}`} />
+                        <Compass weight="duotone" className={`w-5 h-5 ${theme.accentText}`} />
                         Visual Daily Timeline ({timelineDay})
                       </h3>
                       <p className={`text-xs ${theme.textMuted}`}>
@@ -1324,7 +1322,7 @@ export default function App() {
                       }}
                       className={`px-3 py-1.5 rounded-2xl text-xs font-semibold flex items-center gap-1 border ${theme.softBadge}`}
                     >
-                      <Plus className="w-3.5 h-3.5" /> Add Class
+                      <Plus weight="bold" className="w-3.5 h-3.5" /> Add Class
                     </button>
                   </div>
 
@@ -1382,16 +1380,16 @@ export default function App() {
                     </select>
                     <button
                       type="submit"
-                      className={`px-4 py-2 rounded-2xl font-semibold text-xs ${theme.primaryBtn}`}
+                      className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1 ${theme.primaryBtn}`}
                     >
-                      + Plot
+                      <Plus weight="bold" className="w-3.5 h-3.5" /> Plot
                     </button>
                   </form>
 
                   {/* Timeline Stream */}
                   {dailyStream.length === 0 ? (
                     <div className={`p-8 rounded-2xl border text-center space-y-2 ${theme.innerCardBg}`}>
-                      <p className="font-serif italic text-xl">An open, unhurried {timelineDay} ✨</p>
+                      <p className="font-serif italic text-xl">An open, unhurried {timelineDay}</p>
                       <p className={`text-xs ${theme.textMuted}`}>
                         No fixed classes or tasks plotted for {timelineDay}. Plot a task above or launch the focus timer!
                       </p>
@@ -1423,7 +1421,7 @@ export default function App() {
                               <div className={`w-3.5 h-3.5 rounded-full border-2 z-10 shrink-0 ${theme.pageBg} ${theme.timelineLine}`} />
                               <div className={`flex-1 px-4 py-2.5 rounded-2xl border border-dashed flex flex-wrap items-center justify-between gap-2 text-xs ${theme.innerCardBg}`}>
                                 <span className="font-medium flex items-center gap-1.5">
-                                  <Sparkles className={`w-3.5 h-3.5 ${theme.accentText}`} />
+                                  <Sparkle weight="duotone" className={`w-4 h-4 ${theme.accentText}`} />
                                   {entry.title} ({Math.floor(entry.durationMins / 60) > 0 ? `${Math.floor(entry.durationMins / 60)}h ` : ''}{entry.durationMins % 60}m)
                                 </span>
                                 <button
@@ -1435,7 +1433,7 @@ export default function App() {
                                   }}
                                   className={`text-xs font-mono px-2.5 py-1 rounded-xl border flex items-center gap-1 ${theme.softBadge}`}
                                 >
-                                  <Play className="w-3 h-3" /> Start 25m
+                                  <Play weight="fill" className="w-3 h-3" /> Start 25m
                                 </button>
                               </div>
                             </div>
@@ -1463,7 +1461,7 @@ export default function App() {
                                   : `${theme.pageBg} border-current`
                               }`}
                             >
-                              {entry.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                              {entry.completed && <Check weight="bold" className="w-2.5 h-2.5" />}
                             </button>
 
                             <div
@@ -1477,12 +1475,17 @@ export default function App() {
                             >
                               <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                                 <div className="flex flex-wrap items-center gap-1.5">
-                                  <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
-                                    {entry.kind === 'class' ? `🎓 ${entry.badge}` : '✨ Intention'}
+                                  <span className={`text-xs font-mono px-2 py-0.5 rounded-full border flex items-center gap-1 ${theme.softBadge}`}>
+                                    {entry.kind === 'class' ? (
+                                      <GraduationCap weight="duotone" className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Sparkle weight="duotone" className="w-3.5 h-3.5" />
+                                    )}
+                                    {entry.kind === 'class' ? entry.badge : 'Intention'}
                                   </span>
                                   {entry.overlaps && (
                                     <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-400/40">
-                                      ⚠️ Time Overlap
+                                      Time Overlap
                                     </span>
                                   )}
                                   {isHappeningNow && (
@@ -1492,7 +1495,7 @@ export default function App() {
                                   )}
                                   {isNextUp && countdownLabel && (
                                     <span className={`text-xs font-mono px-2 py-0.5 rounded-full border ${theme.softBadge}`}>
-                                      ⏳ {countdownLabel}
+                                      {countdownLabel}
                                     </span>
                                   )}
                                 </div>
@@ -1519,7 +1522,7 @@ export default function App() {
                                       entry.completed ? theme.doneBadge : theme.cardBg
                                     }`}
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <CheckCircle weight={entry.completed ? 'fill' : 'duotone'} className="w-4 h-4" />
                                     {entry.completed ? 'Done' : `+${entry.durationMins}m`}
                                   </button>
                                   {entry.kind === 'task' && entry.rawTask && (
@@ -1528,7 +1531,7 @@ export default function App() {
                                       onClick={() => deleteTask(entry.rawTask!)}
                                       className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash weight="duotone" className="w-4 h-4" />
                                     </button>
                                   )}
                                 </div>
@@ -1547,7 +1550,7 @@ export default function App() {
                 <div className={`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                      <Heart className={`w-5 h-5 ${theme.accentText}`} />
+                      <Heart weight="duotone" className={`w-5 h-5 ${theme.accentText}`} />
                       Shared Squad Feed
                     </h3>
                     <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border ${theme.softBadge}`}>
@@ -1585,12 +1588,12 @@ export default function App() {
                             disabled={isOwnLog}
                             onClick={() => toggleCheerLog(log.id)}
                             aria-label={isOwnLog ? 'Your activity log' : 'Cheer companion'}
-                            title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer 💜'}
+                            title={isOwnLog ? 'Companions can cheer your log!' : 'Send a warm cheer'}
                             className={`px-2.5 py-1 rounded-xl border text-xs font-mono flex items-center gap-1 transition shrink-0 ${
                               hasCheered ? theme.primaryBtn : mStyle.softBadge
                             } ${isOwnLog ? 'opacity-70 cursor-default' : 'hover:scale-105'}`}
                           >
-                            <span>💜</span>
+                            <Heart weight={hasCheered || log.cheeredBy.length > 0 ? 'fill' : 'duotone'} className="w-3.5 h-3.5" />
                             <span>{log.cheeredBy.length}</span>
                           </button>
                         </div>
@@ -1602,7 +1605,7 @@ export default function App() {
                 {/* University Exam Dates */}
                 <div className={`rounded-3xl p-5 sm:p-6 border backdrop-blur-md cozy-transition ${theme.cardBg}`}>
                   <h3 className="font-serif italic text-2xl flex items-center gap-2 mb-3">
-                    <GraduationCap className={`w-5 h-5 ${theme.accentText}`} />
+                    <GraduationCap weight="duotone" className={`w-5 h-5 ${theme.accentText}`} />
                     University Exams (1405)
                   </h3>
                   <div className="space-y-2.5">
@@ -1617,7 +1620,7 @@ export default function App() {
                         </div>
                         <div className="text-right font-mono">
                           <span className={`font-bold block ${theme.accentText}`}>{ex.date}</span>
-                          <span className={`text-xs ${theme.textMuted}`}>⏰ {ex.time}</span>
+                          <span className={`text-xs ${theme.textMuted}`}>{ex.time}</span>
                         </div>
                       </div>
                     ))}
@@ -1641,7 +1644,7 @@ export default function App() {
                   onClick={openCreateGoal}
                   className={`px-4 py-2.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${theme.primaryBtn}`}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus weight="bold" className="w-4 h-4" />
                   New Goal for {currentMember.name}
                 </button>
               </div>
@@ -1688,14 +1691,14 @@ export default function App() {
                                     onClick={() => openEditGoal(g)}
                                     className="p-1.5 opacity-60 hover:opacity-100"
                                   >
-                                    <Edit3 className="w-3.5 h-3.5" />
+                                    <PencilSimple weight="duotone" className="w-4 h-4" />
                                   </button>
                                   <button
                                     aria-label={`Delete ${g.title}`}
                                     onClick={() => deleteGoal(g)}
                                     className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <Trash weight="duotone" className="w-4 h-4" />
                                   </button>
                                 </div>
                               </div>
@@ -1762,7 +1765,7 @@ export default function App() {
                   }}
                   className={`px-4 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1.5 ${theme.primaryBtn}`}
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus weight="bold" className="w-3.5 h-3.5" />
                   Add Class for {currentMember.name}
                 </button>
               </div>
@@ -1784,7 +1787,7 @@ export default function App() {
                       </h4>
                       {dayItems.length === 0 ? (
                         <p className={`text-xs py-6 text-center italic ${theme.textMuted}`}>
-                          A free, unhurried {selectedDay} ☕
+                          A free, unhurried {selectedDay}
                         </p>
                       ) : (
                         dayItems.map((item) => {
@@ -1815,7 +1818,7 @@ export default function App() {
                                       attendedToday ? theme.doneBadge : theme.cardBg
                                     }`}
                                   >
-                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <CheckCircle weight={attendedToday ? 'fill' : 'duotone'} className="w-4 h-4" />
                                     {attendedToday ? 'Attended' : 'Check-in'}
                                   </button>
                                 )}
@@ -1824,7 +1827,7 @@ export default function App() {
                                   onClick={() => deleteScheduleItem(item)}
                                   className="p-1.5 opacity-60 hover:text-rose-400 hover:opacity-100"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash weight="duotone" className="w-4 h-4" />
                                 </button>
                               </div>
                             </div>
@@ -1861,8 +1864,9 @@ export default function App() {
                             </span>
                           </div>
                         </div>
-                        <span className={`text-xs font-mono px-2.5 py-1 rounded-full border font-bold ${theme.streakBadge}`}>
-                          🔥 {mStat.streak}d
+                        <span className={`text-xs font-mono px-2.5 py-1 rounded-full border font-bold flex items-center gap-1 ${theme.streakBadge}`}>
+                          <Fire weight="fill" className="w-3.5 h-3.5 text-amber-500" />
+                          {mStat.streak}d
                         </span>
                       </div>
 
@@ -1882,7 +1886,7 @@ export default function App() {
 
                       {selectedHeatCell && selectedHeatCell.member === member.name && (
                         <div className={`text-xs font-mono px-3 py-1.5 rounded-xl border flex justify-between ${theme.innerCardBg}`}>
-                          <span>📅 {selectedHeatCell.date}</span>
+                          <span>{selectedHeatCell.date}</span>
                           <span className="font-bold">{selectedHeatCell.mins} minutes logged</span>
                         </div>
                       )}
@@ -1891,12 +1895,12 @@ export default function App() {
                 })}
               </div>
 
-              {/* Badges */}
+              {/* Badges with Phosphor Duotone Vector Icons */}
               <div className={`rounded-3xl p-6 border ${theme.cardBg}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="font-serif italic text-2xl flex items-center gap-2">
-                      <Award className={`w-5 h-5 ${theme.accentText}`} />
+                      <Medal weight="duotone" className={`w-6 h-6 ${theme.accentText}`} />
                       {currentMember.name}'s Sanctuary Badges
                     </h3>
                   </div>
@@ -1906,25 +1910,28 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeBadges.map((b) => (
-                    <div
-                      key={b.id}
-                      className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all ${
-                        b.unlocked ? `${theme.innerCardBg} ${theme.activeBorder}` : `${theme.innerCardBg} opacity-45 grayscale`
-                      }`}
-                    >
-                      <div className="text-2xl w-11 h-11 rounded-2xl flex items-center justify-center shrink-0">
-                        {b.icon}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <h5 className="font-bold text-xs sm:text-sm">{b.name}</h5>
-                          {b.unlocked && <span className="text-xs font-mono text-emerald-500">✓</span>}
+                  {activeBadges.map((b) => {
+                    const BadgeIcon = b.Icon;
+                    return (
+                      <div
+                        key={b.id}
+                        className={`p-4 rounded-2xl border flex items-center gap-3.5 transition-all ${
+                          b.unlocked ? `${theme.innerCardBg} ${theme.activeBorder}` : `${theme.innerCardBg} opacity-45 grayscale`
+                        }`}
+                      >
+                        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border shrink-0 ${theme.softBadge}`}>
+                          <BadgeIcon weight={b.unlocked ? 'duotone' : 'regular'} className="w-6 h-6" />
                         </div>
-                        <p className={`text-xs ${theme.textMuted}`}>{b.desc}</p>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h5 className="font-bold text-xs sm:text-sm">{b.name}</h5>
+                            {b.unlocked && <CheckCircle weight="fill" className="w-3.5 h-3.5 text-emerald-500" />}
+                          </div>
+                          <p className={`text-xs ${theme.textMuted}`}>{b.desc}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -1971,10 +1978,11 @@ export default function App() {
                     timerMode === 'stopwatch' ? 'pomodoro' : timerMode === 'pomodoro' ? 'break' : 'stopwatch'
                   )
                 }
-                className={`px-2.5 py-1.5 rounded-xl text-xs font-mono border shrink-0 transition ${theme.softBadge}`}
+                className={`px-2.5 py-1.5 rounded-xl text-xs font-mono border shrink-0 flex items-center gap-1 transition ${theme.softBadge}`}
                 title="Switch Timer Mode (Stopwatch / 25m Focus / 5m Break)"
               >
-                {timerMode === 'pomodoro' ? '🍅 25m' : timerMode === 'break' ? '☕ 5m' : '⏱️ Free'}
+                <Timer weight="duotone" className="w-4 h-4" />
+                {timerMode === 'pomodoro' ? '25m' : timerMode === 'break' ? '5m' : 'Free'}
               </button>
               <label htmlFor="dock-goal-select" className="sr-only">Select Goal</label>
               <select
@@ -2002,7 +2010,7 @@ export default function App() {
                 onClick={toggleTimer}
                 className={`px-3.5 py-2 rounded-2xl font-semibold text-xs flex items-center gap-1 transition ${theme.primaryBtn}`}
               >
-                {isTimerRunning ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                {isTimerRunning ? <Pause weight="fill" className="w-3.5 h-3.5" /> : <Play weight="fill" className="w-3.5 h-3.5" />}
                 <span className="hidden sm:inline">{isTimerRunning ? 'Pause' : 'Start'}</span>
               </button>
               {timerMode !== 'break' && (
@@ -2012,7 +2020,7 @@ export default function App() {
                   title={canLogSession ? 'Log elapsed minutes' : 'Focus at least 1 minute to log'}
                   className={`px-3 py-2 rounded-2xl font-semibold text-xs border flex items-center gap-1 transition disabled:opacity-40 ${theme.softBadge}`}
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check weight="bold" className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Log</span>
                 </button>
               )}
@@ -2021,13 +2029,13 @@ export default function App() {
                 aria-label="Reset Timer"
                 className={`p-2 rounded-xl border ${theme.innerCardBg}`}
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <ArrowCounterClockwise weight="duotone" className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR */}
+        {/* MOBILE THUMB-FRIENDLY BOTTOM NAVIGATION BAR (Phosphor Duotone -> Fill) */}
         <nav
           aria-label="Mobile Navigation"
           className={`lg:hidden fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-2xl grid grid-cols-4 px-2 py-1.5 ${theme.sidebarBg}`}
@@ -2043,7 +2051,7 @@ export default function App() {
                   active ? theme.accentText : theme.textMuted
                 }`}
               >
-                <Icon className="w-4 h-4 mb-0.5" />
+                <Icon weight={active ? 'fill' : 'duotone'} className="w-5 h-5 mb-0.5" />
                 <span className="text-[11px]">{item.label.split(' ')[0]}</span>
               </button>
             );
@@ -2058,7 +2066,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Data Backup & Cloud Sync</h3>
               <button aria-label="Close modal" onClick={() => setShowSyncModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2069,10 +2077,10 @@ export default function App() {
                   onClick={handleExportJSON}
                   className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 ${theme.primaryBtn}`}
                 >
-                  <Download className="w-3.5 h-3.5" /> Export Backup
+                  <DownloadSimple weight="duotone" className="w-4 h-4" /> Export Backup
                 </button>
                 <label className={`flex-1 py-2 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer ${theme.cardBg}`}>
-                  <Upload className="w-3.5 h-3.5" /> Import JSON
+                  <UploadSimple weight="duotone" className="w-4 h-4" /> Import JSON
                   <input type="file" accept=".json" onChange={handleImportJSON} className="hidden" />
                 </label>
               </div>
@@ -2080,7 +2088,7 @@ export default function App() {
 
             <div className="space-y-2">
               <label htmlFor="sync-url-input" className={`block text-xs ${theme.textMuted}`}>
-                Optional Real-Time REST Database URL (Firebase / Custom JSON Endpoint)
+                Optional Real-Time REST Database URL
               </label>
               <input
                 id="sync-url-input"
@@ -2115,7 +2123,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Share {currentMember.name}'s Snapshot</h3>
               <button aria-label="Close modal" onClick={() => setShowShareModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2127,8 +2135,8 @@ export default function App() {
               onClick={handleShareStatus}
               className={`w-full py-3 rounded-2xl font-semibold text-xs flex items-center justify-center gap-2 ${theme.primaryBtn}`}
             >
-              <Copy className="w-4 h-4" />
-              {copiedShare ? 'Copied to Clipboard! ✨' : 'Share / Copy Status Text'}
+              <Copy weight="duotone" className="w-4 h-4" />
+              {copiedShare ? 'Copied to Clipboard!' : 'Share / Copy Status Text'}
             </button>
           </div>
         </div>
@@ -2141,7 +2149,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Invite Companion ({state.members.length}/4)</h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowMemberModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2176,10 +2184,10 @@ export default function App() {
                 onChange={(e) => setMemberForm({ ...memberForm, theme: e.target.value as ThemePalette })}
                 className={`w-full border rounded-2xl px-3 py-2.5 text-xs ${theme.innerCardBg}`}
               >
-                <option value="peach-terracotta">Warm Terracotta & Peach 🍑</option>
-                <option value="matcha-cream">Matcha Oat Milk 🍵</option>
-                <option value="lavender-blush">Velvet Lavender & Rose 💜</option>
-                <option value="warm-sage">Espresso & Warm Sage ☕</option>
+                <option value="peach-terracotta">Warm Terracotta & Peach</option>
+                <option value="matcha-cream">Matcha Oat Milk</option>
+                <option value="lavender-blush">Velvet Lavender & Rose</option>
+                <option value="warm-sage">Espresso & Warm Sage</option>
               </select>
             </div>
 
@@ -2204,7 +2212,7 @@ export default function App() {
                 {editingGoal ? 'Edit Goal' : `New Goal for ${currentMember.name}`}
               </h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowGoalModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2279,7 +2287,7 @@ export default function App() {
             <div className="flex items-center justify-between">
               <h3 className="font-serif italic text-2xl">Add Class ({currentMember.name})</h3>
               <button type="button" aria-label="Close modal" onClick={() => setShowScheduleModal(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
 
@@ -2362,13 +2370,13 @@ export default function App() {
           <div className={`border rounded-3xl max-w-lg w-full p-7 space-y-4 shadow-2xl ${theme.pageBg} ${theme.activeBorder}`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-mono px-3 py-1 rounded-full border ${theme.softBadge}`}>
-                SyncPulse v4.0 Guide
+                SyncPulse v4.1 Guide
               </span>
               <button aria-label="Close guide" onClick={() => setShowTutorial(false)}>
-                <X className="w-4 h-4" />
+                <X weight="bold" className="w-4 h-4" />
               </button>
             </div>
-            <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary ✨</h3>
+            <h3 className="font-serif italic text-3xl">Your Cozy Co-Op Sanctuary</h3>
             <ul className={`text-xs space-y-2 leading-relaxed ${theme.textMuted}`}>
               <li>• <b>Visual Timeline:</b> Plots your classes and tasks for the selected day and highlights Free Focus Windows.</li>
               <li>• <b>Persistent Timer:</b> Runs accurately even if you refresh the page or lock your phone. Supports Stopwatch, 25m Pomodoro, and 5m Breaks.</li>
@@ -2377,7 +2385,7 @@ export default function App() {
             </ul>
             <div className="flex justify-end pt-2">
               <button onClick={() => setShowTutorial(false)} className={`px-5 py-2.5 rounded-2xl text-xs font-semibold ${theme.primaryBtn}`}>
-                Got It ✨
+                Got It
               </button>
             </div>
           </div>
