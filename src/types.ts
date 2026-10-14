@@ -1,12 +1,12 @@
 export type ThemePalette = 'warm-sage' | 'lavender-blush' | 'peach-terracotta' | 'matcha-cream';
-export type SessionFeeling = 'hard' | 'steady' | 'great';
+export type SessionFeeling = 'easy' | 'normal' | 'hard';
 export type AmbientSound = 'off' | 'rain' | 'forest' | 'tone';
 
 export interface ActivePresence {
   isFocusing: boolean;
   targetTitle: string;
+  durationPreset: number;
   startedAtMs: number;
-  mode: 'stopwatch' | 'pomodoro' | 'break';
 }
 
 export interface Member {
@@ -15,7 +15,7 @@ export interface Member {
   tagline: string;
   avatar: string;
   theme: ThemePalette;
-  statusNote?: string;
+  todayIntention?: string;
   presence?: ActivePresence | null;
 }
 
@@ -51,6 +51,7 @@ export interface GoalItem {
 export interface TaskItem {
   id: string;
   userId: string;
+  goalId?: string; // Links action directly to a Goal/Direction
   day: string;
   title: string;
   reminderTime: string;
@@ -73,6 +74,7 @@ export interface TimeLog {
   id: string;
   sourceKey?: string;
   userId: string;
+  goalId?: string;
   targetTitle: string;
   minutes: number;
   date: string;

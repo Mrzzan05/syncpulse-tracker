@@ -18,17 +18,17 @@ export const Surface: React.FC<SurfaceProps> = ({
     ambient: 'bg-[var(--bg-elevated)] border border-[var(--border-subtle)]'
   };
   return (
-    <div className={`rounded-3xl transition-colors duration-300 ${styles[variant]} ${className}`}>
+    <div className={`rounded-3xl transition-colors duration-200 ${styles[variant]} ${className}`}>
       {children}
     </div>
   );
 };
 
-// Signature SyncPulse visual metaphor: ●──────●──────● with living wave
+// Signature SyncPulse visual element: ●──────●──────●
 export const PulseLine: React.FC<{ active?: boolean; label?: string }> = ({ active = false, label }) => {
   return (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-1.5 flex-1 max-w-[140px]">
+      <div className="flex items-center gap-1.5 flex-1 max-w-[120px]">
         <span
           className="w-2 h-2 rounded-full shrink-0 transition-transform"
           style={{
@@ -57,6 +57,18 @@ export const PulseLine: React.FC<{ active?: boolean; label?: string }> = ({ acti
     </div>
   );
 };
+
+// Calm Skeleton Loader (Audit Point 60 & 129: "Syncing your rhythm... ●━━━○━━━○")
+export const RhythmSkeleton: React.FC = () => (
+  <div className="py-16 space-y-6 max-w-md mx-auto text-center animate-pulse">
+    <div className="flex items-center justify-center gap-2 text-xs font-mono text-[var(--text-muted)]">
+      <span>Syncing your rhythm...</span>
+      <span>●━━━○━━━○</span>
+    </div>
+    <div className="h-8 bg-[var(--bg-elevated)] rounded-2xl w-3/4 mx-auto" />
+    <div className="h-32 bg-[var(--bg-surface)] rounded-3xl w-full border border-[var(--border-subtle)]" />
+  </div>
+);
 
 export const Modal: React.FC<{
   open: boolean;
