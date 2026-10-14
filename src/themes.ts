@@ -1,261 +1,173 @@
 import { ThemePalette } from './types';
 
-export interface CozyStyle {
+export interface CalmStyle {
   name: string;
   pageBg: string;
   sidebarBg: string;
-  cardBg: string;
-  innerCardBg: string;
-  dockBg: string;
+  surfaceBg: string;
+  subtleBg: string;
   textMain: string;
   textMuted: string;
   divider: string;
   trackBg: string;
-  orb1: string;
-  orb2: string;
   primaryBtn: string;
   softBadge: string;
-  streakBadge: string;
-  doneBadge: string;
   activeNav: string;
-  activeBorder: string;
   progressBar: string;
   accentText: string;
-  barColor: string;
-  timelineLine: string;
-  selectionCls: string;
   heatLevels: [string, string, string, string];
 }
 
-export const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CozyStyle => {
-  const streakBadge = isLatte
-    ? 'bg-amber-100 text-amber-900 border-amber-300'
-    : 'bg-amber-500/15 text-amber-300 border-amber-500/30';
-
-  const doneBadge = isLatte
-    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
-    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-
+// Ultra-calm, low-contrast, eye-soothing palettes inspired by Things 3 & Headspace
+export const GET_COZY_THEME = (palette: ThemePalette, isLatte: boolean): CalmStyle => {
   if (palette === 'lavender-blush') {
     return isLatte
       ? {
-          name: 'Lavender Oat Latte 💜',
-          pageBg: 'bg-[#FAF5FF]',
-          sidebarBg: 'bg-[#F3E8FF]/95 border-purple-200',
-          cardBg: 'bg-white/90 border-purple-200/90 shadow-sm shadow-purple-950/5',
-          innerCardBg: 'bg-[#F6EEFC]/90 border-purple-200/75',
-          dockBg: 'bg-white/95 border-purple-300 shadow-2xl shadow-purple-950/10',
-          textMain: 'text-[#2E1B3B]',
-          textMuted: 'text-[#6A517D]',
-          divider: 'border-purple-200/80',
-          trackBg: 'bg-purple-200/70',
-          orb1: 'bg-purple-300/40',
-          orb2: 'bg-pink-300/35',
-          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B47AEA] to-[#D685B8] hover:opacity-95 text-white shadow-md shadow-purple-500/20',
-          softBadge: 'bg-purple-100 text-purple-900 border-purple-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-purple-200/80 text-[#2E1B3B] font-bold border-purple-300',
-          activeBorder: 'border-purple-400 shadow-lg shadow-purple-300/30',
-          progressBar: 'bg-gradient-to-r from-[#9D65C9] via-[#C084FC] to-[#F472B6]',
-          accentText: 'text-[#7E3AF2]',
-          barColor: 'from-[#9D65C9] to-[#E879F9]',
-          timelineLine: 'border-purple-300',
-          selectionCls: 'selection:bg-purple-300/50',
-          heatLevels: ['bg-purple-100 border-purple-200', 'bg-purple-300 border-purple-400', 'bg-purple-500 border-purple-600', 'bg-fuchsia-600 border-fuchsia-700']
+          name: 'Soft Lavender',
+          pageBg: 'bg-[#F9F7FC]',
+          sidebarBg: 'bg-[#F2EDF9] border-[#E5DDF0]',
+          surfaceBg: 'bg-white border-[#EAE2F3] shadow-sm shadow-purple-950/[0.02]',
+          subtleBg: 'bg-[#F4EFFA] border-[#E6DDF2]',
+          textMain: 'text-[#2B2138]',
+          textMuted: 'text-[#7A6B8A]',
+          divider: 'border-[#ECE6F4]',
+          trackBg: 'bg-[#E9E1F4]',
+          primaryBtn: 'bg-[#845EC2] hover:bg-[#734EB0] text-white',
+          softBadge: 'bg-[#F0E9F9] text-[#6B46A8] border-[#DFD2F2]',
+          activeNav: 'bg-[#E8DEF6] text-[#2B2138] font-semibold',
+          progressBar: 'bg-[#845EC2]',
+          accentText: 'text-[#734EB0]',
+          heatLevels: ['bg-[#F0EBF8] border-[#E4DCF0]', 'bg-[#D5C4EE] border-[#C5B0E6]', 'bg-[#A685E2] border-[#9571D8]', 'bg-[#7E57C2] border-[#6C46B0]']
         }
       : {
-          name: 'Cozy Velvet Lavender 💜',
-          pageBg: 'bg-[#170F21]',
-          sidebarBg: 'bg-[#120B1B]/95 border-purple-300/15',
-          cardBg: 'bg-[#231832]/85 border-purple-300/15 shadow-xl shadow-black/30',
-          innerCardBg: 'bg-[#160F20]/85 border-purple-300/15',
-          dockBg: 'bg-[#1E142B]/95 border-purple-400/30 shadow-2xl shadow-black/70',
-          textMain: 'text-[#F7F1FF]',
-          textMuted: 'text-[#C4B2D6]',
-          divider: 'border-purple-300/15',
-          trackBg: 'bg-purple-950/80',
-          orb1: 'bg-[#9D65C9]/20',
-          orb2: 'bg-[#E879F9]/15',
-          primaryBtn: 'bg-gradient-to-r from-[#9D65C9] via-[#B779E2] to-[#D977B4] hover:opacity-95 text-white shadow-lg shadow-purple-950/50',
-          softBadge: 'bg-purple-400/15 text-purple-200 border-purple-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-purple-500/25 text-white border-purple-400/40',
-          activeBorder: 'border-purple-400/50 shadow-xl shadow-purple-950/60',
-          progressBar: 'bg-gradient-to-r from-[#A855F7] via-[#D946EF] to-[#F472B6]',
-          accentText: 'text-[#DFB6FF]',
-          barColor: 'from-[#A855F7] to-[#F472B6]',
-          timelineLine: 'border-purple-400/30',
-          selectionCls: 'selection:bg-purple-500/40',
-          heatLevels: ['bg-purple-950/70 border-purple-800/40', 'bg-purple-700/70 border-purple-500/50', 'bg-purple-500 border-purple-400', 'bg-fuchsia-400 border-pink-300']
+          name: 'Velvet Lavender',
+          pageBg: 'bg-[#15121C]',
+          sidebarBg: 'bg-[#110E17] border-white/[0.06]',
+          surfaceBg: 'bg-[#1D1826] border-white/[0.06]',
+          subtleBg: 'bg-[#171320] border-white/[0.05]',
+          textMain: 'text-[#F2ECF9]',
+          textMuted: 'text-[#9E91B0]',
+          divider: 'border-white/[0.06]',
+          trackBg: 'bg-white/[0.07]',
+          primaryBtn: 'bg-[#9B72CF] hover:bg-[#8A60C0] text-white',
+          softBadge: 'bg-[#9B72CF]/15 text-[#D8C2F2] border-[#9B72CF]/25',
+          activeNav: 'bg-white/[0.08] text-white font-semibold',
+          progressBar: 'bg-[#A982DB]',
+          accentText: 'text-[#C8A8F0]',
+          heatLevels: ['bg-white/[0.04] border-white/[0.05]', 'bg-[#5E4382]/60 border-[#73539C]/40', 'bg-[#845EC2]/80 border-[#9B72CF]', 'bg-[#B388EB] border-[#C8A8F0]']
         };
   }
 
   if (palette === 'peach-terracotta') {
     return isLatte
       ? {
-          name: 'Warm Terracotta Latte',
-          pageBg: 'bg-[#FDF8F5]',
-          sidebarBg: 'bg-[#F9EFEA]/95 border-orange-200',
-          cardBg: 'bg-white/90 border-orange-200/90 shadow-sm',
-          innerCardBg: 'bg-[#FAF0EA]/90 border-orange-200/75',
-          dockBg: 'bg-white/95 border-orange-300 shadow-2xl',
-          textMain: 'text-[#362019]',
-          textMuted: 'text-[#7C584C]',
-          divider: 'border-orange-200/80',
-          trackBg: 'bg-orange-200/70',
-          orb1: 'bg-amber-300/35',
-          orb2: 'bg-rose-300/30',
-          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-md',
-          softBadge: 'bg-orange-100 text-orange-900 border-orange-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-orange-200/75 text-[#362019] border-orange-300',
-          activeBorder: 'border-orange-400 shadow-lg',
-          progressBar: 'bg-gradient-to-r from-[#D97757] to-[#F59E0B]',
-          accentText: 'text-[#B84A24]',
-          barColor: 'from-[#D97757] to-[#F59E0B]',
-          timelineLine: 'border-orange-300',
-          selectionCls: 'selection:bg-orange-300/50',
-          heatLevels: ['bg-orange-100 border-orange-200', 'bg-orange-300 border-orange-400', 'bg-orange-500 border-orange-600', 'bg-amber-600 border-amber-700']
+          name: 'Warm Terracotta',
+          pageBg: 'bg-[#FBF8F6]',
+          sidebarBg: 'bg-[#F5EFEA] border-[#E8DDD5]',
+          surfaceBg: 'bg-white border-[#EDE3DC] shadow-sm shadow-stone-900/[0.02]',
+          subtleBg: 'bg-[#F7F1EC] border-[#E8DDD5]',
+          textMain: 'text-[#33241E]',
+          textMuted: 'text-[#876F66]',
+          divider: 'border-[#EFE6DF]',
+          trackBg: 'bg-[#ECE0D8]',
+          primaryBtn: 'bg-[#C86D51] hover:bg-[#B55D42] text-white',
+          softBadge: 'bg-[#F6E8E3] text-[#A85238] border-[#E8D1C9]',
+          activeNav: 'bg-[#EFE2DA] text-[#33241E] font-semibold',
+          progressBar: 'bg-[#C86D51]',
+          accentText: 'text-[#B55D42]',
+          heatLevels: ['bg-[#F3ECE8] border-[#E6DBD4]', 'bg-[#E6BFB3] border-[#D9ABA0]', 'bg-[#D18872] border-[#C47760]', 'bg-[#B85D43] border-[#A34E36]']
         }
       : {
-          name: 'Fireside Terracotta',
-          pageBg: 'bg-[#1B1311]',
-          sidebarBg: 'bg-[#140E0C]/95 border-orange-300/15',
-          cardBg: 'bg-[#291D1B]/85 border-orange-300/15',
-          innerCardBg: 'bg-[#16100E]/85 border-orange-300/15',
-          dockBg: 'bg-[#241917]/95 border-orange-400/30 shadow-2xl',
-          textMain: 'text-[#FDF4F0]',
-          textMuted: 'text-[#CBB2A8]',
-          divider: 'border-orange-300/15',
-          trackBg: 'bg-orange-950/80',
-          orb1: 'bg-orange-500/15',
-          orb2: 'bg-amber-500/15',
-          primaryBtn: 'bg-gradient-to-r from-[#D97757] to-[#E09F67] text-white shadow-lg',
-          softBadge: 'bg-orange-400/15 text-orange-200 border-orange-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-orange-500/20 text-white border-orange-400/40',
-          activeBorder: 'border-orange-400/50 shadow-xl',
-          progressBar: 'bg-gradient-to-r from-[#EA580C] to-[#FBBF24]',
-          accentText: 'text-[#FDBA8C]',
-          barColor: 'from-[#EA580C] to-[#FBBF24]',
-          timelineLine: 'border-orange-400/30',
-          selectionCls: 'selection:bg-orange-500/40',
-          heatLevels: ['bg-orange-950/60 border-orange-900/40', 'bg-orange-700/60 border-orange-600/40', 'bg-orange-500 border-orange-400', 'bg-amber-400 border-yellow-300']
+          name: 'Fireside Clay',
+          pageBg: 'bg-[#171312]',
+          sidebarBg: 'bg-[#120F0E] border-white/[0.06]',
+          surfaceBg: 'bg-[#211B19] border-white/[0.06]',
+          subtleBg: 'bg-[#1A1514] border-white/[0.05]',
+          textMain: 'text-[#F7EFEA]',
+          textMuted: 'text-[#A8958D]',
+          divider: 'border-white/[0.06]',
+          trackBg: 'bg-white/[0.07]',
+          primaryBtn: 'bg-[#C86D51] hover:bg-[#B55D42] text-white',
+          softBadge: 'bg-[#C86D51]/15 text-[#F0C4B6] border-[#C86D51]/25',
+          activeNav: 'bg-white/[0.08] text-white font-semibold',
+          progressBar: 'bg-[#D47A5E]',
+          accentText: 'text-[#E8A590]',
+          heatLevels: ['bg-white/[0.04] border-white/[0.05]', 'bg-[#6E3D2E]/60 border-[#854B3A]/40', 'bg-[#A85840]/80 border-[#C86D51]', 'bg-[#DF8A70] border-[#F0B29E]']
         };
   }
 
   if (palette === 'matcha-cream') {
     return isLatte
       ? {
-          name: 'Matcha Oat Milk',
-          pageBg: 'bg-[#F6F9F4]',
-          sidebarBg: 'bg-[#EBF2E6]/95 border-emerald-200',
-          cardBg: 'bg-white/90 border-emerald-200/90 shadow-sm',
-          innerCardBg: 'bg-[#ECF3E8]/90 border-emerald-200/75',
-          dockBg: 'bg-white/95 border-emerald-300 shadow-2xl',
-          textMain: 'text-[#1B2E22]',
-          textMuted: 'text-[#4F6D59]',
-          divider: 'border-emerald-200/80',
-          trackBg: 'bg-emerald-200/70',
-          orb1: 'bg-emerald-300/30',
-          orb2: 'bg-lime-300/25',
-          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-md',
-          softBadge: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-emerald-200/75 text-[#1B2E22] border-emerald-300',
-          activeBorder: 'border-emerald-400 shadow-lg',
-          progressBar: 'bg-gradient-to-r from-[#4E8C6F] to-[#84CC16]',
-          accentText: 'text-[#2D6A4F]',
-          barColor: 'from-[#4E8C6F] to-[#84CC16]',
-          timelineLine: 'border-emerald-300',
-          selectionCls: 'selection:bg-emerald-300/50',
-          heatLevels: ['bg-emerald-100 border-emerald-200', 'bg-emerald-300 border-emerald-400', 'bg-emerald-500 border-emerald-600', 'bg-teal-600 border-teal-700']
+          name: 'Matcha Mist',
+          pageBg: 'bg-[#F7F9F6]',
+          sidebarBg: 'bg-[#EEF3EC] border-[#DCE5D8]',
+          surfaceBg: 'bg-white border-[#E2EBE0] shadow-sm shadow-stone-900/[0.02]',
+          subtleBg: 'bg-[#F1F6EF] border-[#DCE5D8]',
+          textMain: 'text-[#1F2D24]',
+          textMuted: 'text-[#667B6C]',
+          divider: 'border-[#E6EEE4]',
+          trackBg: 'bg-[#DDE7DA]',
+          primaryBtn: 'bg-[#52796F] hover:bg-[#43665D] text-white',
+          softBadge: 'bg-[#E6F0EA] text-[#3F6359] border-[#CFE0D6]',
+          activeNav: 'bg-[#E0EBDD] text-[#1F2D24] font-semibold',
+          progressBar: 'bg-[#52796F]',
+          accentText: 'text-[#43665D]',
+          heatLevels: ['bg-[#EDF2EB] border-[#DFE7DC]', 'bg-[#B7D1C1] border-[#A3C2AF]', 'bg-[#74A18E] border-[#618F7B]', 'bg-[#4A7866] border-[#3B6353]']
         }
       : {
-          name: 'Forest Matcha Night',
-          pageBg: 'bg-[#101914]',
-          sidebarBg: 'bg-[#0B120E]/95 border-emerald-300/15',
-          cardBg: 'bg-[#18261F]/85 border-emerald-300/15',
-          innerCardBg: 'bg-[#0D1411]/85 border-emerald-300/15',
-          dockBg: 'bg-[#15221B]/95 border-emerald-400/30 shadow-2xl',
-          textMain: 'text-[#F0FAF4]',
-          textMuted: 'text-[#A7C4B3]',
-          divider: 'border-emerald-300/15',
-          trackBg: 'bg-emerald-950/80',
-          orb1: 'bg-emerald-500/15',
-          orb2: 'bg-teal-500/15',
-          primaryBtn: 'bg-gradient-to-r from-[#4E8C6F] to-[#68A889] text-white shadow-lg',
-          softBadge: 'bg-emerald-400/15 text-emerald-200 border-emerald-300/30',
-          streakBadge,
-          doneBadge,
-          activeNav: 'bg-emerald-500/20 text-white border-emerald-400/40',
-          activeBorder: 'border-emerald-400/50 shadow-xl',
-          progressBar: 'bg-gradient-to-r from-[#10B981] to-[#84CC16]',
-          accentText: 'text-[#86EFAC]',
-          barColor: 'from-[#10B981] to-[#84CC16]',
-          timelineLine: 'border-emerald-400/30',
-          selectionCls: 'selection:bg-emerald-500/40',
-          heatLevels: ['bg-emerald-950/60 border-emerald-900/40', 'bg-emerald-700/60 border-emerald-600/40', 'bg-emerald-500 border-emerald-400', 'bg-lime-400 border-emerald-300']
+          name: 'Forest Calm',
+          pageBg: 'bg-[#121714]',
+          sidebarBg: 'bg-[#0E1210] border-white/[0.06]',
+          surfaceBg: 'bg-[#19211C] border-white/[0.06]',
+          subtleBg: 'bg-[#141A16] border-white/[0.05]',
+          textMain: 'text-[#ECF4EE]',
+          textMuted: 'text-[#8FA696]',
+          divider: 'border-white/[0.06]',
+          trackBg: 'bg-white/[0.07]',
+          primaryBtn: 'bg-[#52796F] hover:bg-[#618B80] text-white',
+          softBadge: 'bg-[#52796F]/20 text-[#B8D8CE] border-[#52796F]/30',
+          activeNav: 'bg-white/[0.08] text-white font-semibold',
+          progressBar: 'bg-[#6B9E8F]',
+          accentText: 'text-[#98C9BA]',
+          heatLevels: ['bg-white/[0.04] border-white/[0.05]', 'bg-[#2F4F44]/60 border-[#3E6658]/40', 'bg-[#4E8070]/80 border-[#639685]', 'bg-[#7BB5A3] border-[#98C9BA]']
         };
   }
 
-  // Default: 'warm-sage' (Mehrsan)
+  // Default: 'warm-sage' (Mehrsan â€” Warm Stone & Muted Sage)
   return isLatte
     ? {
-        name: 'Warm Oat & Sage ☕',
-        pageBg: 'bg-[#FBF9F5]',
-        sidebarBg: 'bg-[#F3EFE6]/95 border-[#DDD3C0]',
-        cardBg: 'bg-white/90 border-[#E2D9C8] shadow-sm shadow-stone-900/5',
-        innerCardBg: 'bg-[#F4EFE6]/90 border-[#DDD3C0]',
-        dockBg: 'bg-white/95 border-[#C8BFA8] shadow-2xl shadow-stone-900/10',
-        textMain: 'text-[#292524]',
-        textMuted: 'text-[#68625D]',
-        divider: 'border-[#E2D9C8]',
-        trackBg: 'bg-[#E5DEC9]',
-        orb1: 'bg-amber-200/45',
-        orb2: 'bg-teal-200/40',
-        primaryBtn: 'bg-gradient-to-r from-[#4A6B65] via-[#5B7F78] to-[#B87D4B] hover:opacity-95 text-white shadow-md',
-        softBadge: 'bg-[#EFECE6] text-[#3B5752] border-[#CFC6B4]',
-        streakBadge,
-        doneBadge,
-        activeNav: 'bg-[#E5DEC9] text-[#292524] font-bold border-[#C8BFA8]',
-        activeBorder: 'border-[#5B7F78] shadow-lg',
-        progressBar: 'bg-gradient-to-r from-[#4A6B65] via-[#66968C] to-[#D99B52]',
-        accentText: 'text-[#3F5E58]',
-        barColor: 'from-[#4A6B65] to-[#D99B52]',
-        timelineLine: 'border-[#CFC6B4]',
-        selectionCls: 'selection:bg-[#D99B52]/30',
-        heatLevels: ['bg-[#EBE5D9] border-[#DCD3C2]', 'bg-[#94B0A7] border-[#7A9A90]', 'bg-[#5B7F78] border-[#4A6B65]', 'bg-[#C88A4B] border-[#B0753B]']
+        name: 'Warm Stone & Sage',
+        pageBg: 'bg-[#F7F5F0]',
+        sidebarBg: 'bg-[#EFECE6] border-[#E2DDD3]',
+        surfaceBg: 'bg-white border-[#E6E1D8] shadow-sm shadow-stone-900/[0.02]',
+        subtleBg: 'bg-[#F3F0EA] border-[#E2DDD3]',
+        textMain: 'text-[#262421]',
+        textMuted: 'text-[#78736A]',
+        divider: 'border-[#EAE5DC]',
+        trackBg: 'bg-[#E5E0D5]',
+        primaryBtn: 'bg-[#4F6F68] hover:bg-[#415D57] text-white',
+        softBadge: 'bg-[#EAE6DF] text-[#425E58] border-[#D8D2C7]',
+        activeNav: 'bg-[#E4DFD5] text-[#262421] font-semibold',
+        progressBar: 'bg-[#4F6F68]',
+        accentText: 'text-[#425E58]',
+        heatLevels: ['bg-[#ECE8E0] border-[#DFD9CE]', 'bg-[#B2C7C1] border-[#9EB5AE]', 'bg-[#6F968D] border-[#5D837A]', 'bg-[#4A6E66] border-[#3C5C55]']
       }
     : {
-        name: 'Cozy Espresso & Amber ☕',
-        pageBg: 'bg-[#151413]',
-        sidebarBg: 'bg-[#100F0E]/95 border-[#2E2A27]',
-        cardBg: 'bg-[#211F1D]/85 border-[#36322E] shadow-xl shadow-black/30',
-        innerCardBg: 'bg-[#171514]/90 border-[#2C2825]',
-        dockBg: 'bg-[#1E1C1A]/95 border-[#443E38] shadow-2xl shadow-black/80',
-        textMain: 'text-[#F5F2EB]',
-        textMuted: 'text-[#B5AFA9]',
-        divider: 'border-[#332F2B]',
-        trackBg: 'bg-[#2C2825]',
-        orb1: 'bg-[#D99B52]/15',
-        orb2: 'bg-[#5B7F78]/20',
-        primaryBtn: 'bg-gradient-to-r from-[#5B7F78] to-[#C88A4B] hover:opacity-95 text-white shadow-lg',
-        softBadge: 'bg-[#2D2A26] text-[#E6CBA8] border-[#443F3A]',
-        streakBadge,
-        doneBadge,
-        activeNav: 'bg-[#2D2A26] text-white border-[#5B7F78]/60',
-        activeBorder: 'border-[#C88A4B]/50 shadow-xl',
-        progressBar: 'bg-gradient-to-r from-[#5B7F78] via-[#84A98C] to-[#E09F5A]',
-        accentText: 'text-[#E6B88A]',
-        barColor: 'from-[#5B7F78] to-[#E09F5A]',
-        timelineLine: 'border-[#383430]',
-        selectionCls: 'selection:bg-amber-500/30',
-        heatLevels: ['bg-[#262320] border-[#332F2B]', 'bg-[#3F5E57] border-[#527870]', 'bg-[#66968C] border-[#84A98C]', 'bg-[#E09F5A] border-[#F3B978]']
+        name: 'Cozy Espresso',
+        pageBg: 'bg-[#161514]',
+        sidebarBg: 'bg-[#121110] border-white/[0.06]',
+        surfaceBg: 'bg-[#1E1C1A] border-white/[0.06]',
+        subtleBg: 'bg-[#181715] border-white/[0.05]',
+        textMain: 'text-[#F2EFE9]',
+        textMuted: 'text-[#9C968E]',
+        divider: 'border-white/[0.06]',
+        trackBg: 'bg-white/[0.07]',
+        primaryBtn: 'bg-[#587B73] hover:bg-[#668C83] text-white',
+        softBadge: 'bg-[#587B73]/20 text-[#C2DBD5] border-[#587B73]/30',
+        activeNav: 'bg-white/[0.08] text-white font-semibold',
+        progressBar: 'bg-[#6B948B]',
+        accentText: 'text-[#9EC4BB]',
+        heatLevels: ['bg-white/[0.04] border-white/[0.05]', 'bg-[#334A44]/60 border-[#425E57]/40', 'bg-[#52786F]/80 border-[#668C83]', 'bg-[#82B0A5] border-[#9EC4BB]']
       };
 };
