@@ -1,15 +1,13 @@
-﻿import { AppState, ThemePalette } from './types';
-import { getLocalDateStr, getTodayWeekday, uid } from './utils';
+import { AppState, ThemePalette } from './types';
+import { getTodayWeekday, uid } from './utils';
 
-// Optional: Paste your default Firebase Realtime Database URL here so you never have to type it manually!
 export const DEFAULT_CLOUD_DB_URL = 'https://syncpulse-8b026-default-rtdb.firebaseio.com/';
 
-// 1. Clean Demo Template (Starts at 0 stats)
 export const CREATE_DEMO_STATE = (): AppState => {
   const now = Date.now();
   const todayDay = getTodayWeekday();
   return {
-    version: 6,
+    version: 7,
     isConfigured: true,
     workspaceName: 'Calm Study Sanctuary',
     roomCode: 'public-demo',
@@ -72,7 +70,6 @@ export const CREATE_DEMO_STATE = (): AppState => {
   };
 };
 
-// 2. Custom Blank Sanctuary Generator for any new user
 export const CREATE_CUSTOM_SANCTUARY = (
   workspaceName: string,
   roomCode: string,
@@ -92,7 +89,7 @@ export const CREATE_CUSTOM_SANCTUARY = (
       tagline: p1Tagline.trim() || 'Focused Learner',
       avatar: (p1Name.trim()[0] || 'M').toUpperCase(),
       theme: p1Theme,
-      statusNote: 'Ready for a calm, productive day',
+      statusNote: 'Building my daily rhythm',
       presence: null
     }
   ];
@@ -134,7 +131,7 @@ export const CREATE_CUSTOM_SANCTUARY = (
   }
 
   return {
-    version: 6,
+    version: 7,
     isConfigured: true,
     workspaceName: workspaceName.trim() || 'Our Sanctuary',
     roomCode: roomCode.trim() || uid('room'),
@@ -148,12 +145,11 @@ export const CREATE_CUSTOM_SANCTUARY = (
   };
 };
 
-// 3. Mehrsan & Ronak's Private Preset أ¢â‚¬â€‌ ALL STATS & HOURS START AT ZERO (0h, Lv.1, 0 XP, 0 Logs)
 export const CREATE_MEHRSAN_RONAK_PRESET = (customRoomCode = 'mr-1405'): AppState => {
   const now = Date.now();
 
   return {
-    version: 6,
+    version: 7,
     isConfigured: true,
     workspaceName: 'Mehrsan & Ronak',
     roomCode: customRoomCode,
@@ -162,7 +158,7 @@ export const CREATE_MEHRSAN_RONAK_PRESET = (customRoomCode = 'mr-1405'): AppStat
       {
         id: 'mehrsan',
         name: 'Mehrsan',
-        tagline: 'Computer Eng أ¢â‚¬آ¢ Deep Learning & Web',
+        tagline: 'Computer Eng • Deep Learning & Web',
         avatar: 'M',
         theme: 'warm-sage',
         statusNote: 'Steady focus, one step at a time',
@@ -171,7 +167,7 @@ export const CREATE_MEHRSAN_RONAK_PRESET = (customRoomCode = 'mr-1405'): AppStat
       {
         id: 'ronak',
         name: 'Ronak',
-        tagline: 'French B2 أ¢â‚¬آ¢ English & University',
+        tagline: 'French B2 • English & University',
         avatar: 'R',
         theme: 'lavender-blush',
         statusNote: 'Step by step toward B2 fluency',
@@ -179,19 +175,17 @@ export const CREATE_MEHRSAN_RONAK_PRESET = (customRoomCode = 'mr-1405'): AppStat
       }
     ],
     schedules: [
-      // Mehrsan's Weekly University Schedule
-      { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Damanafshan أ¢â‚¬آ¢ Room 101', category: 'Core', attendedDates: [] },
-      { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Yousefi أ¢â‚¬آ¢ Room 1205', category: 'Core', attendedDates: [] },
-      { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Karimi أ¢â‚¬آ¢ Room 102', category: 'General', attendedDates: [] },
-      { id: 'm-s4', userId: 'mehrsan', day: 'Sunday', title: 'Special Topics (Deep Learning)', startTime: '08:30', endTime: '10:30', details: 'Prof. Yousefi أ¢â‚¬آ¢ Room 102', category: 'Core', attendedDates: [] },
-      { id: 'm-s5', userId: 'mehrsan', day: 'Sunday', title: 'Principles of Compiler Design', startTime: '14:00', endTime: '16:00', details: 'Prof. Damanafshan أ¢â‚¬آ¢ Room 101', category: 'Core', attendedDates: [] },
-      { id: 'm-s6', userId: 'mehrsan', day: 'Monday', title: 'Fundamentals of Info Security', startTime: '12:30', endTime: '14:00', details: 'Prof. Tajbakhsh أ¢â‚¬آ¢ Room 101', category: 'Core', attendedDates: [] },
-      { id: 'm-s7', userId: 'mehrsan', day: 'Tuesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi أ¢â‚¬آ¢ Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s1', userId: 'mehrsan', day: 'Saturday', title: 'Principles of Compiler Design', startTime: '08:30', endTime: '10:30', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s2', userId: 'mehrsan', day: 'Saturday', title: 'Special Topics (Deep Learning)', startTime: '10:30', endTime: '12:30', details: 'Prof. Yousefi • Room 1205', category: 'Core', attendedDates: [] },
+      { id: 'm-s3', userId: 'mehrsan', day: 'Saturday', title: 'Analytical History of Early Islam', startTime: '14:00', endTime: '16:00', details: 'Prof. Karimi • Room 102', category: 'General', attendedDates: [] },
+      { id: 'm-s4', userId: 'mehrsan', day: 'Sunday', title: 'Special Topics (Deep Learning)', startTime: '08:30', endTime: '10:30', details: 'Prof. Yousefi • Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s5', userId: 'mehrsan', day: 'Sunday', title: 'Principles of Compiler Design', startTime: '14:00', endTime: '16:00', details: 'Prof. Damanafshan • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s6', userId: 'mehrsan', day: 'Monday', title: 'Fundamentals of Info Security', startTime: '12:30', endTime: '14:00', details: 'Prof. Tajbakhsh • Room 101', category: 'Core', attendedDates: [] },
+      { id: 'm-s7', userId: 'mehrsan', day: 'Tuesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
       { id: 'm-s8', userId: 'mehrsan', day: 'Tuesday', title: 'Electrical & Electronic Circuits Lab', startTime: '12:30', endTime: '14:00', details: 'Room 210', category: 'Lab', attendedDates: [] },
-      { id: 'm-s9', userId: 'mehrsan', day: 'Wednesday', title: 'Fundamentals of Info Security', startTime: '08:30', endTime: '10:30', details: 'Prof. Tajbakhsh أ¢â‚¬آ¢ Room 102', category: 'Core', attendedDates: [] },
-      { id: 'm-s10', userId: 'mehrsan', day: 'Wednesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi أ¢â‚¬آ¢ Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s9', userId: 'mehrsan', day: 'Wednesday', title: 'Fundamentals of Info Security', startTime: '08:30', endTime: '10:30', details: 'Prof. Tajbakhsh • Room 102', category: 'Core', attendedDates: [] },
+      { id: 'm-s10', userId: 'mehrsan', day: 'Wednesday', title: 'Web Programming', startTime: '10:30', endTime: '12:30', details: 'Prof. Azimi • Room 102', category: 'Core', attendedDates: [] },
 
-      // Ronak's Weekly Schedule
       { id: 'r-s1', userId: 'ronak', day: 'Saturday', title: 'French Class', startTime: '21:00', endTime: '22:30', details: 'Evening Session', category: 'Language', attendedDates: [] },
       { id: 'r-s2', userId: 'ronak', day: 'Sunday', title: 'University Classes', startTime: '08:30', endTime: '12:30', details: 'Campus Block', category: 'University', attendedDates: [] },
       { id: 'r-s3', userId: 'ronak', day: 'Monday', title: 'University Classes', startTime: '08:30', endTime: '14:30', details: 'Campus Block', category: 'University', attendedDates: [] },
@@ -284,4 +278,3 @@ export const INITIAL_STATE: AppState = {
   ...CREATE_DEMO_STATE(),
   isConfigured: false
 };
-

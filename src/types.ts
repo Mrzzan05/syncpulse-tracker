@@ -1,4 +1,6 @@
 export type ThemePalette = 'warm-sage' | 'lavender-blush' | 'peach-terracotta' | 'matcha-cream';
+export type SessionFeeling = 'hard' | 'steady' | 'great';
+export type AmbientSound = 'off' | 'rain' | 'forest' | 'tone';
 
 export interface ActivePresence {
   isFocusing: boolean;
@@ -75,6 +77,7 @@ export interface TimeLog {
   minutes: number;
   date: string;
   createdAtMs: number;
+  feeling?: SessionFeeling;
   cheeredBy: string[];
 }
 
